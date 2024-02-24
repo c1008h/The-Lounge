@@ -1,14 +1,14 @@
 import React from 'react'
 import {Textarea} from "@nextui-org/react";
 
-interface FormProps {
+interface FormTemplateProps {
     label?: string;
     placeholder?: string;
     className?: string;
     onValueChange: (value: string) => void
 }
 
-export default function FormTemplate({label, placeholder, className, onValueChange}): FormProps {
+export default function FormTemplate({label, placeholder, className, onValueChange}: FormTemplateProps) {
   return (
     <Textarea
         label={label}
