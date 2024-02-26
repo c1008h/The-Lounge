@@ -1,45 +1,49 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Image from "next/image";
-import { NextUIProvider } from "@nextui-org/react";
+import { NextUIProvider, Divider } from "@nextui-org/react";
 import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate} from '../components'
 import {textMessages} from '../constants/SAMPLEMESSAGES'
 import {chatSessions} from '../constants/Sessions'
-import {Divider} from "@nextui-org/react";
-import axios from 'axios';
 import {SessionProps, TextMessageProps } from '../interfaces/messages'
-import SocketIOClient from 'socket.io-client';
+import socketClient from '../services/socketioConfig'
+import { Socket } from "socket.io-client";
 
 export default function Home() {
-  const [message, setMessage] = useState<string>()
+  const [message, setMessage] = useState<string>('') // ONE MESSAGE
+  const [messages, setMessages] = useState<TextMessageProps[]>([]) // ARRAY OF MESSAGES
+  const [socket, setSocket] = useState<Socket | null>(null);
 
-  if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') {
-    throw new Error('NEXT_PUBLIC_SOCKET_PORT is not defined');
-  }
-
+  if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') throw new Error('NEXT_PUBLIC_SOCKET_PORT is not defined');
   const PORT = process.env.NEXT_PUBLIC_SOCKET_PORT
-  // const socket = SocketIOClient(PORT);
 
-  // useEffect(() => {
-  //   console.log("TEXT MESSAGES:", textMessages)
-  // }, [])
+  useEffect(() => {
+    const socketInstance: Socket = socketClient();
+    setSocket(socketInstance);
+
+    socketInstance.on('chat message', (incomingMessage: TextMessageProps) => {
+      setMessages((prevMessages) => [...prevMessages, incomingMessage])
+    })
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, []);
 
   const handleValueChange = (value: string) => setMessage(value);
 
   const handleMessageSubmit = async () => {
-    try {
-      const data = { message };
-      console.log(data)
-      console.log(process.env.NEXT_PUBLIC_SOCKET_PORT)
+    console.log("MESSAGE:", message)
 
-      const response = await axios.post(PORT, data, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      // console.log("Success:", response)
-    } catch (error) {
-      console.error("Error sending message:", error)
+    if (message?.trim() && socket) {
+      socket.emit("chat message", { 
+        message: message, 
+        sender: "YourSenderIdentifier", 
+        timestamp: new Date().toISOString() 
+      });    
+      setMessage('')
+    } else {
+      console.error("Message is empty or Socket connection is not initialized");
     }
   }
 
@@ -92,6 +96,7 @@ export default function Home() {
               <FormTemplate 
                 className={'bg-white shadow rounded-lg overflow-hidden'}
                 onValueChange={handleValueChange}
+                value={message}
               />
               <ButtonTemplate 
                 className=""

@@ -1,7 +1,13 @@
 const { Server } = require('socket.io');
 
 function setupSocket(server) {
-    const io = new Server(server)
+    const io = new Server(server, {
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"]
+        }
+    })
+    console.log("Socket.IO server initialized");
 
     io.on('connection', (socket) => {
         console.log('a user connected');
@@ -32,13 +38,13 @@ function setupSocket(server) {
     
         socket.on('chat message', async (data) => {
             try {
-                const chatSessionId = data.chatSessionId; 
-    
-                await saveMessageToDatabase(chatSessionId, {
-                    senderUid: data.senderUid,
-                    message: data.message,
-                    timestamp: Date.now(),
-                });
+                // const chatSessionId = data.chatSessionId; 
+                console.log("RECEIVED MESSAGE:", data)
+                // await saveMessageToDatabase(chatSessionId, {
+                //     senderUid: data.senderUid,
+                //     message: data.message,
+                //     timestamp: Date.now(),
+                // });
                 // console.log('Message:', data);
                 io.emit('chat message', data);
     

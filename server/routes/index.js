@@ -1,6 +1,6 @@
 const route = require('express').Router();
 const apiRoutes = require('./api')
 
-route.post('/api', apiRoutes)
+route.use('/api', apiRoutes)
 
 module.exports = route;
