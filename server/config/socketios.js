@@ -1,4 +1,6 @@
 const { Server } = require('socket.io');
+const { createChatSession, chatSessionExists, saveMessage } = require('../services/realtimeDatabase/chatSession');
+const { addChatSessionToUser, userHasChatSession } = require('../services/firestore/user')
 
 function setupSocket(server) {
     const io = new Server(server, {
@@ -11,47 +13,52 @@ function setupSocket(server) {
 
     io.on('connection', (socket) => {
         console.log('a user connected');
-    
-        socket.on("joinExistingSession", async (chatSessionId) => {
-            try {
-                if (!chatSessionId) {
-                    console.error("No chat session ID provided for joining existing chat.")
-                    return
-                }
+        
+        // Handler for starting a new chat session
+        socket.on('startchat', async (participants) => {
+            const chatSessionId = await createChatSession(participants)
+            await Promise.all(participants.map(userId => addChatSessionToUser(userId, chatSessionId)))
 
-                const messages = await loadMessages(chatSessionId);
-                socket.emit('loadMessages', messages);
-            } catch (error) {
-                console.error("Error loading messages:", error)
-            }
+            socket.join(chatSessionId);
+            socket.emit('chatStarted', { chatSessionId });
         })
 
-        socket.on('createNewSession', async ({ uid1, uid2 }) => {
+        socket.on('joinRoom', async ({ userId, roomId }) => {
             try {
-                const chatSessionId = await createChatSession(uid1, uid2);
-                socket.emit('chatSessionCreated', chatSessionId);
+                socket.join(roomId)
+                const chatSessionExist = await chatSessionExists(roomId);
+                const userAuthorized = await userHasChatSession(userId, roomId);
+    
+                if (chatSessionExist && userAuthorized) {
+                    socket.join(roomId);                
+                    socket.emit('joinedChat', { roomId });
+                    
+                    // Optionally, load and emit previous messages from this chat session
+                    // const messages = await loadMessagesForSession(roomId);
+                    socket.emit('previousMessages', messages);
+                } else {
+                    socket.emit('errorJoiningChat', { message: 'Unable to join chat.' });
+                }
             } catch (error) {
-                console.error("Error creating chat session:", error);
-                socket.emit('chatSessionCreationFailed');
+                console.error('Error joining chat session:', error);
+                socket.emit('errorJoiningChat', { message: error.message || 'Unable to join chat.' });
             }
-        });
+        })
     
-        socket.on('chat message', async (data) => {
+        socket.on('sendMessage', async (data) => {
             try {
-                // const chatSessionId = data.chatSessionId; 
                 console.log("RECEIVED MESSAGE:", data)
-                // await saveMessageToDatabase(chatSessionId, {
-                //     senderUid: data.senderUid,
-                //     message: data.message,
-                //     timestamp: Date.now(),
-                // });
-                // console.log('Message:', data);
-                io.emit('chat message', data);
-    
+                await saveMessage(roomId, { data });
+                io.to(roomId).emit('newMessage', data)
             } catch(error) {
                 console.error("Error handling chat message:", error)
             }
         });
+
+        socket.on('leaveRoom', ({ userId, roomId }) => {
+            socket.leave(roomId)
+            console.log(`User ${userId} left room ${roomId}`);
+        })
 
         socket.on('disconnect', () => {
             console.log('user disconnected')

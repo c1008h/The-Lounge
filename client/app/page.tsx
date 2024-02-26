@@ -21,7 +21,7 @@ export default function Home() {
     const socketInstance: Socket = socketClient();
     setSocket(socketInstance);
 
-    socketInstance.on('chat message', (incomingMessage: TextMessageProps) => {
+    socketInstance.on('newMessage', (incomingMessage: TextMessageProps) => {
       setMessages((prevMessages) => [...prevMessages, incomingMessage])
     })
 
@@ -30,13 +30,11 @@ export default function Home() {
     };
   }, []);
 
-  const handleValueChange = (value: string) => setMessage(value);
-
   const handleMessageSubmit = async () => {
     console.log("MESSAGE:", message)
 
     if (message?.trim() && socket) {
-      socket.emit("chat message", { 
+      socket.emit("sendMessage", { 
         message: message, 
         sender: "YourSenderIdentifier", 
         timestamp: new Date().toISOString() 
@@ -95,7 +93,7 @@ export default function Home() {
             <div className="w-2/3 flex fixed bottom-0 p-4 bg-white">
               <FormTemplate 
                 className={'bg-white shadow rounded-lg overflow-hidden'}
-                onValueChange={handleValueChange}
+                onValueChange={(value: string) => setMessage(value)}
                 value={message}
               />
               <ButtonTemplate 
