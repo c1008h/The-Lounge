@@ -15,7 +15,7 @@ export default function CardTemplate({chatWith, message, sender, id, timestamp}:
   const alignmentStyles = isSelf ? "self-end" : "self-start";
 
   return (
-    <Card key={id} className={`${cardStyles} ${alignmentStyles} max-w-xs md:max-w-md mx-2 my-1 rounded-lg`}>
+    <Card className={`${cardStyles} ${alignmentStyles} max-w-xs md:max-w-md mx-2 my-1 rounded-lg`}>
       <CardBody>
         <p className="p-2">{message ? message : chatWith}</p>
       </CardBody>

@@ -8,9 +8,9 @@ interface BoxTemplateProps {
   textStyle?: string
 }
 
-export default function BoxTemplate({textStyle, boxStyle, chatWith, id, timestamp}: BoxTemplateProps) {
+export default function BoxTemplate({ textStyle, boxStyle, chatWith, id, timestamp}: BoxTemplateProps) {
   return (
-    <div key={id} className={boxStyle}>
+    <div className={boxStyle}>
       <p className={textStyle}>
        {chatWith}
       </p>

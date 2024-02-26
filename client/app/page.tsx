@@ -10,14 +10,19 @@ import axios from 'axios';
 import {SessionProps, TextMessageProps } from '../interfaces/messages'
 import SocketIOClient from 'socket.io-client';
 
-const socket = SocketIOClient(process.env.NEXT_PUBLIC_SOCKET_PORT || '');
-
 export default function Home() {
   const [message, setMessage] = useState<string>()
 
-  useEffect(() => {
-    console.log("TEXT MESSAGES:", textMessages)
-  }, [])
+  if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') {
+    throw new Error('NEXT_PUBLIC_SOCKET_PORT is not defined');
+  }
+
+  const PORT = process.env.NEXT_PUBLIC_SOCKET_PORT
+  // const socket = SocketIOClient(PORT);
+
+  // useEffect(() => {
+  //   console.log("TEXT MESSAGES:", textMessages)
+  // }, [])
 
   const handleValueChange = (value: string) => setMessage(value);
 
@@ -25,12 +30,14 @@ export default function Home() {
     try {
       const data = { message };
       console.log(data)
-      const response = await axios.post(`http://localhost:3008/api/socket`, data, {
+      console.log(process.env.NEXT_PUBLIC_SOCKET_PORT)
+
+      const response = await axios.post(PORT, data, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      console.log("Success:", response)
+      // console.log("Success:", response)
     } catch (error) {
       console.error("Error sending message:", error)
     }
@@ -46,18 +53,17 @@ export default function Home() {
           <div className="flex flex-col h-screen w-1/3"> 
             <div className='bg-neutral-500 w-full h-20 justify-center items-center relative flex'><h1 className='text-center'>EXTRA COOL CHAT</h1></div>
             {chatSessions.map((session, index) => (
-              <>
+              <React.Fragment key={`session-${index}`} >
                 <div className='flex flex-row justify-between p-3'>
                   <BoxTemplate 
-                    key={session.id}
                     id={session.id}
                     chatWith={session.chatWith}
                     boxStyle={'flex items-center justify-start'}
                   />
-                  <ButtonTemplate label='X' className='justify-center' onPress={handleDeleteSession(session.id)}/>
+                  <ButtonTemplate label='X' className='justify-center' onPress={() => handleDeleteSession(session.id)}/>
                 </div>
                 <Divider className="my-4 self-center" />
-              </>
+              </React.Fragment>
             ))}
             <div>
 
@@ -71,14 +77,15 @@ export default function Home() {
             </div>
             {/* CHAT LOG SHOULD TAKE UP MOST OF THE HEIGHT */}
             {textMessages.map((message, index) => (
-              <CardTemplate 
-                key={index}
-                id={message.id}
-                message={message.message}
-                sender={message.sender}
-                timestamp={message.timestamp}
-                alignment={message.sender === 'SELF' ? 'right' : 'left'}
-              />
+              <React.Fragment key={`message-${index}`}>
+                <CardTemplate 
+                  id={message.id}
+                  message={message.message}
+                  sender={message.sender}
+                  timestamp={message.timestamp}
+                  alignment={message.sender === 'SELF' ? 'right' : 'left'}
+                />
+              </React.Fragment>
             ))}
             {/* TEXT BOX SHOULD BE BOTTOM OF SCREEN */}
             <div className="w-2/3 flex fixed bottom-0 p-4 bg-white">

@@ -1,8 +1,8 @@
 import { Socket, io } from "socket.io-client"
 
 export default function socketClient() {
-    const socket = io(`:${PORT + 1}`, { path: '/', addTrailingSlash: false })
-
+    // const socket = io(`:${PORT + 1}`, { path: '/', addTrailingSlash: false })
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_PORT)
     socket.on("connect", () => {
         console.log("connected")
     })
