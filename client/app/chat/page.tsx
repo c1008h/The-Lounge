@@ -9,7 +9,7 @@ import {SessionProps, TextMessageProps } from '@/interfaces/messages'
 import socketClient from '@/services/socketioConfig'
 import { Socket } from "socket.io-client";
 
-export default function Chat() {
+export default function Page() {
   const [message, setMessage] = useState<string>('') // ONE MESSAGE
   const [messages, setMessages] = useState<TextMessageProps[]>([]) // ARRAY OF MESSAGES
   const [socket, setSocket] = useState<Socket | null>(null);
