@@ -3,15 +3,29 @@ import React, { useState } from 'react'
 import Head from 'next/head';
 import Link from 'next/link';
 import {ButtonTemplate} from '@/components';
+import { useAuth } from '@/context/AuthProvider';
 
 export default function Page() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const { signInWithGoogle } = useAuth();
 
     const handleSignUp = (e) => {
       e.preventDefault();
     };
+    const handleGoogleSignup = async () => {
+        try {
+            const result = await signInWithGoogle(); 
+            if (result) {
+                console.log('Google sign-in successful:', result);
+            } else {
+                console.log('Google sign-in failed');
+            }
+        } catch (error) {
+            console.error('Error signing up with Google:', error); 
+        }
+    }
   
     return (
       <div className="flex flex-col justify-center items-center min-h-screen py-20 bg-gradient-to-b from-blue-300 to-blue-500">
@@ -40,6 +54,7 @@ export default function Page() {
           <div className="mb-8">
             <p className="text-white">Or sign up with:</p>
             <ButtonTemplate 
+                onPress={handleGoogleSignup}
                 label={"Sign Up with Google"}
                 className="w-full bg-white text-blue-500 font-semibold py-3 rounded-md shadow-md hover:bg-blue-600 hover:text-white transition duration-300 mb-2"
             />
