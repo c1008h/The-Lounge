@@ -57,7 +57,7 @@ export default function Page() {
   const handleDeleteSession = async (sessionId: string) => console.log("DELETE BUTTON!")
 
   return (
-    <NextUIProvider>
+    // <NextUIProvider>
       <div className="flex flex-col min-h-screen bg-neutral-400	">
         <div className="flex flex-row flex-1 ">
           {/* LEFT SESSION NAVIGATION */}
@@ -117,6 +117,6 @@ export default function Page() {
           </div>
         </div>
       </div>
-    </NextUIProvider>
+    // </NextUIProvider>
   );
 }

@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import Head from 'next/head';
 import Link from 'next/link';
-import {ButtonTemplate} from '@/components';
+import {ButtonTemplate, Divider} from '@/components';
 import { useAuth } from '@/context/AuthProvider';
 
 export default function Page() {
@@ -51,8 +51,14 @@ export default function Page() {
                 type="submit" 
              />
           </form>
+          <p className="text-white">Already have an account? <Link href="/login" className="text-blue-200 hover:underline">Log in</Link></p>
+
           <div className="mb-8">
-            <p className="text-white">Or sign up with:</p>
+            <div className='flex flex-row text-white items-center justify-center m-4'>
+              <Divider />
+              <p className="mx-4">Or</p>
+              <Divider />
+            </div>
             <ButtonTemplate 
                 onPress={handleGoogleSignup}
                 label={"Sign Up with Google"}
@@ -63,7 +69,6 @@ export default function Page() {
                 className="w-full bg-white text-blue-500 font-semibold py-3 rounded-md shadow-md hover:bg-blue-600 hover:text-white transition duration-300"
             />
           </div>
-          <p className="text-white">Already have an account? <Link href="/login" className="text-blue-200 hover:underline">Log in</Link></p>
         </main>
       </div>
     );

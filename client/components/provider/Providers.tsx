@@ -11,9 +11,9 @@ export function Provider({ children }: ProviderProps) {
   return (
     <NextUIProvider >
         <AuthProvider>
-                {/* NAV WILL GO HERE */}
-               {children}
-                {/* FOOTER WILL GO HERE */}
+            {/* NAV WILL GO HERE */}
+            {children}
+            {/* FOOTER WILL GO HERE */}
         </AuthProvider>
     </NextUIProvider>
     )
