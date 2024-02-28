@@ -2,6 +2,9 @@
 import firebase, { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { collection } from "firebase/firestore";
+import { getDatabase, ref, onValue } from "firebase/database";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -13,12 +16,27 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, 
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_REAL_TIME_DATABASE
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app)
+const database = getDatabase(app);
+
 // const analytics = getAnalytics(app);
 
-export { app, auth }
+const userCollection = collection(db,'users')
+
+const sessionsRT = ref(database, '/session')
+
+export { 
+  app, 
+  auth, 
+  db, 
+  userCollection, 
+  database,
+  sessionsRT 
+}

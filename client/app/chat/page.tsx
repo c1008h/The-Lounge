@@ -2,23 +2,53 @@
 import React, { useState, useEffect } from 'react'
 import Image from "next/image";
 import { NextUIProvider, Divider } from "@nextui-org/react";
-import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate} from '@/components'
+import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, InputForm} from '@/components'
 import {textMessages} from '@/constants/SAMPLEMESSAGES'
 import {chatSessions} from '@/constants/Sessions'
 import {SessionProps, TextMessageProps } from '@/interfaces/messages'
 import socketClient from '@/services/socketioConfig'
 import { Socket } from "socket.io-client";
+import { db, auth, userCollection, sessionsRT } from '@/services/firebaseConfig';
+import { collection, doc, getDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { onValue } from "firebase/database";
+import { useChatParticipants } from '@/hooks/useChatParticipants';
+
+interface ParticipantProps {
+  uid: string;
+  role: string;
+}
 
 export default function Page() {
   const [message, setMessage] = useState<string>('') // ONE MESSAGE
   const [messages, setMessages] = useState<TextMessageProps[]>([]) // ARRAY OF MESSAGES
+  const [sessions, setSessions] = useState<string[]>([])
   const [socket, setSocket] = useState<Socket | null>(null);
   const [chatSessionId, setChatSessionId] = useState<string | null>(null);
-  const [participants, setParticipants] = useState<string[]>([]);
-  const uid = '123'
-  
+  // const [participants, setParticipants] = useState<ParticipantProps[]>([]);
+  const [uid, setUid] = useState<string>()
+  const [addToChat, setAddToChat] = useState<boolean>(false)
+  const [inputValue, setInputValue] = useState('');
+
+  const { participants, addParticipant, removeParticipant } = useChatParticipants();
+
   if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') throw new Error('NEXT_PUBLIC_SOCKET_PORT is not defined');
   const PORT = process.env.NEXT_PUBLIC_SOCKET_PORT
+
+  useEffect(() => {
+    const currentUser = auth.currentUser
+    if (currentUser) {
+      setUid(currentUser.uid)
+
+      const userDocRef = doc(userCollection, currentUser.uid)
+      getDoc(userDocRef).then((docSnap) => {
+        if (docSnap.exists()) {
+          setSessions(docSnap.data().sessions || [])
+        }
+      })
+    }
+  }, [])
+
+  console.log(sessions)
 
   useEffect(() => {
     const socketInstance: Socket = socketClient();
@@ -47,6 +77,11 @@ export default function Page() {
       console.error("Message is empty or Socket connection is not initialized");
     }
   }
+
+  const handleAddNewSession = async () => {
+    setAddToChat(true)
+
+  }
   const createNewSession = async () => {
     if (!socket) throw Error("socket connection is not initialized")
     socket.emit('startchat', participants, (response: { chatSessionId: string }) => {
@@ -56,6 +91,20 @@ export default function Page() {
 
   const handleDeleteSession = async (sessionId: string) => console.log("DELETE BUTTON!")
 
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
+  
+  const handleAddParticipant = () => {
+    if (inputValue.trim() !== '') {
+      const participant = { id: Date.now().toString(), name: inputValue.trim() };
+      addParticipant(participant);
+      setInputValue(''); // Clear the input after adding
+      setAddToChat(false); // Optionally, hide the input form after adding
+    }
+  };
+
+  console.log("PARTICIPANTS:", participants)
+
+
   return (
     // <NextUIProvider>
       <div className="flex flex-col min-h-screen bg-neutral-400	">
@@ -64,7 +113,7 @@ export default function Page() {
           <div className="flex flex-col h-screen w-1/3"> 
             <div className='bg-neutral-500 w-full h-20 justify-center items-center relative flex'>
               <h1 className='text-center'>EXTRA COOL CHAT</h1>
-              <ButtonTemplate label='+' className='' onPress={() => createNewSession()}/>
+              <ButtonTemplate label='+' className='' onPress={() => handleAddNewSession()}/>
             </div>
             {chatSessions.map((session, index) => (
               <React.Fragment key={`session-${index}`} >
@@ -87,7 +136,26 @@ export default function Page() {
           {/* RIGHT SIDE OF SCREEN */}
           <div className="w-2/3 h-screen bg-gray-100 flex flex-col gap-4 relative">
             <div className='relative flex top-0 bg-slate-400 w-full h-24 justify-center items-center'>
-              <h3 className='text-center'>RECIPRICANTS NAME</h3>
+              {addToChat ? (
+                <div className='flex flex-row bg-slate-400'>
+                  <InputForm 
+                    value={inputValue}
+                    className={'bg-slate-400'}
+                    onValueChange={(v: string) => setInputValue(v)} 
+                    onKeyDown={(event) => { 
+                      if (event.key === 'Enter') {
+                        handleAddParticipant(); 
+                      }
+                    }}
+                  />
+                  <ButtonTemplate 
+                    onPress={handleAddParticipant}
+                    label={'+'}
+                  />
+                </div>
+              ) : (
+                <h3 className='text-white'>To: RECIPRICANTS NAME</h3>
+              )}
             </div>
             {/* CHAT LOG SHOULD TAKE UP MOST OF THE HEIGHT */}
             {textMessages.map((message, index) => (
