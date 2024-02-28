@@ -17,9 +17,14 @@ export const useChatParticipants = () => {
         setParticipants([...participants, participant]);
       }
     };
-  
-    const removeParticipant = (uid: string) => {
+
+    const removeSpecificParticipant = (uid: string) => {
       setParticipants(participants.filter((p) => p.uid !== uid));
+
+    }
+  
+    const removeParticipant = () => {
+      setParticipants(prevParticipants => prevParticipants.slice(0, -1));
     };
   
     // Optionally, a function to validate participants before adding
@@ -29,6 +34,12 @@ export const useChatParticipants = () => {
       return true; // Placeholder
     };
   
-    return { participants, addParticipant, removeParticipant, validateParticipant };
+    return { 
+      participants, 
+      removeSpecificParticipant, 
+      addParticipant, 
+      removeParticipant, 
+      validateParticipant 
+    };
 };
   

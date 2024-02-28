@@ -29,7 +29,7 @@ export default function Page() {
   const [addToChat, setAddToChat] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState('');
 
-  const { participants, addParticipant, removeParticipant } = useChatParticipants();
+  const { participants, addParticipant, removeSpecificParticipant, removeParticipant } = useChatParticipants();
 
   if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') throw new Error('NEXT_PUBLIC_SOCKET_PORT is not defined');
   const PORT = process.env.NEXT_PUBLIC_SOCKET_PORT
@@ -123,7 +123,6 @@ export default function Page() {
   };
 
   console.log('PARTICIPANTS:', participants)
-  // console.log("PARTICIPANTS:", participants)
 
   return (
     // <NextUIProvider>
@@ -171,6 +170,8 @@ export default function Page() {
                     onKeyDown={(event) => { 
                       if (event.key === 'Enter' || event.key === ' ') {
                         handleAddParticipant(); 
+                      } else if (event.key === 'Backspace' && !inputValue.trim()) {
+                        removeParticipant();
                       }
                     }}
                   />
