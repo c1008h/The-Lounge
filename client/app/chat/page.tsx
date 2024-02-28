@@ -70,7 +70,7 @@ export default function Page() {
     if (message?.trim() && socket) {
       socket.emit("sendMessage", { 
         message: message, 
-        sender: "YourSenderIdentifier", 
+        sender: uid, 
         timestamp: new Date().toISOString() 
       });    
       setMessage('')
@@ -175,8 +175,15 @@ export default function Page() {
                       }
                     }}
                   />
-                  <ButtonTemplate 
-                    onPress={handleAddParticipant}
+                  <ButtonTemplate
+                    onPress={() => {
+                      if (participants.length !== 0) {
+                        createNewSession()
+                      } else {
+                        console.log("no participants to message")
+                        return
+                      }
+                    }}
                     label={'+'}
                   />
                 </div>
