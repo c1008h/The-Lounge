@@ -49,6 +49,7 @@ export default function Page() {
   }, [])
 
   console.log(sessions)
+  console.log("UID", uid)
 
   useEffect(() => {
     const socketInstance: Socket = socketClient();
@@ -81,10 +82,26 @@ export default function Page() {
   const handleAddNewSession = async () => {
     setAddToChat(true)
 
+    // try {
+    //   createNewSession()
+    //   console.log("Created session!")
+    // } catch (error) {
+    //   console.error("Error creating new session")
+    // }
   }
+
   const createNewSession = async () => {
-    if (!socket) throw Error("socket connection is not initialized")
-    socket.emit('startchat', participants, (response: { chatSessionId: string }) => {
+    if (!socket) {
+      console.error("socket connection is not initialized")
+      return;
+    }
+    const sessionData = {
+      initiator: uid,
+      participants: participants
+    }
+    console.log("SESSION DATA:", sessionData)
+
+    socket.emit('startchat', sessionData, (response: { chatSessionId: string }) => {
       setChatSessionId(response.chatSessionId);
     });
   }
@@ -94,16 +111,19 @@ export default function Page() {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
   
   const handleAddParticipant = () => {
-    if (inputValue.trim() !== '') {
-      const participant = { id: Date.now().toString(), name: inputValue.trim() };
-      addParticipant(participant);
-      setInputValue(''); // Clear the input after adding
-      setAddToChat(false); // Optionally, hide the input form after adding
+    const participantName = inputValue.trim();
+    console.log("PART NAME:", participantName)
+    const isAlreadyAdded = participants.some(p => p.name === participantName);
+
+    if (participantName && !isAlreadyAdded) {
+      const newParticipant = { uid: Date.now().toString(), name: participantName, role: "participant" };
+      addParticipant(newParticipant);
+      setInputValue(''); 
     }
   };
 
-  console.log("PARTICIPANTS:", participants)
-
+  console.log('PARTICIPANTS:', participants)
+  // console.log("PARTICIPANTS:", participants)
 
   return (
     // <NextUIProvider>
@@ -115,12 +135,12 @@ export default function Page() {
               <h1 className='text-center'>EXTRA COOL CHAT</h1>
               <ButtonTemplate label='+' className='' onPress={() => handleAddNewSession()}/>
             </div>
-            {chatSessions.map((session, index) => (
+            {sessions.map((session, index) => (
               <React.Fragment key={`session-${index}`} >
                 <div className='flex flex-row justify-between p-3'>
                   <BoxTemplate 
-                    id={session.id}
-                    chatWith={session.chatWith}
+                    id={session}
+                    // chatWith={session.chatWith}
                     boxStyle={'flex items-center justify-start'}
                   />
                   <ButtonTemplate label='X' className='justify-center' onPress={() => handleDeleteSession(session.id)}/>
@@ -139,12 +159,17 @@ export default function Page() {
               {addToChat ? (
                 <div className='flex items-center flex-row bg-slate-400 text-white' >
                   <label className='mr-2'>To: </label>
+                  {participants.map((participant, index) => (
+                    <div key={index} className='participant-block mr-2 mb-2 bg-gray-300 text-gray-700 p-2 rounded-lg flex items-center'>
+                      {participant.name}
+                    </div>
+                  ))}
                   <input 
                     value={inputValue}
                     className='bg-slate-400 no-border outline-none'
                     onChange={(e) => setInputValue(e.target.value)} 
                     onKeyDown={(event) => { 
-                      if (event.key === 'Enter' || event.key === 'Space') {
+                      if (event.key === 'Enter' || event.key === ' ') {
                         handleAddParticipant(); 
                       }
                     }}
