@@ -137,13 +137,14 @@ export default function Page() {
           <div className="w-2/3 h-screen bg-gray-100 flex flex-col gap-4 relative">
             <div className='relative flex top-0 bg-slate-400 w-full h-24 justify-center items-center'>
               {addToChat ? (
-                <div className='flex flex-row bg-slate-400'>
-                  <InputForm 
+                <div className='flex items-center flex-row bg-slate-400 text-white' >
+                  <label className='mr-2'>To: </label>
+                  <input 
                     value={inputValue}
-                    className={'bg-slate-400'}
-                    onValueChange={(v: string) => setInputValue(v)} 
+                    className='bg-slate-400 no-border outline-none'
+                    onChange={(e) => setInputValue(e.target.value)} 
                     onKeyDown={(event) => { 
-                      if (event.key === 'Enter') {
+                      if (event.key === 'Enter' || event.key === 'Space') {
                         handleAddParticipant(); 
                       }
                     }}
