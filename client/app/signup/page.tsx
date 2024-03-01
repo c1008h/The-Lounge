@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, FormEvent } from 'react'
 import Head from 'next/head';
 import Link from 'next/link';
 import {ButtonTemplate, Divider} from '@/components';
@@ -7,35 +7,37 @@ import { useAuth } from '@/provider/AuthProvider';
 import { useRouter } from 'next/navigation'
 
 export default function Page() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const { signInWithGoogle } = useAuth();
-    const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<string>()
+  const { signInWithGoogle, signUpWithEmail } = useAuth();
+  const router = useRouter();
 
-    const handleSignUp = (e) => {
-      e.preventDefault();
-    };
-    const handleGoogleSignup = async () => {
-      signInWithGoogle().then((result) => {
-        if (result) {
-          router.push('/chat')
-        }
-      }).catch(error => {
-        console.error("Sign-up failed:", error)
-      })
-
-      // try {
-      //   const result = await signInWithGoogle(); 
-      //   if (result) {
-      //     console.log('Google sign-in successful:', result);
-      //   } else {
-      //     console.log('Google sign-in failed');
-      //   }
-      // } catch (error) {
-      //   console.error('Error signing up with Google:', error); 
-      // }
+  const handleSignUp = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!email || !password || !confirmPassword) {
+      setError("Please make sure all fields are filled.")
+      return
     }
+
+    try {
+      const result = await signUpWithEmail(email, password)
+      console.log("RESULT", result)
+    } catch (error) {
+      setError(`Error signing up with email: ${error}`)
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    signInWithGoogle().then((result) => {
+      if (result) {
+        router.push('/chat')
+      }
+    }).catch(error => {
+      console.error("Sign-up failed:", error)
+    })
+  }
   
   return (
     <div className="flex flex-col justify-center items-center min-h-screen py-20 bg-gradient-to-b from-blue-300 to-blue-500">

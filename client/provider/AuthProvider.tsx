@@ -1,12 +1,22 @@
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
-import { auth, db, userCollection } from '@/services/firebaseConfig'; // Import your Firebase authentication instance and Google auth provider
-import { UserCredential, AdditionalUserInfo, signInWithPopup, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
+import { auth, db, userCollection } from '@/services/firebaseConfig'; 
+import { 
+  UserCredential, 
+  AdditionalUserInfo, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  getAdditionalUserInfo,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from "firebase/auth";
 import { addDoc } from "firebase/firestore";
 
 interface AuthContextType {
   signInWithGoogle: () => Promise<UserCredential | undefined>;
-  signUpWithEmail: (email: string, password: string) => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
+  signInWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,26 +76,72 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return undefined;
   };
 
-  const signUpWithEmail = async (email: string, password: string): Promise<void> => {
+  const signUpWithEmail = async (email: string, password: string): Promise<UserCredential | undefined> => {
     try {
-      await auth.createUserWithEmailAndPassword(email, password); // Use Firebase createUserWithEmailAndPassword method for email signup
+      const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredentials.user
+
+      console.log("USER:", userCredentials)
+
+      const userDocData = {
+        uid: user.uid,
+        email: user.email,
+      }
+
+      try {
+        addDoc(userCollection, userDocData)
+        .then((docRef) => console.log("Document written with ID:", docRef.id))
+        
+      } catch (error) {
+        console.error("cannot add new user to firestore:", error)
+      }
+      return userCredentials
     } catch (error) {
-      console.error('Error signing up with email:', error);
+      const firebaseError = error as { code?: string, message?: string };
+
+      if (firebaseError.code === 'auth/email-already-in-use') {
+        console.error('The email address is already in use by another account.');
+        alert("This email is already in use.")
+      } else {
+        console.error('Error signing up with email:', error);
+      }
+      return undefined;
     }
   };
 
-  const signInWithEmail = async (email: string, password: string): Promise<void> => {
+  const signInWithEmail = async (email: string, password: string): Promise<UserCredential | undefined> => {
     try {
-      await auth.signInWithEmailAndPassword(email, password); // Use Firebase signInWithEmailAndPassword method for email login
+      const userCredentials = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredentials.user
+      console.log("USER:", userCredentials)
+
+      return userCredentials;
     } catch (error) {
-      console.error('Error signing in with email:', error);
+      const firebaseError = error as { code?: string, message?: string };
+
+      if (firebaseError.code === 'auth/invalid-credential') {
+        console.error('Invalid password or email.');
+        alert("Invalid password or email.")
+      } else {
+        console.error('Error logging in with email:', error);
+      }
+      return undefined;
     }
   };
+
+  const logout = async () => {
+    try {
+      await signOut(auth)
+    } catch (error) {
+      console.error("Trouble signing out:", error)
+    }
+  }
 
   const value: AuthContextType = {
     signInWithGoogle,
     signUpWithEmail,
     signInWithEmail,
+    logout
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
