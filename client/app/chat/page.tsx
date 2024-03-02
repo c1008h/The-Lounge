@@ -147,8 +147,9 @@ export default function Page() {
                 <Divider className="my-4 self-center" />
               </React.Fragment>
             ))}
-            <div>
-
+            <div className='w-1/3 flex fixed bottom-0 bg-neutral-500 h-20 items-center justify-center'>
+              <div className='bg-blue-400 h-10 w-10 rounded-3xl'></div>
+              <ButtonTemplate label='+' className='bg-blue-400 h-10 w-10 rounded-3xl'/>
             </div>
           </div>
 
