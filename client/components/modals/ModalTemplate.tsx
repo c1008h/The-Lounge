@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal } from '@nextui-org/react'
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
 
 interface ModalTemplateProps {
     label: string;
@@ -9,7 +9,12 @@ export default function ModalTemplate({
 }: ModalTemplateProps) {
   return (
     <Modal>
-      <h1>{label}</h1>
+        <ModalContent>
+            <ModalBody>
+            <h1>{label}</h1>
+
+            </ModalBody>
+        </ModalContent>
     </Modal>
   )
 }
