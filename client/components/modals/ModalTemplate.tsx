@@ -2,17 +2,21 @@ import React from 'react'
 import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
 
 interface ModalTemplateProps {
-    label: string;
+    label?: string;
+    content?: string;
 }
 export default function ModalTemplate({
-    label
+    label,
+    content
 }: ModalTemplateProps) {
   return (
     <Modal>
         <ModalContent>
+            <ModalHeader>
+                {label}
+            </ModalHeader>
             <ModalBody>
-            <h1>{label}</h1>
-
+                <p>{content}</p>
             </ModalBody>
         </ModalContent>
     </Modal>
