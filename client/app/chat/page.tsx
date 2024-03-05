@@ -12,7 +12,7 @@ import { db, auth, userCollection, sessionsRT } from '@/services/firebaseConfig'
 import { collection, doc, getDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { onValue } from "firebase/database";
 import { useChatParticipants } from '@/hooks/useChatParticipants';
-
+import Sidebar from './sidebar';
 interface ParticipantProps {
   uid: string;
   role: string;
@@ -79,16 +79,7 @@ export default function Page() {
     }
   }
 
-  const handleAddNewSession = async () => {
-    setAddToChat(true)
-
-    // try {
-    //   createNewSession()
-    //   console.log("Created session!")
-    // } catch (error) {
-    //   console.error("Error creating new session")
-    // }
-  }
+  const handleAddNewSession = async () => setAddToChat(true)
 
   const createNewSession = async () => {
     if (!socket) {
@@ -106,7 +97,6 @@ export default function Page() {
     });
   }
 
-  const handleDeleteSession = async (sessionId: string) => console.log("DELETE BUTTON!")
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
   
@@ -129,7 +119,7 @@ export default function Page() {
       <div className="flex flex-col min-h-screen bg-neutral-400	">
         <div className="flex flex-row flex-1 ">
           {/* LEFT SESSION NAVIGATION */}
-          <div className="flex flex-col h-screen w-1/3"> 
+          {/* <div className="flex flex-col h-screen w-1/3"> 
             <div className='bg-neutral-500 w-full h-20 justify-center items-center relative flex'>
               <h1 className='text-center'>EXTRA COOL CHAT</h1>
               <ButtonTemplate label='+' className='' onPress={() => handleAddNewSession()}/>
@@ -151,8 +141,11 @@ export default function Page() {
               <div className='bg-blue-400 h-10 w-10 rounded-3xl'></div>
               <ButtonTemplate label='+' className='bg-blue-400 h-10 w-10 rounded-3xl'/>
             </div>
-          </div>
-
+          </div> */}
+          <Sidebar 
+            sessions={sessions}
+            handleAddNewSession={handleAddNewSession}
+          />
           {/* RIGHT SIDE OF SCREEN */}
           <div className="w-2/3 h-screen bg-gray-100 flex flex-col gap-4 relative">
             <div className='relative flex top-0 bg-slate-400 w-full h-24 justify-center items-center'>
