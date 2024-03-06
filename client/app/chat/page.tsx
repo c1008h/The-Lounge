@@ -12,7 +12,7 @@ import { db, auth, userCollection, sessionsRT } from '@/services/firebaseConfig'
 import { collection, doc, getDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { onValue } from "firebase/database";
 import { useChatParticipants } from '@/hooks/useChatParticipants';
-import Sidebar from './sidebar';
+import Sidebar from './Sidebar';
 interface ParticipantProps {
   uid: string;
   role: string;
