@@ -105,7 +105,7 @@ export default function Page() {
     const isAlreadyAdded = participants.some(p => p.name === participantName);
 
     if (participantName && !isAlreadyAdded) {
-      const newParticipant = { uid: Date.now().toString(), name: participantName, role: "participant" };
+      const newParticipant = { uid: '1234', name: participantName, role: "participant" };
       addParticipant(newParticipant);
       setInputValue(''); 
     }
@@ -149,6 +149,7 @@ export default function Page() {
                     onPress={() => {
                       if (participants.length !== 0) {
                         createNewSession()
+                        console.log("new session requested")
                       } else {
                         console.log("no participants to message")
                         return

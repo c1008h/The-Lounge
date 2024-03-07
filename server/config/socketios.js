@@ -16,18 +16,21 @@ function setupSocket(server) {
         
         // Handler for starting a new chat session
         socket.on('startchat', async (data) => {
-
+            const participants = data.participants
+            const initiator = data.initiator;
+            
             console.log("DATA:", data)
             const chatSessionId = await createChatSession(participants)
             console.log(initiator, chatSessionId)
 
             await Promise.all([
                 addChatSessionToUser(initiator, chatSessionId), 
-                ...participants.map(userId => addChatSessionToUser(userId, chatSessionId)) 
+                ...participants.map(userId => addChatSessionToUser(initiator, chatSessionId)) 
             ]);
+            console.log("new session created successfully!")
 
             socket.join(chatSessionId);
-            socket.emit('chatStarted', { uid, chatSessionId });
+            socket.emit('chatStarted', { initiator, chatSessionId });
         })
 
         socket.on('joinRoom', async ({ userId, roomId }) => {

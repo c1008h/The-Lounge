@@ -1,5 +1,7 @@
 const { userRef } = require('../../config/firebaseConfig')
 const admin = require('firebase-admin'); 
+const { query, where, getDocs } = require('firebase-admin/firestore');
+const { user } = require('pg/lib/defaults');
 
 const addNewUser = async (userId, userData) => {
     try {
@@ -21,12 +23,22 @@ const updateUser = async (userId, updates) => {
 
 const addChatSessionToUser = async (userId, chatSessionId) => {
     try {
-        const userIdRef = userRef.doc(userId)
-        await userIdRef.update({
-            sessions: admin.firestore.FieldValue.arrayUnion(chatSessionId)
-        })
+        // await query(userRef.where("uid", "==", userId)).get();
+        // const querySnapshot = await getDocs(q);
+        const querySnapshot = await userRef.where("uid", "==", userId).get();
 
-        console.log(`Chat session ${chatSessionId} added to user ${userId}.`);
+        if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0].ref
+
+            console.log("USER DOC!:", userDoc)
+
+            await userDoc.update({
+                sessions: admin.firestore.FieldValue.arrayUnion(chatSessionId)
+            })
+            console.log(`Chat session ${chatSessionId} added to user ${userId}.`);
+        } else {
+            console.log(`User with UID ${userId} not found.`);
+        }
     } catch (error) {
         console.error(`Error adding chat session to user ${userId}:`, error);
     }

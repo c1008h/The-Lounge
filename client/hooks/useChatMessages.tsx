@@ -16,7 +16,7 @@ interface ChatMessageProps {
     createdAt: number | Date;
 }
 
-function useChatMessages(sessionId: string) {
+export const useChatMessages = (sessionId: string) => {
     const [messages, setMessages] = useState<ChatMessageProps[]>([]);
 
     useEffect(() => {
