@@ -26,7 +26,7 @@ export default function Page() {
 
   const { currentUser } = useAuth();
   const { participants, addParticipant, removeSpecificParticipant, removeParticipant } = useChatParticipants();
-  const { sessions, loading, error, deleteSession } = useSessions(uid);
+  const { sessions, loading, error, deleteSession, sessionDetails } = useSessions(currentUser?.uid || '');
 
   if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') throw new Error('NEXT_PUBLIC_SOCKET_PORT is not defined');
   const PORT = process.env.NEXT_PUBLIC_SOCKET_PORT
@@ -37,8 +37,9 @@ export default function Page() {
     }
   }, [currentUser])
 
-  console.log(sessions)
-  console.log("UID", uid)
+  console.log("SESSIONS FROM USER:", sessions)
+  console.log("SESSIONS details from real time:", sessionDetails)
+  // console.log("UID", uid)
 
   useEffect(() => {
     const socketInstance: Socket = socketClient();
@@ -53,11 +54,25 @@ export default function Page() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!socket) return
+    socket.on('chatSessionId', (data) => {
+      const { chatSessionId } = data;
+      console.log("Received chatSessionId:", chatSessionId);
+      setChatSessionId(chatSessionId);
+    });
+  
+    return () => {
+      socket.off('chatSessionId');
+    };
+  }, [socket])
+
   const handleMessageSubmit = async () => {
     console.log("MESSAGE:", message)
 
     if (message?.trim() && socket) {
-      socket.emit("sendMessage", { 
+      socket.emit("sendMessage", {
+        sessionId: chatSessionId!,
         message: message, 
         sender: uid, 
         timestamp: new Date().toISOString() 
@@ -82,6 +97,7 @@ export default function Page() {
     console.log("SESSION DATA:", sessionData)
 
     socket.emit('startchat', sessionData, (response: { chatSessionId: string }) => {
+      console.log("RESPONSE CHAT SESSIONS ID:", response)
       setChatSessionId(response.chatSessionId);
     });
   }
@@ -119,7 +135,7 @@ export default function Page() {
         <div className="flex flex-row flex-1 ">
           {/* LEFT SESSION NAVIGATION */}
           <Sidebar 
-            sessions={sessions}
+            sessions={sessionDetails}
             handleAddNewSession={handleAddNewSession}
           />
           {/* RIGHT SIDE OF SCREEN */}

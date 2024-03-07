@@ -19,10 +19,11 @@ const createChatSession = async (participants) => {
         throw error;
     }
 }
-const saveMessage = async (chatSessionId, messageData) => {
+const saveMessage = async (sessionId, data) => {
+    console.log('message data', data.message)
     try {
-        const sessionMessagesRef = realTimeDb.ref(`sessions/${chatSessionId}/messages`);      
-        await sessionMessagesRef.push(messageData); 
+        const sessionMessagesRef = realTimeDb.ref(`sessions/${sessionId}/messages`);      
+        await sessionMessagesRef.push(data.message); 
 
         console.log('Message saved to Firebase chat session');
     } catch (error) {

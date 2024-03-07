@@ -2,8 +2,8 @@
 import { initializeApp } from "firebase/app";
 // import { getAnalytics } from "firebase/analytics";
 import { getAuth, setPersistence, browserSessionPersistence } from "firebase/auth";
-import { collection, getFirestore } from "firebase/firestore";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { CollectionReference, Firestore, collection, getFirestore } from "firebase/firestore";
+import { getDatabase, ref, onValue, DatabaseReference, Database } from "firebase/database";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -22,14 +22,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app)
-const database = getDatabase(app);
+const db: Firestore = getFirestore(app)
+const database: Database = getDatabase(app);
 
 // const analytics = getAnalytics(app);
 
-const userCollection = collection(db,'users')
+const userCollection: CollectionReference = collection(db,'users')
 
-const sessionsRT = ref(database, '/session')
+const sessionsRT: DatabaseReference = ref(database, '/session')
 
 export { 
   app, 

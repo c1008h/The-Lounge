@@ -17,11 +17,8 @@ function setupSocket(server) {
         // Handler for starting a new chat session
         socket.on('startchat', async (data) => {
             const participants = data.participants
-            const initiator = data.initiator;
-            
-            console.log("DATA:", data)
+            const initiator = data.initiator;   
             const chatSessionId = await createChatSession(participants)
-            console.log(initiator, chatSessionId)
 
             await Promise.all([
                 addChatSessionToUser(initiator, chatSessionId), 
@@ -30,6 +27,8 @@ function setupSocket(server) {
             console.log("new session created successfully!")
 
             socket.join(chatSessionId);
+            socket.emit('chatSessionId', { chatSessionId });
+
             socket.emit('chatStarted', { initiator, chatSessionId });
         })
 
@@ -56,10 +55,16 @@ function setupSocket(server) {
         })
     
         socket.on('sendMessage', async (data) => {
+            console.log("data", data)
+            const msgData = {
+                sender: data.sender,
+                message: data.message,
+                timestamp: data.timestamp
+            }
             try {
                 console.log("RECEIVED MESSAGE:", data)
-                await saveMessage(roomId, { data });
-                io.to(roomId).emit('newMessage', data)
+                await saveMessage(data.sessionId, { msgData });
+                io.to(data.sessionId).emit('newMessage', data)
             } catch(error) {
                 console.error("Error handling chat message:", error)
             }
