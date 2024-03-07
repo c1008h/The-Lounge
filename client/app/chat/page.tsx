@@ -1,26 +1,22 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Image from "next/image";
-import { NextUIProvider, Divider } from "@nextui-org/react";
+import { NextUIProvider } from "@nextui-org/react";
 import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, InputForm} from '@/components'
 import {textMessages} from '@/constants/SAMPLEMESSAGES'
 import {SessionProps, TextMessageProps } from '@/interfaces/messages'
 import socketClient from '@/services/socketioConfig'
 import { Socket } from "socket.io-client";
 import { db, auth, userCollection, sessionsRT } from '@/services/firebaseConfig';
-import { collection, doc, getDoc, query, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { onValue } from "firebase/database";
 import { useChatParticipants } from '@/hooks/useChatParticipants';
+import { useSessions } from '@/hooks/useSessions';
+import { useAuth } from '@/provider/AuthProvider';
 import Sidebar from './Sidebar';
-interface ParticipantProps {
-  uid: string;
-  role: string;
-}
 
 export default function Page() {
   const [message, setMessage] = useState<string>('') // ONE MESSAGE
   const [messages, setMessages] = useState<TextMessageProps[]>([]) // ARRAY OF MESSAGES
-  const [sessions, setSessions] = useState<string[]>([])
+  // const [sessions, setSessions] = useState<string[]>([])
   const [socket, setSocket] = useState<Socket | null>(null);
   const [chatSessionId, setChatSessionId] = useState<string | null>(null);
   // const [participants, setParticipants] = useState<ParticipantProps[]>([]);
@@ -28,24 +24,18 @@ export default function Page() {
   const [addToChat, setAddToChat] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState('');
 
+  const { currentUser } = useAuth();
   const { participants, addParticipant, removeSpecificParticipant, removeParticipant } = useChatParticipants();
+  const { sessions, loading, error, deleteSession } = useSessions(uid);
 
   if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') throw new Error('NEXT_PUBLIC_SOCKET_PORT is not defined');
   const PORT = process.env.NEXT_PUBLIC_SOCKET_PORT
 
   useEffect(() => {
-    const currentUser = auth.currentUser
     if (currentUser) {
       setUid(currentUser.uid)
-
-      const userDocRef = doc(userCollection, currentUser.uid)
-      getDoc(userDocRef).then((docSnap) => {
-        if (docSnap.exists()) {
-          setSessions(docSnap.data().sessions || [])
-        }
-      })
     }
-  }, [])
+  }, [currentUser])
 
   console.log(sessions)
   console.log("UID", uid)
@@ -112,7 +102,17 @@ export default function Page() {
   };
 
   console.log('PARTICIPANTS:', participants)
-
+  if (loading) {
+    return <div>Loading sessions...</div>;
+  }
+  
+  if (error) {
+    console.error(error);
+    return <div>Error loading sessions. Please try again later.</div>;
+  }
+  if (!currentUser) {
+    return <div>Please login to view this page.</div>;
+  }
   return (
     // <NextUIProvider>
       <div className="flex flex-col min-h-screen bg-neutral-400	">

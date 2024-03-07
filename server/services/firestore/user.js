@@ -1,7 +1,5 @@
 const { userRef } = require('../../config/firebaseConfig')
 const admin = require('firebase-admin'); 
-const { query, where, getDocs } = require('firebase-admin/firestore');
-const { user } = require('pg/lib/defaults');
 
 const addNewUser = async (userId, userData) => {
     try {
@@ -23,8 +21,6 @@ const updateUser = async (userId, updates) => {
 
 const addChatSessionToUser = async (userId, chatSessionId) => {
     try {
-        // await query(userRef.where("uid", "==", userId)).get();
-        // const querySnapshot = await getDocs(q);
         const querySnapshot = await userRef.where("uid", "==", userId).get();
 
         if (!querySnapshot.empty) {

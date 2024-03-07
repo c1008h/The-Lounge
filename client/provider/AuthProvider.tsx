@@ -8,7 +8,8 @@ import {
   getAdditionalUserInfo,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  User
 } from "firebase/auth";
 import { addDoc } from "firebase/firestore";
 
@@ -17,6 +18,7 @@ interface AuthContextType {
   signUpWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
   signInWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
   logout: () => Promise<void>;
+  currentUser: User | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +35,13 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(setCurrentUser);
+    return unsubscribe;
+  }, []);
+
   const provider = new GoogleAuthProvider();
 
   const signInWithGoogle = async (): Promise<UserCredential | undefined> => {
@@ -141,7 +150,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signInWithGoogle,
     signUpWithEmail,
     signInWithEmail,
-    logout
+    logout,
+    currentUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

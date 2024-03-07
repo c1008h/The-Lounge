@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import { ButtonTemplate, Divider } from '@/components'
+import { ButtonTemplate, Divider, BoxTemplate } from '@/components'
 
 interface SessionProps {
     id: string;
