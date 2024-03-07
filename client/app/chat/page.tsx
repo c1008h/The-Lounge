@@ -4,7 +4,6 @@ import Image from "next/image";
 import { NextUIProvider, Divider } from "@nextui-org/react";
 import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, InputForm} from '@/components'
 import {textMessages} from '@/constants/SAMPLEMESSAGES'
-import {chatSessions} from '@/constants/Sessions'
 import {SessionProps, TextMessageProps } from '@/interfaces/messages'
 import socketClient from '@/services/socketioConfig'
 import { Socket } from "socket.io-client";
@@ -119,29 +118,6 @@ export default function Page() {
       <div className="flex flex-col min-h-screen bg-neutral-400	">
         <div className="flex flex-row flex-1 ">
           {/* LEFT SESSION NAVIGATION */}
-          {/* <div className="flex flex-col h-screen w-1/3"> 
-            <div className='bg-neutral-500 w-full h-20 justify-center items-center relative flex'>
-              <h1 className='text-center'>EXTRA COOL CHAT</h1>
-              <ButtonTemplate label='+' className='' onPress={() => handleAddNewSession()}/>
-            </div>
-            {sessions.map((session, index) => (
-              <React.Fragment key={`session-${index}`} >
-                <div className='flex flex-row justify-between p-3'>
-                  <BoxTemplate 
-                    id={session}
-                    // chatWith={session.chatWith}
-                    boxStyle={'flex items-center justify-start'}
-                  />
-                  <ButtonTemplate label='X' className='justify-center' onPress={() => handleDeleteSession(session.id)}/>
-                </div>
-                <Divider className="my-4 self-center" />
-              </React.Fragment>
-            ))}
-            <div className='w-1/3 flex fixed bottom-0 bg-neutral-500 h-20 items-center justify-center'>
-              <div className='bg-blue-400 h-10 w-10 rounded-3xl'></div>
-              <ButtonTemplate label='+' className='bg-blue-400 h-10 w-10 rounded-3xl'/>
-            </div>
-          </div> */}
           <Sidebar 
             sessions={sessions}
             handleAddNewSession={handleAddNewSession}

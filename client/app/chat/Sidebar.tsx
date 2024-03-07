@@ -19,10 +19,17 @@ export default function Sidebar({
 
     return (
         <div className="flex flex-col h-screen w-1/3"> 
-            <div className='bg-neutral-500 w-full h-20 justify-center items-center relative flex'>
-                <h1 className='text-center'>EXTRA COOL CHAT</h1>
-                <ButtonTemplate label='+' className='' onPress={() => handleAddNewSession()}/>
+            <div className='bg-neutral-500 w-full h-20 items-center relative flex justify-between'>
+                <h4 className=''>Profile Icon</h4>
+                <div className='flex flex-row'>
+                    <h4 className=''>Friendlist</h4>
+                    <h4 className=''>Icon</h4>
+                </div>
+
+
             </div>
+            <ButtonTemplate label='NEW CHAT' className='m-4' onPress={() => handleAddNewSession()}/>
+
             {sessions.map((session, index) => (
                 <React.Fragment key={`session-${index}`} >
                     <div className='flex flex-row justify-between p-3'>
@@ -36,10 +43,6 @@ export default function Sidebar({
                     <Divider className="my-4 self-center" />
                 </React.Fragment>
             ))}
-            <div className='w-1/3 flex fixed bottom-0 bg-neutral-500 h-20 items-center justify-center'>
-                <div className='bg-blue-400 h-10 w-10 rounded-3xl'></div>
-                <ButtonTemplate label='+' className='bg-blue-400 h-10 w-10 rounded-3xl'/>
-            </div>
         </div>
     )
 }
