@@ -3,12 +3,18 @@ import React, { useState, useEffect, useCallback } from 'react'
 import Image from "next/image";
 import { NextUIProvider } from "@nextui-org/react";
 import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, InputForm} from '@/components'
+import { useSessionsListener } from '@/hooks/useSessionsListener';
+import { useSession } from '@/context/SessionContext';
+import { useParticipantsListener } from '@/hooks/useParticipantsListener';
+import { useParticipants } from '@/context/ParticipantsContext';
+import { useChatListener } from '@/hooks/useChatListener';
+import { useChat } from '@/context/ChatContext';
+
 import {textMessages} from '@/constants/SAMPLEMESSAGES'
-import {SessionProps, TextMessageProps } from '@/interfaces/messages'
+import {SessionProps, TextMessageProps } from '@/interfaces/Chat'
 import socketClient from '@/services/socketioConfig'
 import { Socket } from "socket.io-client";
-import { useChatParticipants } from '@/hooks/useChatParticipants';
-import { useSessions } from '@/hooks/useSessions';
+import { useSessions } from '@/hooks/useSessionsListener';
 import { useAuth } from '@/provider/AuthProvider';
 import Sidebar from './Sidebar';
 
@@ -24,7 +30,10 @@ export default function Page() {
   const [inputValue, setInputValue] = useState('');
 
   const { currentUser } = useAuth();
-  const { participants, addParticipant, removeSpecificParticipant, removeParticipant } = useChatParticipants();
+
+  const { addParticipant, removeParticipant, removeSpecificParticipant } = useParticipants();
+  const { partcipants, error } = useParticipantsListener(sessionId);
+
   const { sessions, loading, error, deleteSession, sessionDetails } = useSessions(currentUser?.uid || '');
 
   if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') throw new Error('NEXT_PUBLIC_SOCKET_PORT is not defined');
