@@ -1,18 +1,22 @@
-const { db, realTimeDb  } = require('../../config/firebaseConfig')
+const { db, chatSessionsRef  } = require('../../config/firebaseConfig')
 
 const createChatSession = async (participants) => {
     try {
-        const chatSessionRef = realTimeDb.ref('sessions')
-        const newChatSessionRef = chatSessionRef.push()
+        const chatSessionRef = chatSessionsRef.push();
+        const chatSessionId = chatSessionRef.key;
+        const chatSessionReference = chatSessionsRef.child(chatSessionId);
+        const participantsRef = chatSessionReference.child('participants');
+        const createdRef = chatSessionReference.child('created');
+        const messagesRef = chatSessionReference.child('messages');
+        const timestamp = Date.now();
 
-        await newChatSessionRef.set({
-            participants: participants,
-            createdAt: Date.now(),
-            messages: []
-        })
+        await participantsRef.set({ [uid1]: true, [uid2]: true });
+        await createdRef.set(formattedDate)
+        await messagesRef.set([]);
 
-        const chatSessionId = newChatSessionRef.key;
+
         console.log('New chat session created with ID:', chatSessionId);
+
         return chatSessionId;
     } catch (error) {
         console.error('Error creating chat session:', error);
@@ -20,7 +24,9 @@ const createChatSession = async (participants) => {
     }
 }
 const saveMessage = async (sessionId, data) => {
-    console.log('message data', data.message)
+    // console.log('message data', data.message)
+    if (!sessionId) return
+
     try {
         const sessionMessagesRef = realTimeDb.ref(`sessions/${sessionId}/messages`);      
         await sessionMessagesRef.push(data.message); 

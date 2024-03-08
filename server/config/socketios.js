@@ -14,17 +14,17 @@ function setupSocket(server) {
     io.on('connection', (socket) => {
         console.log('a user connected');
         
-        // Handler for starting a new chat session
         socket.on('startchat', async (data) => {
             const participants = data.participants
             const initiator = data.initiator;   
             const chatSessionId = await createChatSession(participants)
 
+            console.log("chatsessionID", chatSessionId)
             await Promise.all([
                 addChatSessionToUser(initiator, chatSessionId), 
-                ...participants.map(userId => addChatSessionToUser(initiator, chatSessionId)) 
+                ...participants.map(userId => addChatSessionToUser(userId, chatSessionId)) 
             ]);
-            console.log("new session created successfully!")
+            console.log(`new session created successfully with session id: ${chatSessionId}`)
 
             socket.join(chatSessionId);
             socket.emit('chatSessionId', { chatSessionId });
@@ -55,16 +55,19 @@ function setupSocket(server) {
         })
     
         socket.on('sendMessage', async (data) => {
-            console.log("data", data)
-            const msgData = {
-                sender: data.sender,
-                message: data.message,
-                timestamp: data.timestamp
+
+            const { sender, message, timestamp, sessionId } = data
+
+            const messages = {
+                sender: sender,
+                message: message,
+                timestamp: timestamp
             }
+            
             try {
                 console.log("RECEIVED MESSAGE:", data)
-                await saveMessage(data.sessionId, { msgData });
-                io.to(data.sessionId).emit('newMessage', data)
+                await saveMessage(sessionId, { messages });
+                io.to(sessionId).emit('newMessage', messages)
             } catch(error) {
                 console.error("Error handling chat message:", error)
             }

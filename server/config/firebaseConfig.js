@@ -11,10 +11,13 @@ admin.initializeApp({
 const db = admin.firestore();
 const realTimeDb = admin.database()
 
+const chatSessionsRef = realTimeDb.ref("sessions")
+
 const userRef = db.collection('users')
 
 module.exports = {
   db,
   realTimeDb,
-  userRef
+  chatSessionsRef,
+  userRef,
 };

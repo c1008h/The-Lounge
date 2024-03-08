@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Image from "next/image";
 import { NextUIProvider } from "@nextui-org/react";
 import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, InputForm} from '@/components'
@@ -7,7 +7,6 @@ import {textMessages} from '@/constants/SAMPLEMESSAGES'
 import {SessionProps, TextMessageProps } from '@/interfaces/messages'
 import socketClient from '@/services/socketioConfig'
 import { Socket } from "socket.io-client";
-import { db, auth, userCollection, sessionsRT } from '@/services/firebaseConfig';
 import { useChatParticipants } from '@/hooks/useChatParticipants';
 import { useSessions } from '@/hooks/useSessions';
 import { useAuth } from '@/provider/AuthProvider';
@@ -55,7 +54,7 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (!socket) return
+    if (!socket) return;
     socket.on('chatSessionId', (data) => {
       const { chatSessionId } = data;
       console.log("Received chatSessionId:", chatSessionId);
@@ -65,7 +64,7 @@ export default function Page() {
     return () => {
       socket.off('chatSessionId');
     };
-  }, [socket])
+  }, [socket]);
 
   const handleMessageSubmit = async () => {
     console.log("MESSAGE:", message)
@@ -86,6 +85,8 @@ export default function Page() {
   const handleAddNewSession = async () => setAddToChat(true)
 
   const createNewSession = async () => {
+    console.log("createNewSession called");
+
     if (!socket) {
       console.error("socket connection is not initialized")
       return;
@@ -97,7 +98,10 @@ export default function Page() {
     console.log("SESSION DATA:", sessionData)
 
     socket.emit('startchat', sessionData, (response: { chatSessionId: string }) => {
-      console.log("RESPONSE CHAT SESSIONS ID:", response)
+      if (!response) {
+        console.error("Error creating chat session:", response)
+      }
+      console.log("RESPONSE CHAT SESSIONS ID:", sessionData)
       setChatSessionId(response.chatSessionId);
     });
   }
@@ -162,16 +166,9 @@ export default function Page() {
                     }}
                   />
                   <ButtonTemplate
-                    onPress={() => {
-                      if (participants.length !== 0) {
-                        createNewSession()
-                        console.log("new session requested")
-                      } else {
-                        console.log("no participants to message")
-                        return
-                      }
-                    }}
+                    onPress={() => createNewSession()}
                     label={'+'}
+                    disabled={participants.length < 1}
                   />
                 </div>
               ) : (

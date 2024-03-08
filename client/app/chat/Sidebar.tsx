@@ -17,7 +17,6 @@ export default function Sidebar({
 }: SidebarProps) {
     const handleDeleteSession = async (sessionId: string) => console.log("DELETE BUTTON!")
 
-    console.log("SESSIONS PASSED THROUGH:", sessions)
     return (
         <div className="flex flex-col h-screen w-1/3"> 
             <div className='bg-neutral-500 w-full h-20 items-center relative flex justify-between'>
