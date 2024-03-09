@@ -5,7 +5,7 @@ import { Session } from '@/interfaces/Session';
 import { useSocket } from '@/hooks/useSocket';
 interface SessionContextType {
     sessions: Session[];
-    addSession: (session: Session) => void;
+    addSession: () => void;
     deleteSession: (sessionId: string) => void;
     leaveSession: (sessionId: string) => void;
 }

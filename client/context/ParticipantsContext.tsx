@@ -4,7 +4,7 @@ import { useSocket } from '@/hooks/useSocket';
 interface ParticipantsContextType {
   participants: Participant[];
   addParticipant: (participant: Participant) => void;
-  removeParticipant: (uid: string) => void;
+  removeParticipant: () => void;
   removeSpecificParticipant: (uid: string) => void;
 }
 

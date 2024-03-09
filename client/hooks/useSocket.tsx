@@ -5,16 +5,16 @@ if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') throw new Error(
 const PORT = process.env.NEXT_PUBLIC_SOCKET_PORT
 
 export const useSocket = (): { socket: Socket | null } => {
-    const [socket, setSocket] = useState<Socket | null>(null);
-  
-    useEffect(() => {
-      const newSocket = io(PORT);
-      setSocket(newSocket);
-  
-      return () => {
-        newSocket.disconnect();
-      };
-    }, []);
-  
-    return { socket };
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  useEffect(() => {
+    const newSocket = io(PORT);
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
+  return { socket };
 };
