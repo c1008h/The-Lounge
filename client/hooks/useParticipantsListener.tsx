@@ -3,7 +3,12 @@ import { sessionsRT } from '@/services/firebaseConfig';
 import { child, onValue, Unsubscribe, DatabaseReference} from 'firebase/database';
 import { Participant } from '@/interfaces/Participant';
 
-export const useParticipantsListener = async (sessionId: string) => {
+interface ParticipantsListenerResult {
+  participants: Participant[] | null;
+  error: string | null;
+}
+
+export const useParticipantsListener = (sessionId: string): ParticipantsListenerResult => {
   const [participants, setParticipants] = useState<Participant[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 

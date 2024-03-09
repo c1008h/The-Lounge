@@ -25,6 +25,7 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
     const [participants, setParticipants] = useState<Participant[]>([]);
 
     const addParticipant = useCallback((participant: Participant) => {
+        console.log("PARTICIPANT IN CONTEXT:", participant)
         setParticipants(prevParticipants => {
             const isAlreadyAdded = participants.some((p) => p.uid === participant.uid);
             if (!isAlreadyAdded) {
@@ -35,7 +36,7 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
         
         if (socket) socket.emit('addParticipant', participant);
 
-    }, [participants, socket]);
+    }, [socket, participants]);
 
     const removeSpecificParticipant = useCallback((uid: string) => {
         setParticipants(participants.filter((p) => p.uid !== uid));
