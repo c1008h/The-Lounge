@@ -1,12 +1,16 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Image from "next/image";
+import { useDispatch, useSelector } from 'react-redux';
 import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, Error, InputForm, Loading} from '@/components'
 import { useParticipants, useSession, useChat } from '@/context';
 import { useSessionsListener, useParticipantsListener, useChatListener } from '@/hooks';
 import { useAuth } from '@/provider/AuthProvider';
 import Sidebar from './Sidebar';
 import { Participant } from '@/interfaces/Participant';
+import { addAParticipant, backspaceParticipant } from '@/features/participants/participantSlices';
+import { selectParticipants } from '@/features/participants/participantSelectors';
+import { RootState } from '@/features/store';
 
 export default function Page() {
   const [message, setMessage] = useState<string>('') // ONE MESSAGE
@@ -15,7 +19,10 @@ export default function Page() {
   const [addToChat, setAddToChat] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState('');
 
+  const dispatch = useDispatch(); 
+
   const { currentUser } = useAuth();
+  const participantList = useSelector((state: RootState) => state.participant.participants);
 
   const { addSession, deleteSession, leaveSession } = useSession()
   const { sessions, loading: sessionLoading, error: sessionError, sessionDetails } = useSessionsListener(currentUser?.uid || null)
@@ -48,11 +55,18 @@ export default function Page() {
     // const isAlreadyAdded = participants.some(p => p.name === participantName);
 
     if (participantName) {
-      const newParticipant = { uid: '1234', name: participantName, role: "participant" };
+      const newParticipant = { uid: '1234', name: participantName};
+
+      dispatch(addAParticipant(newParticipant));
       addParticipant(newParticipant);
       setInputValue(''); 
     }
   };
+
+  const handleBackSpace = () => {
+    dispatch(backspaceParticipant())
+    removeParticipant()
+  }
 
   const handleSendMessage = () => {
     if (!uid) return
@@ -91,7 +105,7 @@ export default function Page() {
             {addToChat ? (
               <div className='flex items-center flex-row bg-slate-400 text-white' >
                 <label className='mr-2' htmlFor="participantInput">To: </label>
-                {participants && participants.map((participant: Participant, index: number) => (
+                {participantList && participantList.map((participant: Participant, index: number) => (
                   <div key={index} className='participant-block mr-2 mb-2 bg-gray-300 text-gray-700 p-2 rounded-lg flex items-center'>
                     {participant.name}
                   </div>
@@ -105,7 +119,8 @@ export default function Page() {
                     if (event.key === 'Enter' || event.key === ' ') {
                       handleAddParticipant(); 
                     } else if (event.key === 'Backspace' && !inputValue.trim()) {
-                      removeParticipant();
+                      // removeParticipant();
+                      handleBackSpace()
                     }
                   }}
                 />
