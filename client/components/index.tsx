@@ -8,3 +8,6 @@ export {default as ButtonTemplate} from './ButtonTemplate'
 export {default as BoxTemplate} from './BoxTemplate'
 
 export {default as Divider} from './ui/Divider'
+
+export {default as Loading} from './Loading';
+export {default as Error} from './Error';

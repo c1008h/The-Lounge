@@ -1,13 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { initializeSession, fetchMessages, addMessage } from './chatService'; // Abstracted Firebase & Socket.IO logic
-import { Session, Message, Participant } from './ChatTypes'; // Assuming you have defined these types
+import React, { ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { Message } from '@/interfaces/Chat'
+import { useSocket } from '@/hooks/useSocket';
 
 interface ChatContextType {
-  session: Session | null;
   messages: Message[];
-  participants: Participant[];
-  addMessage: (message: Message) => void;
-  // Add other relevant functions and state
+  sendMessage: (message: Message) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -18,29 +15,30 @@ export const useChat = (): ChatContextType => {
   return context;
 };
 
-export const ChatProvider: React.FC = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
+export const ChatProvider = ({ children }: { children: ReactNode }) => {
+  const { socket } = useSocket();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [participants, setParticipants] = useState<Participant[]>([]);
 
-  // Initialize session, fetch participants, etc. on component mount
-  useEffect(() => {
-    const init = async () => {
-      const initialSession = await initializeSession(); // Placeholder function
-      setSession(initialSession);
-      // Assume fetchMessages and similar functions are real-time enabled
-      fetchMessages(initialSession.id, setMessages); // This could set up a Firebase or Socket.IO listener
-    };
-    init();
-  }, []);
-
-  const addMessage = (newMessage: Message) => {
-    addMessageToFirebaseOrEmitViaSocket(newMessage); // Placeholder function
+  const sendMessage = useCallback((newMessage: Message) => {
     setMessages(prev => [...prev, newMessage]);
-  };
+    if (socket) socket.emit('sendMessage', newMessage);
+
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleSendMessage = (msg: Message) => sendMessage(msg)
+
+    socket.on('sendMessage', handleSendMessage)
+
+    return () => {
+      socket.off('sendMessage', handleSendMessage)
+    }
+  }, [socket, sendMessage])
 
   return (
-    <ChatContext.Provider value={{ session, messages, participants, addMessage }}>
+    <ChatContext.Provider value={{ messages, sendMessage }}>
       {children}
     </ChatContext.Provider>
   );
