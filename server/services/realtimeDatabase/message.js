@@ -1,12 +1,23 @@
-const { db, chatSessionsRef  } = require('../../config/firebaseConfig')
+const { chatSessionsRef  } = require('../../config/firebaseConfig')
 
-const saveMessage = async (sessionId, data) => {
-    // console.log('message data', data.message)
-    if (!sessionId) return
-
+const saveMessage = async (sessionId, message) => {
     try {
-        const sessionMessagesRef = realTimeDb.ref(`sessions/${sessionId}/messages`);      
-        await sessionMessagesRef.push(data.message); 
+        console.log("message in saveMessage function:", message)
+        console.log("sessionId in saveMessage function:", sessionId)
+    
+        const sessionRef = chatSessionsRef.child(sessionId);
+        const chatSessionDataSnapshot = await sessionRef.once('value');
+        const chatSessionData = chatSessionDataSnapshot.val();
+
+        let messages = [];
+
+        if (chatSessionData && chatSessionData.messages) {
+            messages = chatSessionData.messages;
+        }
+
+        messages.push(message);
+
+        await sessionRef.update({ messages });
 
         console.log('Message saved to Firebase chat session');
     } catch (error) {

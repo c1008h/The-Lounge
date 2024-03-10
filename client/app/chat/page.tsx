@@ -3,19 +3,20 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from "next/image";
 import { useDispatch, useSelector } from 'react-redux';
-import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, Error, InputForm, Loading} from '@/components'
+import { CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, Error, InputForm, Loading } from '@/components'
 import { useParticipants, useSession, useChat } from '@/context';
 import { useSessionsListener, useParticipantsListener, useChatListener } from '@/hooks';
 import { useAuth } from '@/provider/AuthProvider';
 import Sidebar from './Sidebar';
 import { Participant } from '@/interfaces/Participant';
-import { addAParticipant, backspaceParticipant } from '@/features/participants/participantSlices';
+import { addAParticipant, backspaceParticipant, clearParticipants } from '@/features/participants/participantSlices';
+import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
 import { selectParticipants } from '@/features/participants/participantSelectors';
+import { selectSession } from '@/features/session/sessionSelectors'
 import { RootState } from '@/features/store';
 
 export default function Page() {
-  const [message, setMessage] = useState<string>('') // ONE MESSAGE
-  const [chatSessionId, setChatSessionId] = useState<string | null>(null);
+  const [message, setMessage] = useState<string>('') 
   const [uid, setUid] = useState<string>()
   const [addToChat, setAddToChat] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState('');
@@ -25,35 +26,39 @@ export default function Page() {
 
   const { currentUser } = useAuth();
   const participantList = useSelector((state: RootState) => state.participant.participants);
+  const activeSessionID = useSelector((state: RootState) => state.session.currentSession)
+  const userState = useSelector((state:RootState) => state.auth.user)
 
-  const { addASession, deleteSession, leaveSession } = useSession()
-  const { sessions, loading: sessionLoading, error: sessionError, sessionDetails } = useSessionsListener(currentUser?.uid || null)
+  const { addASession, deleteSession, leaveSession, currentSessionId } = useSession()
+  const { sessions, loading: sessionLoading, error: sessionError, sessionDetails } = useSessionsListener(uid || null)
   const { addParticipant, removeParticipant, removeSpecificParticipant } = useParticipants();
-  const { participants, error: participantError } = useParticipantsListener(chatSessionId);
+  const { participants, error: participantError } = useParticipantsListener(activeSessionID);
   const { sendMessage } = useChat()
-  const { messages, error: chatError } = useChatListener(chatSessionId)
+  const { messages, error: chatError } = useChatListener(activeSessionID)
+  console.log("CURRENT SESSION ID IN PAGE:", activeSessionID)
 
   useEffect(() => {
-    if (currentUser) {
-      setUid(currentUser.uid)
-    } else if (!currentUser) {
+    if (userState) {
+      console.log("USER STATE UID:", userState)
+      setUid(userState.uid)
+    } else if (!userState) {
       router.push('/login')
     }
     return () => {
 
     }
-  }, [currentUser, router])
+  }, [userState, router])
 
   console.log(`SESSIONS FROM USER ${uid}: ${sessions}`)
   console.log(`SESSIONS details from real time: ${sessionDetails}`)
-  console.log(`Participants in this chat session ${chatSessionId}: ${participants}`)
+  console.log(`Participants in this chat session ${activeSessionID}: ${participants}`)
   console.log("USER UID", uid)
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
   
   const handleNewChat = () => {
     if(!uid) return
-    
+    dispatch(clearParticipants())
     setAddToChat(true);
     addASession(uid)
   }
@@ -63,11 +68,11 @@ export default function Page() {
     console.log("PART NAME:", participantName)
     // const isAlreadyAdded = participants.some(p => p.name === participantName);
 
-    if (participantName) {
+    if (participantName && activeSessionID) {
       const newParticipant = { uid: '1234', name: participantName};
 
       dispatch(addAParticipant(newParticipant));
-      addParticipant(newParticipant);
+      addParticipant(activeSessionID, newParticipant);
       setInputValue(''); 
     }
   };
@@ -78,15 +83,17 @@ export default function Page() {
   }
 
   const handleSendMessage = () => {
-    if (!uid) return
+    if (uid && activeSessionID ) {
 
-    const messageData = {
-      message: message,
-      sender: uid,
-      timestamp: new Date().toISOString()
+      console.log("Active session ID:", activeSessionID)
+      const messageData = {
+        message: message,
+        sender: uid,
+        timestamp: new Date().toISOString()
+      }
+  
+      sendMessage(activeSessionID, messageData)
     }
-
-    sendMessage(messageData)
   }
 
   if (sessionLoading) return <Loading message={'Loading sessions...'} />
@@ -130,7 +137,9 @@ export default function Page() {
                   }}
                 />
                 <ButtonTemplate
-                  onPress={() => addASession()}
+                  // onPress={() =>       
+                  //   // addParticipant(activeSessionID, newParticipant);
+                  // }
                   label={'+'}
                   // disabled={participants.length < 1 || participants == null}
                 />

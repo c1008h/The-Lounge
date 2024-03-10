@@ -1,5 +1,7 @@
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { auth, db, userCollection } from '@/services/firebaseConfig'; 
+import { loginUser, logoutUser } from '@/features/auth/authSlices';
 import { 
   UserCredential, 
   AdditionalUserInfo, 
@@ -36,11 +38,21 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(setCurrentUser);
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setCurrentUser(user)
+        dispatch(loginUser(user))
+      } else {
+        setCurrentUser(null)
+        dispatch(logoutUser())
+      }
+    });
+
     return unsubscribe;
-  }, []);
+  }, [dispatch]);
 
   const provider = new GoogleAuthProvider();
 
@@ -53,9 +65,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential?.accessToken;
 
-      console.log("result:", result)
-      console.log('credential', credential)
-      console.log("isNewUser", details)
+      dispatch(loginUser(user));
+
+      // console.log("result:", result)
+      // console.log('credential', credential)
+      // console.log("isNewUser", details)
 
       if (details?.isNewUser) {
         const userDocData = {
@@ -89,6 +103,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredentials.user
+      dispatch(loginUser(user));
 
       console.log("USER:", userCredentials)
 
@@ -122,6 +137,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const userCredentials = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredentials.user
+      dispatch(loginUser(user));
+
       console.log("USER:", userCredentials)
 
       return userCredentials;
@@ -140,6 +157,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
+      dispatch(logoutUser())
       await signOut(auth)
     } catch (error) {
       console.error("Trouble signing out:", error)

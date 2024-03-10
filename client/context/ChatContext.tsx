@@ -4,7 +4,7 @@ import { useSocket } from '@/hooks/useSocket';
 
 interface ChatContextType {
   messages: Message[];
-  sendMessage: (message: Message) => void;
+  sendMessage: (sessionId: string, message: Message) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -19,21 +19,21 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const { socket } = useSocket();
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const sendMessage = useCallback((newMessage: Message) => {
+  const sendMessage = useCallback((sessionId: string, newMessage: Message) => {
     setMessages(prev => [...prev, newMessage]);
-    if (socket) socket.emit('sendMessage', newMessage);
+    if (socket) socket.emit('sendMessage', sessionId, newMessage);
 
   }, [socket]);
 
   useEffect(() => {
     if (!socket) return;
 
-    const handleSendMessage = (msg: Message) => sendMessage(msg)
+    const handleSendMessage = (sessionId: string, msg: Message) => sendMessage(sessionId, msg)
 
-    socket.on('sendMessage', handleSendMessage)
+    socket.on('sentMessage', handleSendMessage)
 
     return () => {
-      socket.off('sendMessage', handleSendMessage)
+      socket.off('sentMessage', handleSendMessage)
     }
   }, [socket, sendMessage])
 

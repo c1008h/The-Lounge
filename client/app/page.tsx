@@ -14,7 +14,7 @@ export default function Home() {
         <title>Chat with Friends</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="text-center">
+      <div className="text-center">
         <h1 className="text-4xl font-bold text-white mb-6">Welcome to the Chatroom</h1>
         <p className="text-lg text-white mb-8">Connect with your friends anytime, anywhere. Share moments, have fun, and stay connected.</p>
         <ButtonTemplate 
@@ -44,7 +44,7 @@ export default function Home() {
             />
           </div>
         </div>
-      </main>
+      </div>
       <footer className="text-white mt-20 flex flex-col items-center">
         <p className="mb-4">Already have an account? <Link href="/login" className="text-blue-200 hover:underline">Log in</Link></p>
         <p>Don&apos;t have an account yet? <Link href="/signup" className="text-blue-200 hover:underline">Sign up</Link></p>

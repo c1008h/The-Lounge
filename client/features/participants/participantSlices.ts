@@ -21,10 +21,18 @@ export const participantSlice = createSlice({
         },
         removeParticipant: (state, action: PayloadAction<string>) => {
             state.participants = state.participants.filter(participant => participant.uid !== action.payload);
+        },
+        clearParticipants: (state) => {
+            state.participants = []
         }
     },
 })
 
-export const { addAParticipant, backspaceParticipant, removeParticipant } = participantSlice.actions;
+export const { 
+    addAParticipant, 
+    backspaceParticipant, 
+    removeParticipant, 
+    clearParticipants 
+} = participantSlice.actions;
 
 export default participantSlice.reducer;

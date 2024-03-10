@@ -1,6 +1,8 @@
 const { Server } = require('socket.io');
-const { createChatSession, chatSessionExists, saveMessage } = require('../services/realtimeDatabase/chatSession');
+const { createChatSession, chatSessionExists } = require('../services/realtimeDatabase/chatSession');
 const { addChatSessionToUser, userHasChatSession } = require('../services/firestore/user')
+const { addParticipant } = require('../services/realtimeDatabase/participants')
+const { saveMessage } = require('../services/realtimeDatabase/message')
 
 function setupSocket(server) {
     const io = new Server(server, {
@@ -20,6 +22,29 @@ function setupSocket(server) {
 
             socket.emit('sessionAdded', chatSessionId)
         })
+
+        socket.on('addParticipant', async (sessionId, participant) => {
+            if (!participant || !sessionId) return
+
+            console.log("Session ID:", sessionId)
+            console.log("Participant:", participant)
+
+            await addParticipant(sessionId, participant)
+
+            socket.emit('participantAdded', participant)
+        })
+
+        socket.on('sendMessage', async (sessionId, message) => {
+            if (!sessionId || !message) return
+
+            console.log("Session ID", sessionId)
+            console.log("Message:", message)
+            
+            await saveMessage(sessionId, message)
+
+            socket.emit('sentMessage', "message saved!")
+        })
+
         
         // socket.on('startchat', async (data) => {
         //     const participants = data.participants
@@ -61,24 +86,24 @@ function setupSocket(server) {
             }
         })
     
-        socket.on('sendMessage', async (data) => {
+        // socket.on('sendMessage', async (data) => {
 
-            const { sender, message, timestamp, sessionId } = data
+        //     const { sender, message, timestamp, sessionId } = data
 
-            const messages = {
-                sender: sender,
-                message: message,
-                timestamp: timestamp
-            }
+        //     const messages = {
+        //         sender: sender,
+        //         message: message,
+        //         timestamp: timestamp
+        //     }
             
-            try {
-                console.log("RECEIVED MESSAGE:", data)
-                await saveMessage(sessionId, { messages });
-                io.to(sessionId).emit('newMessage', messages)
-            } catch(error) {
-                console.error("Error handling chat message:", error)
-            }
-        });
+        //     try {
+        //         console.log("RECEIVED MESSAGE:", data)
+        //         await saveMessage(sessionId, { messages });
+        //         io.to(sessionId).emit('newMessage', messages)
+        //     } catch(error) {
+        //         console.error("Error handling chat message:", error)
+        //     }
+        // });
 
         socket.on('leaveRoom', ({ userId, roomId }) => {
             socket.leave(roomId)

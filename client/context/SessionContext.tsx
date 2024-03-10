@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { onValue, ref, set, push } from 'firebase/database'; // Assuming using Firebase Realtime Database
+import { useDispatch } from 'react-redux';
+import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
+import { onValue, ref, set, push } from 'firebase/database'; 
 import { sessionsRT } from '@/services/firebaseConfig';
 import { Session } from '@/interfaces/Session';
 import { useSocket } from '@/hooks/useSocket';
@@ -8,6 +10,7 @@ interface SessionContextType {
     addASession: (uid: string) => void;
     deleteSession: (sessionId: string) => void;
     leaveSession: (sessionId: string) => void;
+    currentSessionId: string;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -23,6 +26,8 @@ export const useSession = (): SessionContextType => {
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket()
     const [sessions, setSessions] = useState<Session[]>([]);
+    const [currentSessionId, setCurrentSessionId] = useState<string>()
+    const dispatch = useDispatch(); 
 
     const addASession = useCallback((uid: string) => {
         if (socket) socket.emit('addSession', uid);
@@ -44,6 +49,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         const handleAddSession = (uid: string) => addASession(uid);
         const handleSessionAdded = (sessionId: string) => {
             console.log('SESSION ID RETURNED FROM SERVER:', sessionId)
+            setCurrentSessionId(sessionId)
+            dispatch(selectSessionToState(sessionId))
             setSessions(prevSessions => [
                 ...prevSessions,
                 { id: sessionId, participants: [], createdAt: new Date() }
@@ -61,7 +68,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     }, [socket, addASession, deleteSession, leaveSession])
   
     return (
-        <SessionContext.Provider value={{ sessions, addASession, deleteSession, leaveSession }}>
+        <SessionContext.Provider value={{ sessions, addASession, deleteSession, leaveSession, currentSessionId }}>
             {children}
         </SessionContext.Provider>
     );

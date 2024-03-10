@@ -1,11 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+interface UserProps {
+    uid: string;
+    accessToken: string;
+}
+
 export const authSlice = createSlice({
     name: "auth",
     initialState: {
         isAuthenticated: false,
         user: null,
-        confirmationResult: null, 
     },
     reducers: {
         loginUser: (state, action) => {

@@ -9,7 +9,7 @@ const createChatSession = async (userId) => {
 
         const chatSessionData = {
             created: formattedDate,
-            participants: userId
+            participants: [userId]
         }
 
         await chatSessionsRef.once('value', snapshot => {

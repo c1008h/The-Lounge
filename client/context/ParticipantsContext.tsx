@@ -3,7 +3,7 @@ import { Participant } from '@/interfaces/Participant';
 import { useSocket } from '@/hooks/useSocket';
 interface ParticipantsContextType {
   participants: Participant[];
-  addParticipant: (participant: Participant) => void;
+  addParticipant: (sessionId: string, participant: Participant) => void;
   removeParticipant: () => void;
   removeSpecificParticipant: (uid: string) => void;
 }
@@ -24,8 +24,11 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket();
     const [participants, setParticipants] = useState<Participant[]>([]);
 
-    const addParticipant = useCallback((participant: Participant) => {
+    const addParticipant = useCallback((sessionId: string, participant: Participant) => {
         console.log("PARTICIPANT IN CONTEXT:", participant)
+        console.log("CURRENT SESSION ID IN CONTEXT:", sessionId)
+        if (!sessionId || !participant) return
+
         setParticipants(prevParticipants => {
             const isAlreadyAdded = participants.some((p) => p.uid === participant.uid);
             if (!isAlreadyAdded) {
@@ -34,7 +37,7 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
             return prevParticipants;
         })
         
-        if (socket) socket.emit('addParticipant', participant);
+        if (socket) socket.emit('addParticipant', sessionId, participant);
 
     }, [socket, participants]);
 
@@ -63,7 +66,7 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (!socket) return;
 
-        const handleAddParticipant = (participant: Participant) => addParticipant(participant);
+        const handleAddParticipant = (sessionId: string, participant: Participant) => addParticipant(sessionId, participant);
         const handleRemoveParticipant = (uid: string) => removeSpecificParticipant(uid);
 
         socket.on('participantAdded', handleAddParticipant);
