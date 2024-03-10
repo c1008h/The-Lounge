@@ -18,13 +18,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db: Firestore = getFirestore(app)
-const database: Database = getDatabase(app);
+const database = getDatabase(app);
 
 // const analytics = getAnalytics(app);
 
 const userCollection: CollectionReference = collection(db,'users')
 
-const sessionsRT: DatabaseReference = ref(database, '/session')
+const sessionsRT: DatabaseReference = ref(database, '/sessions');
 
 export { 
   app, 

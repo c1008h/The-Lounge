@@ -35,11 +35,11 @@ export default function Page() {
   const { participants, error: participantError } = useParticipantsListener(activeSessionID);
   const { sendMessage } = useChat()
   const { messages, error: chatError } = useChatListener(activeSessionID)
-  console.log("CURRENT SESSION ID IN PAGE:", activeSessionID)
+  // console.log("CURRENT SESSION ID IN PAGE:", activeSessionID)
 
   useEffect(() => {
     if (userState) {
-      console.log("USER STATE UID:", userState)
+      // console.log("USER STATE UID:", userState)
       setUid(userState.uid)
     } else if (!userState) {
       router.push('/login')
@@ -49,10 +49,10 @@ export default function Page() {
     }
   }, [userState, router])
 
-  console.log(`SESSIONS FROM USER ${uid}: ${sessions}`)
+  // console.log(`SESSIONS FROM USER ${uid}: ${sessions}`)
   console.log(`SESSIONS details from real time: ${sessionDetails}`)
   console.log(`Participants in this chat session ${activeSessionID}: ${participants}`)
-  console.log("USER UID", uid)
+  // console.log("USER UID", uid)
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
   
@@ -66,8 +66,14 @@ export default function Page() {
   const handleAddParticipant = () => {
     const participantName = inputValue.trim();
     console.log("PART NAME:", participantName)
-    // const isAlreadyAdded = participants.some(p => p.name === participantName);
+    const isAlreadyAdded = participantList.some(p => p.name === participantName);
+    // if (isAlreadyAdded) {
+    //   setInputValue('')
+    //   dispatch(removeParticipant())
+    // }
 
+    // WRITE LOGIC FOR IF USER INPUTS THE SAME PERSON
+    // SHOULD EMPTY INPUT VALUE AND NOT DUPLICATE 
     if (participantName && activeSessionID) {
       const newParticipant = { uid: '1234', name: participantName};
 

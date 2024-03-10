@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { userCollection, sessionsRT } from '@/services/firebaseConfig';
 import { query, where, updateDoc, arrayRemove, getDocs } from 'firebase/firestore';
-import { ref, get, onValue } from 'firebase/database';
+import { ref, get, onValue, child, DatabaseReference } from 'firebase/database';
 
 export const useSessionsListener = (userId: string) => {
     const [sessions, setSessions] = useState<string[]>([]);
@@ -40,13 +40,52 @@ export const useSessionsListener = (userId: string) => {
         fetchSessions();
     }, [fetchSessions]);
 
+    // useEffect(() => {
+    //     if (!userId) return;
+
+    //     const sessionDetailsPromises = sessions.map(async sessionId => {
+    //         try {
+    //             const messageRef: DatabaseReference = ref(sessionsRT, `/${sessionId}/messages`);
+    //             const participantsRef = ref(sessionsRT, `${sessionId}/participants`)
+
+    //             const [messageSnapshot, participantsSnapshot] = await Promise.all([
+    //                 get(messageRef),
+    //                 get(participantsRef)
+    //             ]);
+
+    //             const lastMessage = messageSnapshot.exists() ? messageSnapshot.val().pop() : null;
+    //             const participants = participantsSnapshot.exists() ? participantsSnapshot.val() : [];
+
+    //             const timestamp = lastMessage ? lastMessage.timestamp : null;
+    //             return {
+    //                 sessionId, 
+    //                 lastMessage,
+    //                 timestamp,
+    //                 participants
+    //             };
+    //         } catch (error) {
+    //             console.error('Error fetching session details:', error);
+    //             return null;
+    //         }
+    //     });
+
+    //     Promise.all(sessionDetailsPromises).then(sessionDetails => {
+    //         const filteredSessionDetails = sessionDetails.filter(Boolean); 
+    //         console.log("FilteredSessionDetail:",  filteredSessionDetails)
+    //         setSessionDetails(filteredSessionDetails);
+    //     }).catch(error => {
+    //         console.error('Error fetching session details:', error);
+    //         setError(error instanceof Error ? error : new Error('Error fetching session details'));
+    //     });
+
+    //     return () => {}; 
+    // }, [userId, sessions])
 
     useEffect(() => {
         if (!userId) return;
 
         const unsubscribe = onValue(sessionsRT, (snapshot) => {
             const sessionData = snapshot.val();
-            console.log("SESSSION DATA:", sessionData)
 
             if (sessionData) {
                 // const updatedSessionDetails = Object.keys(sessionData).map((sessionId) => {

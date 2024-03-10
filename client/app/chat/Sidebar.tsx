@@ -1,9 +1,16 @@
 "use client"
 import React from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { useSession } from '@/context';
+import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
+
 import { ButtonTemplate, Divider, BoxTemplate } from '@/components'
 
 interface SessionProps {
-    id: string;
+    sessionId: string;
+    lastmessage: string;
+    participants: string[];
+    timestamp: Date | number | string;
 }
 
 interface SidebarProps {
@@ -15,7 +22,13 @@ export default function Sidebar({
     sessions,
     handleAddNewSession
 }: SidebarProps) {
-    const handleDeleteSession = async (sessionId: string) => console.log("DELETE BUTTON!")
+    const { addASession, deleteSession, leaveSession, currentSessionId } = useSession()
+
+    const handleDeleteSession = async (sessionId: string) => {
+        if (!sessionId) return
+        deleteSession(sessionId)
+    }
+    console.log("SESSIONSS DETAILSSS:", sessions)
 
     return (
         <div className="flex flex-col h-screen w-1/3"> 
@@ -34,11 +47,13 @@ export default function Sidebar({
                 <React.Fragment key={`session-${index}`} >
                     <div className='flex flex-row justify-between p-3'>
                         <BoxTemplate 
-                            id={session}
-                            // chatWith={session.chatWith}
+                            id={session.sessionId}
+                            message={session.lastmessage}
+                            timestamp={session.timestamp}
+                            // chatWith={session.participants}
                             boxStyle={'flex items-center justify-start'}
                         />
-                        <ButtonTemplate label='X' className='justify-center' onPress={() => handleDeleteSession(session.id)}/>
+                        <ButtonTemplate label='X' className='justify-center' onPress={() => handleDeleteSession(session.sessionId)}/>
                     </div>
                     <Divider className="my-4 self-center" />
                 </React.Fragment>
