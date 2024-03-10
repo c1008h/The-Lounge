@@ -13,6 +13,15 @@ function setupSocket(server) {
 
     io.on('connection', (socket) => {
         console.log('a user connected');
+
+        socket.on('addSession', async (data) => {
+            console.log("DATA", data)
+
+            const chatSessionId = await createChatSession(data)
+
+            socket.emit('sessionAdded', chatSessionId)
+
+        })
         
         socket.on('startchat', async (data) => {
             const participants = data.participants

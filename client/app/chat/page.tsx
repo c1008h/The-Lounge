@@ -26,7 +26,7 @@ export default function Page() {
   const { currentUser } = useAuth();
   const participantList = useSelector((state: RootState) => state.participant.participants);
 
-  const { addSession, deleteSession, leaveSession } = useSession()
+  const { addASession, deleteSession, leaveSession } = useSession()
   const { sessions, loading: sessionLoading, error: sessionError, sessionDetails } = useSessionsListener(currentUser?.uid || null)
   const { addParticipant, removeParticipant, removeSpecificParticipant } = useParticipants();
   const { participants, error: participantError } = useParticipantsListener(chatSessionId);
@@ -52,8 +52,10 @@ export default function Page() {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
   
   const handleNewChat = () => {
+    if(!uid) return
+    
     setAddToChat(true);
-    addSession()
+    addASession(uid)
   }
 
   const handleAddParticipant = () => {
@@ -128,7 +130,7 @@ export default function Page() {
                   }}
                 />
                 <ButtonTemplate
-                  onPress={() => addSession()}
+                  onPress={() => addASession()}
                   label={'+'}
                   // disabled={participants.length < 1 || participants == null}
                 />

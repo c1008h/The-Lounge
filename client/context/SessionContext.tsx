@@ -26,7 +26,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
     const addASession = useCallback((uid: string) => {
         if (socket) socket.emit('addSession', uid);
-    }, [])
+    }, [socket])
 
     const deleteSession = useCallback((sessionId: string) => {
         setSessions(sessions.filter((s) => s.id !== sessionId));
