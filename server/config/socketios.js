@@ -1,6 +1,6 @@
 const { Server } = require('socket.io');
-const { createChatSession, chatSessionExists } = require('../services/realtimeDatabase/chatSession');
-const { addChatSessionToUser, userHasChatSession } = require('../services/firestore/user')
+const { createChatSession, deleteSessionFromRT, chatSessionExists } = require('../services/realtimeDatabase/chatSession');
+const { addChatSessionToUser, deleteSessionFromUser, userHasChatSession } = require('../services/firestore/user')
 const { addParticipant } = require('../services/realtimeDatabase/participants')
 const { saveMessage } = require('../services/realtimeDatabase/message')
 
@@ -21,6 +21,15 @@ function setupSocket(server) {
             await addChatSessionToUser(data, chatSessionId)
 
             socket.emit('sessionAdded', chatSessionId)
+        })
+
+        socket.on('deleteSession', async (sessionId, userId) => {
+            console.log("Session ID", sessionId)
+            console.log("user id:", userId)
+            await deleteSessionFromUser(sessionId, userId)
+            await deleteSessionFromRT(sessionId)
+
+            socket.emit('sessionDeleted', 'session deleted!')
         })
 
         socket.on('addParticipant', async (sessionId, participant) => {

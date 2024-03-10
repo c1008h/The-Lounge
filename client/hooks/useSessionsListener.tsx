@@ -88,17 +88,19 @@ export const useSessionsListener = (userId: string) => {
             const sessionData = snapshot.val();
 
             if (sessionData) {
-                // const updatedSessionDetails = Object.keys(sessionData).map((sessionId) => {
-                //     const session = sessionData[sessionId];
-                //     console.log("SESSSSSIONS:", session)
-                //     const latestMessage = session.messages ? session.messages[session.messages.length - 1] : null;
+                // const updatedSessionDetails = sessions.map(sessionId => {
+                //     const lastMessage = sessionData[sessionId]?.messages
+                //         ? sessionData[sessionId].messages[sessionData[sessionId].messages.length - 1]
+                //         : null;
+                //     const timestamp = lastMessage ? lastMessage.timestamp : null;
                 //     return {
-                //         sessionId,
-                //         latestMessage,
-                //         participants: session.participants
-                //     };
-                // });
-                const updatedSessionDetails = sessions.map(sessionId => {
+                //         sessionId, 
+                //         lastMessage,
+                //         timestamp,
+                //         participants: sessionData[sessionId]?.participants || []
+                //     }
+                // })
+                const updatedSessionDetails = Object.keys(sessionData).map(sessionId => {
                     const lastMessage = sessionData[sessionId]?.messages
                         ? sessionData[sessionId].messages[sessionData[sessionId].messages.length - 1]
                         : null;
@@ -120,7 +122,14 @@ export const useSessionsListener = (userId: string) => {
         return () => {
             unsubscribe();
         };
-    }, [userId, sessions]);
+    }, [userId]);
+
+    useEffect(() => {
+        setSessionDetails(prevSessionDetails => {
+            const updatedSessionDetails = prevSessionDetails.filter(session => sessions.includes(session.sessionId));
+            return updatedSessionDetails;
+        });
+    }, [sessions]);
 
     return { sessions, loading, error, sessionDetails };
 }

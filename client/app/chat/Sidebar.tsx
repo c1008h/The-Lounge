@@ -14,21 +14,24 @@ interface SessionProps {
 }
 
 interface SidebarProps {
+    userId: string;
     sessions: SessionProps[];
     handleAddNewSession: () => void;
 }
 
 export default function Sidebar({
     sessions,
-    handleAddNewSession
+    handleAddNewSession,
+    userId
 }: SidebarProps) {
     const { addASession, deleteSession, leaveSession, currentSessionId } = useSession()
 
-    const handleDeleteSession = async (sessionId: string) => {
+    const handleDeleteSession = async (sessionId: string, userId: string) => {
         if (!sessionId) return
-        deleteSession(sessionId)
+        deleteSession(sessionId, userId)
     }
     console.log("SESSIONSS DETAILSSS:", sessions)
+    console.log('uid', userId)
 
     return (
         <div className="flex flex-col h-screen w-1/3"> 
@@ -53,7 +56,7 @@ export default function Sidebar({
                             // chatWith={session.participants}
                             boxStyle={'flex items-center justify-start'}
                         />
-                        <ButtonTemplate label='X' className='justify-center' onPress={() => handleDeleteSession(session.sessionId)}/>
+                        <ButtonTemplate label='X' className='justify-center' onPress={() => handleDeleteSession(session.sessionId, userId)}/>
                     </div>
                     <Divider className="my-4 self-center" />
                 </React.Fragment>

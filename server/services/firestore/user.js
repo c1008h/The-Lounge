@@ -49,6 +49,30 @@ const userHasChatSession = async (userId, chatSessionId) => {
     return userData.sessions && userData.sessions.includes(chatSessionId);
 };
 
+const deleteSessionFromUser = async (chatSessionId, userId) => {
+    try {
+        const querySnapshot = await userRef.where("uid", "==", userId).get();
+
+        if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0]
+            const userData = userDoc.data()
+
+            const { sessions } = userData;
+
+            const updatedSessions = sessions.filter(sessionId => sessionId !== chatSessionId)
+
+            await userRef.doc(userDoc.id).update({ sessions: updatedSessions });
+
+            console.log('Session ID deleted from user document.');
+        } else {
+            console.log('User document not found.');
+        }
+
+    } catch (error) {
+        console.error('Error deleting session from user:', error);
+    }
+}
+
 module.exports = {
-    addNewUser, updateUser, addChatSessionToUser, userHasChatSession
+    addNewUser, updateUser, addChatSessionToUser, userHasChatSession, deleteSessionFromUser
 }

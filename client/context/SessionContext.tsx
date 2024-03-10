@@ -8,7 +8,7 @@ import { useSocket } from '@/hooks/useSocket';
 interface SessionContextType {
     sessions: Session[];
     addASession: (uid: string) => void;
-    deleteSession: (sessionId: string) => void;
+    deleteSession: (sessionId: string, userId: string) => void;
     leaveSession: (sessionId: string) => void;
     currentSessionId: string;
 }
@@ -33,10 +33,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         if (socket) socket.emit('addSession', uid);
     }, [socket])
 
-    const deleteSession = useCallback((sessionId: string) => {
+    const deleteSession = useCallback((sessionId: string, userId: string) => {
         setSessions(sessions.filter((s) => s.id !== sessionId));
 
-        if (socket) socket.emit('deleteSession', sessionId);
+        if (socket) socket.emit('deleteSession', sessionId, userId);
     }, [socket, sessions])
 
     const leaveSession = useCallback((sessionId: string) => {
@@ -56,7 +56,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
                 { id: sessionId, participants: [], createdAt: new Date() }
             ]);
         }
-        const handleRemoveSession = (sessionId: string) => deleteSession(sessionId);
+        const handleRemoveSession = (sessionId: string, userId: string) => deleteSession(sessionId, userId);
 
         socket.on('sessionAdded', handleSessionAdded);
         socket.on('sessionRemoved', handleRemoveSession);

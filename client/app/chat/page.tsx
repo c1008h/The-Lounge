@@ -116,6 +116,7 @@ export default function Page() {
         <Sidebar 
           sessions={sessionDetails}
           handleAddNewSession={handleNewChat}
+          userId={uid}
         />
         {/* RIGHT SIDE OF SCREEN */}
         <div className="w-2/3 h-screen bg-gray-100 flex flex-col gap-4 relative">

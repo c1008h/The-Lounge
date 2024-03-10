@@ -1,4 +1,4 @@
-const { chatSessionsRef  } = require('../../config/firebaseConfig')
+const { chatSessionsRef, realTimeDb  } = require('../../config/firebaseConfig')
 
 const createChatSession = async (userId) => {
     try {
@@ -37,7 +37,18 @@ const chatSessionExists = async (chatSessionId) => {
     return snapshot.exists();
 };
 
+const deleteSessionFromRT = async (chatSessionId) => {
+    try {
+        await chatSessionsRef.child(chatSessionId).remove();
+        console.log('Chat session deleted from real-time database.');
+    } catch (error) {
+        console.error('Error deleting chat session from real-time database:', error);
+        throw error
+    }
+}
+
 module.exports = {
     createChatSession,
-    chatSessionExists
+    chatSessionExists,
+    deleteSessionFromRT
 };
