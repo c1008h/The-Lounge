@@ -5,7 +5,7 @@ import { Session } from '@/interfaces/Session';
 import { useSocket } from '@/hooks/useSocket';
 interface SessionContextType {
     sessions: Session[];
-    addSession: () => void;
+    addASession: (uid: string) => void;
     deleteSession: (sessionId: string) => void;
     leaveSession: (sessionId: string) => void;
 }
@@ -24,10 +24,9 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket()
     const [sessions, setSessions] = useState<Session[]>([]);
 
-    const addSession = useCallback((session: Session) => {
-        setSessions(prevSessions => [...prevSessions, session]);
-        if (socket) socket.emit('addSession', session);
-    }, [socket])
+    const addASession = useCallback((uid: string) => {
+        if (socket) socket.emit('addSession', uid);
+    }, [])
 
     const deleteSession = useCallback((sessionId: string) => {
         setSessions(sessions.filter((s) => s.id !== sessionId));
@@ -42,20 +41,26 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (!socket) return
-        const handleAddSession = (session: Session) => addSession(session);
+        const handleAddSession = (uid: string) => addASession(uid);
+        const handleSessionAdded = (sessionId: string) => {
+            setSessions(prevSessions => [
+                ...prevSessions,
+                { id: sessionId, participants: [], createdAt: new Date() }
+            ]);
+        }
         const handleRemoveSession = (sessionId: string) => deleteSession(sessionId);
 
-        socket.on('sessionAdded', handleAddSession);
+        socket.on('sessionAdded', handleSessionAdded);
         socket.on('sessionRemoved', handleRemoveSession);
 
         return () => {
-            socket.off('sessionAdded', handleAddSession);
+            socket.off('sessionAdded', handleSessionAdded);
             socket.off('sessionRemoved', handleRemoveSession);
         }
-    }, [socket, addSession, deleteSession, leaveSession])
+    }, [socket, addASession, deleteSession, leaveSession])
   
     return (
-        <SessionContext.Provider value={{ sessions, addSession, deleteSession, leaveSession }}>
+        <SessionContext.Provider value={{ sessions, addASession, deleteSession, leaveSession }}>
             {children}
         </SessionContext.Provider>
     );

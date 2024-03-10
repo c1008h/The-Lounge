@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from "next/image";
 import { useDispatch, useSelector } from 'react-redux';
 import {CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, Error, InputForm, Loading} from '@/components'
@@ -20,6 +21,7 @@ export default function Page() {
   const [inputValue, setInputValue] = useState('');
 
   const dispatch = useDispatch(); 
+  const router = useRouter();
 
   const { currentUser } = useAuth();
   const participantList = useSelector((state: RootState) => state.participant.participants);
@@ -34,8 +36,13 @@ export default function Page() {
   useEffect(() => {
     if (currentUser) {
       setUid(currentUser.uid)
+    } else if (!currentUser) {
+      router.push('/login')
     }
-  }, [currentUser])
+    return () => {
+
+    }
+  }, [currentUser, router])
 
   console.log(`SESSIONS FROM USER ${uid}: ${sessions}`)
   console.log(`SESSIONS details from real time: ${sessionDetails}`)
@@ -85,10 +92,6 @@ export default function Page() {
   if (sessionError) {
     console.error(sessionError);
     return <Error message={'Error loading sessions. Please try again later.'} error={sessionError}/>
-  }
-
-  if (!currentUser) {
-    return <Error message={'Please login to view this page.'} />
   }
   
   return (
