@@ -15,31 +15,29 @@ function setupSocket(server) {
         console.log('a user connected');
 
         socket.on('addSession', async (data) => {
-            console.log("DATA", data)
-
             const chatSessionId = await createChatSession(data)
+            await addChatSessionToUser(data, chatSessionId)
 
             socket.emit('sessionAdded', chatSessionId)
-
         })
         
-        socket.on('startchat', async (data) => {
-            const participants = data.participants
-            const initiator = data.initiator;   
-            const chatSessionId = await createChatSession(participants)
+        // socket.on('startchat', async (data) => {
+        //     const participants = data.participants
+        //     const initiator = data.initiator;   
+        //     const chatSessionId = await createChatSession(participants)
 
-            console.log("chatsessionID", chatSessionId)
-            await Promise.all([
-                addChatSessionToUser(initiator, chatSessionId), 
-                ...participants.map(userId => addChatSessionToUser(userId, chatSessionId)) 
-            ]);
-            console.log(`new session created successfully with session id: ${chatSessionId}`)
+        //     console.log("chatsessionID", chatSessionId)
+        //     await Promise.all([
+        //         addChatSessionToUser(initiator, chatSessionId), 
+        //         ...participants.map(userId => addChatSessionToUser(userId, chatSessionId)) 
+        //     ]);
+        //     console.log(`new session created successfully with session id: ${chatSessionId}`)
 
-            socket.join(chatSessionId);
-            socket.emit('chatSessionId', { chatSessionId });
+        //     socket.join(chatSessionId);
+        //     socket.emit('chatSessionId', { chatSessionId });
 
-            socket.emit('chatStarted', { initiator, chatSessionId });
-        })
+        //     socket.emit('chatStarted', { initiator, chatSessionId });
+        // })
 
         socket.on('joinRoom', async ({ userId, roomId }) => {
             try {

@@ -25,9 +25,7 @@ const addChatSessionToUser = async (userId, chatSessionId) => {
 
         if (!querySnapshot.empty) {
             const userDoc = querySnapshot.docs[0].ref
-
-            console.log("USER DOC!:", userDoc)
-
+            
             await userDoc.update({
                 sessions: admin.firestore.FieldValue.arrayUnion(chatSessionId)
             })

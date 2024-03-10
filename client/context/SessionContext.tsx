@@ -43,6 +43,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         if (!socket) return
         const handleAddSession = (uid: string) => addASession(uid);
         const handleSessionAdded = (sessionId: string) => {
+            console.log('SESSION ID RETURNED FROM SERVER:', sessionId)
             setSessions(prevSessions => [
                 ...prevSessions,
                 { id: sessionId, participants: [], createdAt: new Date() }
