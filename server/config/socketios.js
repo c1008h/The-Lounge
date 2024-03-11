@@ -3,7 +3,7 @@ const { createChatSession, deleteSessionFromRT, chatSessionExists } = require('.
 const { addChatSessionToUser, deleteSessionFromUser, userHasChatSession } = require('../services/firestore/user')
 const { addParticipant } = require('../services/realtimeDatabase/participants')
 const { saveMessage } = require('../services/realtimeDatabase/message')
-const { searchFriend } = require('../services/firestore/friend')
+const { searchFriend, addFriend } = require('../services/firestore/friend')
 
 function setupSocket(server) {
     const io = new Server(server, {
@@ -60,6 +60,15 @@ function setupSocket(server) {
             const friendFound = await searchFriend(friendId)
 
             socket.emit('friendFound', friendFound)
+        })
+
+        socket.on('addFriend', async (userId, friend) => {
+            console.log(friend)
+            console.log('userId:', userId)
+
+            await addFriend(userId, friend)
+            socket.emit('addedFriend', "friend request sent!")
+
         })
 
         socket.on('joinRoom', async ({ userId, roomId }) => {

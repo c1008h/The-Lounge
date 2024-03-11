@@ -5,12 +5,18 @@ import { onValue, ref, set, push } from 'firebase/database';
 import { Friend } from '@/interfaces/Friend';
 import { useSocket } from '@/hooks/useSocket';
 
+interface User {
+    email?: string;
+    uid?: string;
+    phoneNumber?: string;
+}
+
 interface FriendContextType {
     friends: Friend[];
-    searchFriend: (friendId: string) => void;
+    searchFriend: (friendId: string) => Friend | null;
     addAFriend: (userId: string, friendId: string) => void;
     deleteAFriend: (userId: string, friendId: string) => void;
-    isFriendFound: string | null;
+    isFriendFound: User | null;
 }
 
 const FriendContext = createContext<FriendContextType | undefined>(undefined);
@@ -26,7 +32,7 @@ export const useFriend = (): FriendContextType => {
 export const FriendProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket(); 
     const [friends, setFriends] = useState<Friend[]>([]);
-    const [isFriendFound, setIsFriendFound] = useState('')
+    const [isFriendFound, setIsFriendFound] = useState<Friend>()
     const dispatch = useDispatch(); 
 
     const searchFriend = useCallback((friendId: string) => {
@@ -47,14 +53,22 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (!socket) return
 
-        const handleFriendFound = (friendId: string) => setIsFriendFound(friendId)
+        const handleFriendFound = (friendId: Friend) => {
+            setIsFriendFound(friendId)
+            return friendId
+        }
         
         const handleFriendAdded = (userId: string, friendId: string) => {
             // dispatch(selectSessionToState(sessionId))
-            setFriends(prevFriends => [
-                ...prevFriends,
-                { ...friendDetails, id: friendId }
-            ]);
+            const newFriend = {
+                uid: friendId,
+                displayName: isFriendFound.displayName || null,
+                email: isFriendFound.email || null,
+                phoneNumber: isFriendFound.phoneNumber || null,
+                pending: true
+            }
+
+            setFriends(prevFriends => [...prevFriends, newFriend]);
         }
         const handleRemoveFriend = (userId: string, friendId: string) => deleteAFriend(userId, friendId);
 

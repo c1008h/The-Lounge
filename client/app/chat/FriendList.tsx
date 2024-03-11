@@ -3,7 +3,10 @@ import { useFriendListener } from '@/hooks'
 import { addFriend } from '@/features/friends/friendSlices'
 import { useFriend } from '@/context'
 // import { addAFriend, deleteAFriend, searchFriend } from '@/context'
-import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
+import { ButtonTemplate, ModalTemplate, InputForm, BoxTemplate } from '@/components';
+import { IoPersonAddSharp } from "react-icons/io5";
+import { MdOutlinePending } from "react-icons/md";
+import { FaCheck } from "react-icons/fa";
 
 interface FriendListProps {
     userId: string;
@@ -11,8 +14,10 @@ interface FriendListProps {
 
 export default function FriendList({ userId }: FriendListProps) {
     const [visible, setVisible] = useState(false)
+    const [searchMade, setSearchMade] = useState(false)
+    const [isPending, setIsPending] = useState(false)
     const [searchInput, setSearchInput] = useState<string>('')
-    const { searchFriend, isFriendFound } = useFriend()
+    const { searchFriend, addAFriend, isFriendFound } = useFriend()
     const { friends } = useFriendListener(userId);
 
     // console.log("friend list:", friends)
@@ -20,12 +25,20 @@ export default function FriendList({ userId }: FriendListProps) {
 
     const handleSearchInputChange = (value: string) => setSearchInput(value)
 
-    const handleAddFriend = () => {
+    const handleSearchFriend = () => {
         const trimmedInput = searchInput.trim();
         if (!trimmedInput) return
-
+        setSearchMade(true)
         console.log("trimmedInput:", trimmedInput)
         searchFriend(trimmedInput)
+        setSearchInput('')
+    }
+
+    const handleAddFriend = () => {
+        const { uid } = isFriendFound
+
+        addAFriend(userId, uid)
+        setIsPending(true)
     }
 
     console.log("is friend found:", isFriendFound)
@@ -48,7 +61,31 @@ export default function FriendList({ userId }: FriendListProps) {
                         className=''
                         value={searchInput}
                     />
-                    <ButtonTemplate label='Search' className='justify-center' onPress={() => handleAddFriend()}/>
+                    {searchMade && (
+                        <>
+                        {isFriendFound ? (
+                            <div className='bg-blue-100 border border-blue-300 rounded p-4 mt-4 flex flex-row justify-between items-center'>
+                                <p>Email: {isFriendFound.email}</p>
+                                {isPending ? (
+                                    <div className='flex flex-col justify-center items-center'>
+                                        <MdOutlinePending style={{width:'25', height:'25'}}/>
+                                        <p>Pending</p>
+                                    </div>
+                                ): (
+                                    <IoPersonAddSharp style={{width:'25', height:'25'}} onClick={() => handleAddFriend()}/>
+                                )}
+                                {/* <MdOutlinePending />
+                                <FaCheck />
+                        */}
+                            </div>
+                        ) : (
+                            <div className='bg-blue-100 border border-blue-300 rounded p-4 mt-4'>
+                                <p>Not Found.</p> 
+                            </div>
+                        )}
+                        </>
+                    )}
+                    <ButtonTemplate label='Search' className='justify-center' onPress={() => handleSearchFriend()}/>
                 </ModalTemplate> 
             )} 
         </div>

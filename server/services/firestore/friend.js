@@ -33,6 +33,7 @@ const searchFriend = async (friendId) => {
 
 const addFriend = async (userId, friend) => {
     try {
+        console.log(friend)
 
     } catch (error) {
         console.error("error adding new user:", error)
