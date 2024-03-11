@@ -35,9 +35,8 @@ export default function FriendList({ userId }: FriendListProps) {
     }
 
     const handleAddFriend = () => {
-        const { uid } = isFriendFound
-
-        addAFriend(userId, uid)
+        if (!userId || !isFriendFound) return
+        addAFriend(userId, isFriendFound)
         setIsPending(true)
     }
 

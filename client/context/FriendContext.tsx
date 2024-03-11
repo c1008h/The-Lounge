@@ -1,22 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
-import { onValue, ref, set, push } from 'firebase/database'; 
 import { Friend } from '@/interfaces/Friend';
 import { useSocket } from '@/hooks/useSocket';
-
-interface User {
-    email?: string;
-    uid?: string;
-    phoneNumber?: string;
-}
-
 interface FriendContextType {
     friends: Friend[];
-    searchFriend: (friendId: string) => Friend | null;
-    addAFriend: (userId: string, friendId: string) => void;
+    searchFriend: (friendId: string) => void;
+    addAFriend: (userId: string, friend: Friend) => void;
     deleteAFriend: (userId: string, friendId: string) => void;
-    isFriendFound: User | null;
+    isFriendFound: Friend | null;
 }
 
 const FriendContext = createContext<FriendContextType | undefined>(undefined);
@@ -32,7 +23,7 @@ export const useFriend = (): FriendContextType => {
 export const FriendProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket(); 
     const [friends, setFriends] = useState<Friend[]>([]);
-    const [isFriendFound, setIsFriendFound] = useState<Friend>()
+    const [isFriendFound, setIsFriendFound] = useState<Friend | null>(null)
     const dispatch = useDispatch(); 
 
     const searchFriend = useCallback((friendId: string) => {
@@ -40,8 +31,8 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
         if (socket) socket.emit('searchFriend', friendId)
     }, [socket])
 
-    const addAFriend = useCallback((userId: string, friendId: string) => {
-        if (socket) socket.emit('addFriend', userId, friendId);
+    const addAFriend = useCallback((userId: string, friend: Friend) => {
+        if (socket) socket.emit('addFriend', userId, friend);
     }, [socket])
 
     const deleteAFriend = useCallback((userId: string, friendId: string) => {
@@ -55,20 +46,23 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
 
         const handleFriendFound = (friendId: Friend) => {
             setIsFriendFound(friendId)
-            return friendId
         }
         
-        const handleFriendAdded = (userId: string, friendId: string) => {
+        const handleFriendAdded = (userId: string, friend: Friend) => {
             // dispatch(selectSessionToState(sessionId))
             const newFriend = {
-                uid: friendId,
-                displayName: isFriendFound.displayName || null,
-                email: isFriendFound.email || null,
-                phoneNumber: isFriendFound.phoneNumber || null,
+                uid: friend.uid, 
+                name: friend.name || null, 
+                displayName: friend.displayName || null, 
+                email: friend.email || null,
+                phoneNumber: friend.phoneNumber || null,
                 pending: true
             }
 
-            setFriends(prevFriends => [...prevFriends, newFriend]);
+            setFriends(prevFriends => [
+                ...prevFriends,
+                newFriend
+            ]);
         }
         const handleRemoveFriend = (userId: string, friendId: string) => deleteAFriend(userId, friendId);
 

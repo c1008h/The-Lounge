@@ -1,8 +1,8 @@
 export interface Friend {
     uid: string;
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    displayName?: string;
+    name?: string | null;
+    email?: string | null;
+    phoneNumber?: string | null;
+    displayName?: string | null;
     pending?: boolean | null;
 }
