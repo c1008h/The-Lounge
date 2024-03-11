@@ -2,7 +2,7 @@
 import React, { ReactNode } from "react";
 import { NextUIProvider } from '@nextui-org/react';
 import { AuthProvider } from '@/provider/AuthProvider';
-import { SessionProvider, ParticipantsProvider, ChatProvider } from "@/context";
+import { FriendProvider, SessionProvider, ParticipantsProvider, ChatProvider } from "@/context";
 import { Provider } from 'react-redux';
 import store from '@/features/store'
 
@@ -15,15 +15,17 @@ export function ProviderWrapper({ children }: ProviderProps) {
         <NextUIProvider>
             <Provider store={store}>
                 <AuthProvider>
-                    <SessionProvider>
-                        <ParticipantsProvider>
-                            <ChatProvider>
-                                {/* NAV WILL GO HERE */}
-                                {children}
-                                {/* FOOTER WILL GO HERE */}
-                            </ChatProvider>
-                        </ParticipantsProvider>
-                    </SessionProvider>
+                    <FriendProvider>
+                        <SessionProvider>
+                            <ParticipantsProvider>
+                                <ChatProvider>
+                                    {/* NAV WILL GO HERE */}
+                                    {children}
+                                    {/* FOOTER WILL GO HERE */}
+                                </ChatProvider>
+                            </ParticipantsProvider>
+                        </SessionProvider>
+                    </FriendProvider>
                 </AuthProvider>
             </Provider>
         </NextUIProvider>
