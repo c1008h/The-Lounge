@@ -5,6 +5,9 @@ import { Friend } from '@/interfaces/Friend';
 
 export const useFriendListener = (userId: string) => {
     const [friends, setFriends] = useState<Friend[]>([]);
+    const [friendRequests, setFriendRequests] = useState<Friend[]>([]);
+    const [pendingFriends, setPendingFriends] = useState<Friend[]>([]);
+
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<Error | null>(null);
 
@@ -21,13 +24,24 @@ export const useFriendListener = (userId: string) => {
             const q = query(userCollection, where("uid", "==", userId))
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const friendsData: Friend[] = []
+                const friendRequestsData: Friend[] = [];
+                const pendingFriendsData: Friend[] = [];
+                
                 querySnapshot.forEach((doc) => {
                     const userData = doc.data();
                     if (userData.friends) {
                         friendsData.push(...userData.friends);
                     }
+                    if (userData.friendRequests) {
+                        friendRequestsData.push(...userData.friendRequests);
+                    }
+                    if (userData.sentFriendRequests) {
+                        pendingFriendsData.push(...userData.sentFriendRequests);
+                    }
                 });
                 setFriends(friendsData);
+                setFriendRequests(friendRequestsData);
+                setPendingFriends(pendingFriendsData);
                 setLoading(false);
             })
     
@@ -43,5 +57,5 @@ export const useFriendListener = (userId: string) => {
         fetchFriends();
     }, [fetchFriends]);
 
-    return { friends, loading, error };
+    return { friends, friendRequests, pendingFriends, loading, error };
 }

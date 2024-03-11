@@ -72,6 +72,41 @@ const addFriend = async (userId, friend) => {
     }
 }
 
+const isFriendRequestSent = async (userId, friendId) => {
+    try {
+        const userDoc = await userRef.doc(userId).get();
+        if (userDoc.exists) {
+            const sentFriendRequests = userDoc.data().sentFriendRequests || [];
+            return sentFriendRequests.some(request => request.uid === friendId);
+        } else {
+            console.log("Sender user not found");
+            return false;
+        }
+    } catch (error) {
+        console.error("Error checking if friend request is sent:", error);
+        return false;
+    }
+}
+
+const isFriendRequestReceived = async (userId, friendId) => {
+    try {
+        const friendDoc = await userRef.doc(friendId).get();
+        if (friendDoc.exists) {
+            const friendRequests = friendDoc.data().friendRequests || [];
+            return friendRequests.some(request => request.uid === userId);
+        } else {
+            console.log("Receiver user not found");
+            return false;
+        }
+    } catch (error) {
+        console.error("Error checking if friend request is received:", error);
+        return false;
+    }
+}
+
 module.exports = {
-    searchFriend, addFriend
+    searchFriend, 
+    addFriend,
+    isFriendRequestSent,
+    isFriendRequestReceived
 }
