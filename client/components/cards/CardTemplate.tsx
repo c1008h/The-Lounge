@@ -10,7 +10,7 @@ interface CardTemplateProps {
 }
 
 export default function CardTemplate({chatWith, message, sender, id, timestamp}: CardTemplateProps) {
-  const isSelf = sender === "1234";
+  const isSelf = sender;
   const cardStyles = isSelf ? "bg-blue-500 text-white" : "bg-gray-100 text-black";
   const alignmentStyles = isSelf ? "self-end" : "self-start";
 
