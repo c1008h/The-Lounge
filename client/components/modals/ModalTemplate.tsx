@@ -1,24 +1,34 @@
 import React from 'react'
-import {useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
+import {useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button} from "@nextui-org/react";
 
 interface ModalTemplateProps {
     label?: string;
-    content?: string;
+    visible?: boolean;
+    onClose?: () => void;
+    children?: React.ReactNode; 
 }
+
 export default function ModalTemplate({
+    visible,
     label,
-    content
+    onClose,
+    children,
 }: ModalTemplateProps) {
-  return (
-    <Modal>
-        <ModalContent>
-            <ModalHeader>
-                {label}
-            </ModalHeader>
-            <ModalBody>
-                <p>{content}</p>
-            </ModalBody>
-        </ModalContent>
-    </Modal>
-  )
+    // const { isOpen, onOpenChange } = useDisclosure();
+
+
+    console.log("Modal is open now!")
+    return (
+
+        <Modal 
+            onClose={onClose}
+            isOpen={visible} 
+            closeButton
+        >
+            <ModalContent>
+                <ModalHeader>{label}</ModalHeader>
+                <ModalBody>{children}</ModalBody>
+            </ModalContent>
+        </Modal>
+    )
 }

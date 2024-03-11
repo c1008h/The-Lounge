@@ -11,3 +11,5 @@ export {default as Divider} from './ui/Divider'
 
 export {default as Loading} from './Loading';
 export {default as Error} from './Error';
+
+export {default as ModalTemplate} from './modals/ModalTemplate'

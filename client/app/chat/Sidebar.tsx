@@ -35,18 +35,10 @@ export default function Sidebar({
     const [displaySession, setDisplaySession] = useState(true)
     // const userId = useSelector((state: RootState) => state.auth.user)
 
-
-
     // if (!Array.isArray(sessions) || sessions.length === 0) {
     //     return null; 
     // }
-
-
     
-    // console.log("Current session id in sidebar:", currentSessionId)
-
-
-    // console.log("SESSIONSS DETAILSSS:", sessions)
     console.log('uid', userId)
 
     return (
@@ -71,13 +63,7 @@ export default function Sidebar({
                             }}
                         />
                     )}
-
-
-                    {/* <h4 className='' onProgress={() => setDisplayFriend(true)}>Friendlist</h4> */}
-                    {/* <h4 className=''>Icon</h4> */}
                 </div>
-
-
             </div>
             {displayFriend ? (
                 <FriendList userId={userId} />
@@ -86,32 +72,6 @@ export default function Sidebar({
                     handleAddNewSession={handleAddNewSession}
                     sessions={sessions}
                 />
-                // <>
-                //     <ButtonTemplate label='NEW CHAT' className='m-4' onPress={() => handleAddNewSession()}/>
-
-                //     {!sessions ? (
-                //         <>
-                //         </>
-                //     ) : (
-                //         <>
-                //             {sessions.map((session, index) => (
-                //                 <React.Fragment key={`session-${index}`}>
-                //                     <div className={`flex flex-row justify-between p-3 ${session.sessionId === currentSessionId ? 'bg-blue-100' : 'bg-white'}`} onClick={() => handleSelectSession(session.sessionId)}>
-                //                         <BoxTemplate 
-                //                             id={session.sessionId}
-                //                             message={session.lastmessage}
-                //                             timestamp={session.timestamp}
-                //                             // chatWith={session.participants}
-                //                             boxStyle={'flex items-center justify-start'}
-                //                         />
-                //                         <ButtonTemplate label='X' className='justify-center' onPress={() => handleDeleteSession(session.sessionId, userId)}/>
-                //                     </div>
-                //                     <Divider className="my-4 self-center" />
-                //                 </React.Fragment>
-                //             ))}
-                //         </>
-                //     )}
-                // </>
             )}    
         </div>
     )
