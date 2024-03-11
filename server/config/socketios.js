@@ -66,9 +66,9 @@ function setupSocket(server) {
             console.log(friend)
             console.log('userId:', userId)
 
-            await addFriend(userId, friend)
-            socket.emit('addedFriend', "friend request sent!")
-
+            const result = await addFriend(userId, friend)
+            console.log("successfully added:", result)
+            socket.emit('friendAdded', result)
         })
 
         socket.on('joinRoom', async ({ userId, roomId }) => {

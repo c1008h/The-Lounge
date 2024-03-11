@@ -37,41 +37,38 @@ const addFriend = async (userId, friend) => {
         const { uid, displayName, email, phoneNumber } = friend;
 
         const userSnapshot = await userRef.where("uid", "==", userId).get()
-        
-        if (!userSnapshot.empty) {
-            const userDoc = userSnapshot.docs[0];
-            const sentFriendRequests = userDoc.exists ? userDoc.data().sentFriendRequests || [] : [];
-            sentFriendRequests.push({ uid: uid, displayName: displayName || null, email: email || null, phoneNumber: phoneNumber || null });
-            await userRef.doc(userDoc.id).update({ sentFriendRequests });
-
-            console.log("Friend added successfully");
-
-            const friendSnapshot = await userRef.where("uid", "==", friend.uid).get()
-
-            if (!friendSnapshot.empty) {
-                const friendDoc = friendSnapshot.docs[0];
-                const friendRequests = friendDoc.exists ? friendDoc.data().friendRequests || [] : [];
-
-                const userData = {
-                    uid: userId,
-                    displayName: userDoc.data().displayName || null,
-                    email: userDoc.data().email || null,
-                    phoneNumber: userDoc.data().phoneNumber || null
-                }
-
-                friendRequests.push(userData);
-                await userRef.doc(friendDoc.id).update({ friendRequests });
-                console.log("Friend request sent successfully to the friend");
-            } else {
-                console.log('Friend not found')
-            }
-
-        } else {
-            console.log("Friend added successfully");
+        if (userSnapshot.empty) {
+            console.log("user not found")
+            return false
         }
+
+        const userDoc = userSnapshot.docs[0];
+        const sentFriendRequests = userDoc.exists ? userDoc.data().sentFriendRequests || [] : [];
+        sentFriendRequests.push({ uid: uid, displayName: displayName || null, email: email || null, phoneNumber: phoneNumber || null });
+        await userRef.doc(userDoc.id).update({ sentFriendRequests });
+
+        const friendSnapshot = await userRef.where("uid", "==", friend.uid).get()
+        if (friendSnapshot.empty) {
+            console.log("Friend not found");
+            return false;
+        }
+
+        const friendDoc = friendSnapshot.docs[0];
+        const friendRequests = friendDoc.data().friendRequests || [];
+        const userData = {
+            uid: userId,
+            displayName: userDoc.data().displayName || null,
+            email: userDoc.data().email || null,
+            phoneNumber: userDoc.data().phoneNumber || null
+        };
+        friendRequests.push(userData);
+        await userRef.doc(friendDoc.id).update({ friendRequests });
+        console.log("Friend request sent successfully to the friend");
+
+        return true;
     } catch (error) {
         console.error("error adding new user:", error)
-
+        return false;
     }
 }
 

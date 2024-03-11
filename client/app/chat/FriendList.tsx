@@ -17,7 +17,7 @@ export default function FriendList({ userId }: FriendListProps) {
     const [searchMade, setSearchMade] = useState(false)
     const [isPending, setIsPending] = useState(false)
     const [searchInput, setSearchInput] = useState<string>('')
-    const { searchFriend, addAFriend, isFriendFound } = useFriend()
+    const { searchFriend, addAFriend, isFriendFound, successfullyAdded } = useFriend()
     const { friends } = useFriendListener(userId);
 
     // console.log("friend list:", friends)
@@ -41,9 +41,12 @@ export default function FriendList({ userId }: FriendListProps) {
     }
 
     console.log("is friend found:", isFriendFound)
+    console.log("Successfully added?:", successfullyAdded)
 
     const handler = () => setVisible(true);
     const handleModalClose = () => setVisible(false)
+
+
 
     return (
         <div>

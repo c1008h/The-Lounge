@@ -8,6 +8,7 @@ interface FriendContextType {
     addAFriend: (userId: string, friend: Friend) => void;
     deleteAFriend: (userId: string, friendId: string) => void;
     isFriendFound: Friend | null;
+    successfullyAdded: boolean | null;
 }
 
 const FriendContext = createContext<FriendContextType | undefined>(undefined);
@@ -24,6 +25,8 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket(); 
     const [friends, setFriends] = useState<Friend[]>([]);
     const [isFriendFound, setIsFriendFound] = useState<Friend | null>(null)
+    const [successfullyAdded, setSuccessfullyAdded] = useState<boolean | null>(null)
+
     const dispatch = useDispatch(); 
 
     const searchFriend = useCallback((friendId: string) => {
@@ -48,7 +51,7 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
             setIsFriendFound(friendId)
         }
         
-        const handleFriendAdded = (userId: string, friend: Friend) => {
+        const handleFriendAdded = (result: boolean, userId: string, friend: Friend) => {
             // dispatch(selectSessionToState(sessionId))
             const newFriend = {
                 uid: friend.uid, 
@@ -63,6 +66,8 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
                 ...prevFriends,
                 newFriend
             ]);
+
+            setSuccessfullyAdded(result)
         }
         const handleRemoveFriend = (userId: string, friendId: string) => deleteAFriend(userId, friendId);
 
@@ -78,7 +83,7 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
     }, [socket, dispatch, addAFriend, deleteAFriend])
   
     return (
-        <FriendContext.Provider value={{ friends, searchFriend, addAFriend, deleteAFriend, isFriendFound }}>
+        <FriendContext.Provider value={{ friends, searchFriend, addAFriend, deleteAFriend, isFriendFound, successfullyAdded }}>
             {children}
         </FriendContext.Provider>
     );
