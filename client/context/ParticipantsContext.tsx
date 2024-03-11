@@ -25,8 +25,10 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
     const [participants, setParticipants] = useState<Participant[]>([]);
 
     const addParticipant = useCallback((sessionId: string, participant: Participant) => {
-        console.log("PARTICIPANT IN CONTEXT:", participant)
-        console.log("CURRENT SESSION ID IN CONTEXT:", sessionId)
+        // console.log("PARTICIPANT IN CONTEXT:", participant)
+
+        console.log(`Participant ${participant} and current session ${sessionId} inside of participant context`)
+        // console.log("CURRENT SESSION ID IN CONTEXT:", sessionId)
         if (!sessionId || !participant) return
 
         setParticipants(prevParticipants => {

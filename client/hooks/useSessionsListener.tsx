@@ -40,46 +40,6 @@ export const useSessionsListener = (userId: string) => {
         fetchSessions();
     }, [fetchSessions]);
 
-    // useEffect(() => {
-    //     if (!userId) return;
-
-    //     const sessionDetailsPromises = sessions.map(async sessionId => {
-    //         try {
-    //             const messageRef: DatabaseReference = ref(sessionsRT, `/${sessionId}/messages`);
-    //             const participantsRef = ref(sessionsRT, `${sessionId}/participants`)
-
-    //             const [messageSnapshot, participantsSnapshot] = await Promise.all([
-    //                 get(messageRef),
-    //                 get(participantsRef)
-    //             ]);
-
-    //             const lastMessage = messageSnapshot.exists() ? messageSnapshot.val().pop() : null;
-    //             const participants = participantsSnapshot.exists() ? participantsSnapshot.val() : [];
-
-    //             const timestamp = lastMessage ? lastMessage.timestamp : null;
-    //             return {
-    //                 sessionId, 
-    //                 lastMessage,
-    //                 timestamp,
-    //                 participants
-    //             };
-    //         } catch (error) {
-    //             console.error('Error fetching session details:', error);
-    //             return null;
-    //         }
-    //     });
-
-    //     Promise.all(sessionDetailsPromises).then(sessionDetails => {
-    //         const filteredSessionDetails = sessionDetails.filter(Boolean); 
-    //         console.log("FilteredSessionDetail:",  filteredSessionDetails)
-    //         setSessionDetails(filteredSessionDetails);
-    //     }).catch(error => {
-    //         console.error('Error fetching session details:', error);
-    //         setError(error instanceof Error ? error : new Error('Error fetching session details'));
-    //     });
-
-    //     return () => {}; 
-    // }, [userId, sessions])
 
     useEffect(() => {
         if (!userId) return;
@@ -88,18 +48,7 @@ export const useSessionsListener = (userId: string) => {
             const sessionData = snapshot.val();
 
             if (sessionData) {
-                // const updatedSessionDetails = sessions.map(sessionId => {
-                //     const lastMessage = sessionData[sessionId]?.messages
-                //         ? sessionData[sessionId].messages[sessionData[sessionId].messages.length - 1]
-                //         : null;
-                //     const timestamp = lastMessage ? lastMessage.timestamp : null;
-                //     return {
-                //         sessionId, 
-                //         lastMessage,
-                //         timestamp,
-                //         participants: sessionData[sessionId]?.participants || []
-                //     }
-                // })
+                // Object.keys
                 const updatedSessionDetails = Object.keys(sessionData).map(sessionId => {
                     const lastMessage = sessionData[sessionId]?.messages
                         ? sessionData[sessionId].messages[sessionData[sessionId].messages.length - 1]

@@ -11,8 +11,6 @@ import Sidebar from './Sidebar';
 import { Participant } from '@/interfaces/Participant';
 import { addAParticipant, backspaceParticipant, clearParticipants } from '@/features/participants/participantSlices';
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
-import { selectParticipants } from '@/features/participants/participantSelectors';
-import { selectSession } from '@/features/session/sessionSelectors'
 import { RootState } from '@/features/store';
 
 export default function Page() {
@@ -28,31 +26,32 @@ export default function Page() {
   const participantList = useSelector((state: RootState) => state.participant.participants);
   const activeSessionID = useSelector((state: RootState) => state.session.currentSession)
   const userState = useSelector((state:RootState) => state.auth.user)
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
   const { addASession, deleteSession, leaveSession, currentSessionId } = useSession()
-  const { sessions, loading: sessionLoading, error: sessionError, sessionDetails } = useSessionsListener(uid || null)
+  const { sessions, loading: sessionLoading, error: sessionError, sessionDetails } = useSessionsListener(uid)
+
   const { addParticipant, removeParticipant, removeSpecificParticipant } = useParticipants();
   const { participants, error: participantError } = useParticipantsListener(activeSessionID);
+
   const { sendMessage } = useChat()
   const { messages, error: chatError } = useChatListener(activeSessionID)
   // console.log("CURRENT SESSION ID IN PAGE:", activeSessionID)
 
   useEffect(() => {
-    if (userState) {
+    if (currentUser) {
       // console.log("USER STATE UID:", userState)
-      setUid(userState.uid)
-    } else if (!userState) {
+      setUid(currentUser.uid)
+    } else {
       router.push('/login')
     }
     return () => {
 
     }
-  }, [userState, router])
+  }, [isAuthenticated, currentUser, userState, router])
 
-  // console.log(`SESSIONS FROM USER ${uid}: ${sessions}`)
-  console.log(`SESSIONS details from real time: ${sessionDetails}`)
-  console.log(`Participants in this chat session ${activeSessionID}: ${participants}`)
-  // console.log("USER UID", uid)
+  // console.log(`Participants in this chat session ${activeSessionID}: ${participants}`)
+  console.log("USER UID", uid)
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
   
@@ -75,7 +74,7 @@ export default function Page() {
     // WRITE LOGIC FOR IF USER INPUTS THE SAME PERSON
     // SHOULD EMPTY INPUT VALUE AND NOT DUPLICATE 
     if (participantName && activeSessionID) {
-      const newParticipant = { uid: '1234', name: participantName};
+      const newParticipant = { uid: '0DVpCJ7HYHMLRNT30wJd4YwV2oI3', name: participantName};
 
       dispatch(addAParticipant(newParticipant));
       addParticipant(activeSessionID, newParticipant);
@@ -102,6 +101,11 @@ export default function Page() {
     }
   }
 
+  const handleSelectSession = (sessionId: string) => {
+    console.log("Session selected:", sessionId);
+    dispatch(selectSessionToState(sessionId))
+  }
+
   if (sessionLoading) return <Loading message={'Loading sessions...'} />
   
   if (sessionError) {
@@ -117,6 +121,7 @@ export default function Page() {
           sessions={sessionDetails}
           handleAddNewSession={handleNewChat}
           userId={uid}
+          currentSessionId={currentSessionId}
         />
         {/* RIGHT SIDE OF SCREEN */}
         <div className="w-2/3 h-screen bg-gray-100 flex flex-col gap-4 relative">
@@ -152,10 +157,10 @@ export default function Page() {
                 />
               </div>
             ) : (
-              <h3 className='text-white'>To: {participants}</h3>
+              <h3 className='text-white'>To: {participants && participants.map(participant => participant.name).join(', ')}</h3>
             )}
           </div>
-            {/* {messages.map((message, index) => (
+            {messages && messages.map((message, index) => (
               <React.Fragment key={`message-${index}`}>
                 <CardTemplate 
                   id={message.id}
@@ -165,7 +170,7 @@ export default function Page() {
                   alignment={message.sender === uid ? 'right' : 'left'}
                 />
               </React.Fragment>
-            ))} */}
+            ))}
           
           {/* TEXT BOX SHOULD BE BOTTOM OF SCREEN */}
           <div className="w-2/3 flex fixed bottom-0 p-4 bg-white">

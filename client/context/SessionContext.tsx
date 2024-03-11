@@ -10,7 +10,10 @@ interface SessionContextType {
     addASession: (uid: string) => void;
     deleteSession: (sessionId: string, userId: string) => void;
     leaveSession: (sessionId: string) => void;
+    selectSession: (sessionId: string) => void;
     currentSessionId: string;
+    // selectActiveSession: () => void;
+
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -29,6 +32,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const [currentSessionId, setCurrentSessionId] = useState<string>()
     const dispatch = useDispatch(); 
 
+
     const addASession = useCallback((uid: string) => {
         if (socket) socket.emit('addSession', uid);
     }, [socket])
@@ -44,9 +48,28 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         if (socket) socket.emit('leaveSession', sessionId);
     }, [socket, sessions])
 
+    const selectSession = useCallback((sessionId: string) => {
+        setCurrentSessionId(sessionId)
+        dispatch(selectSessionToState(sessionId))
+    }, [dispatch])
+
+    // const selectActiveSession = useCallback(() => {
+    //     if (sessions.length > 0) {
+    //         const firstSessionId = sessions[0].id;
+    //         console.log("first session ID in context to select:", firstSessionId)
+    //         setCurrentSessionId(firstSessionId);
+    //         dispatch(selectSessionToState(firstSessionId));
+    //         dispatch(initializeParticipants(participants))
+    //     }
+    // }, [sessions, dispatch, participants]);
+
+    // useEffect(() => {
+    //     selectActiveSession();
+    // }, [selectActiveSession]);
+
     useEffect(() => {
         if (!socket) return
-        const handleAddSession = (uid: string) => addASession(uid);
+        // const handleAddSession = (uid: string) => addASession(uid);
         const handleSessionAdded = (sessionId: string) => {
             console.log('SESSION ID RETURNED FROM SERVER:', sessionId)
             setCurrentSessionId(sessionId)
@@ -60,15 +83,17 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
         socket.on('sessionAdded', handleSessionAdded);
         socket.on('sessionRemoved', handleRemoveSession);
+        socket.on('leaveSession', handleRemoveSession)
 
         return () => {
             socket.off('sessionAdded', handleSessionAdded);
             socket.off('sessionRemoved', handleRemoveSession);
+            socket.off('sessionLeft', handleRemoveSession)
         }
-    }, [socket, addASession, deleteSession, leaveSession])
+    }, [socket, dispatch, deleteSession, leaveSession])
   
     return (
-        <SessionContext.Provider value={{ sessions, addASession, deleteSession, leaveSession, currentSessionId }}>
+        <SessionContext.Provider value={{ sessions,  addASession, deleteSession, leaveSession, currentSessionId, selectSession }}>
             {children}
         </SessionContext.Provider>
     );

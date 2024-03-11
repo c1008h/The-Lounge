@@ -2,6 +2,8 @@ const { chatSessionsRef  } = require('../../config/firebaseConfig')
 
 const addParticipant = async (sessionId, participant) => {
     try {
+        if (!sessionId || !participant) throw error ("empty session id or empty participant")
+        
         const chatSessionDataSnapshot = await chatSessionsRef.child(sessionId).once('value');
         const chatSessionData = chatSessionDataSnapshot.val();
 
