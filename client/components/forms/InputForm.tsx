@@ -5,9 +5,9 @@ interface InputFormProps {
     onValueChange?: (value: string) => void;
     onChange?: (value: string) => void;
     onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-    className: string;
+    className?: string;
     value: string;
-    style:  React.CSSProperties,
+    style?:  React.CSSProperties,
 }
 
 export default function InputForm({style, value, onKeyDown, className, onValueChange, onChange}: InputFormProps) {

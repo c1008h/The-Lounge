@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useFriendListener } from '@/hooks'
 import { addFriend } from '@/features/friends/friendSlices'
 import { addAFriend, deleteAFriend } from '@/context'
-import { ButtonTemplate, ModalTemplate } from '@/components';
+import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
 
 interface FriendListProps {
     userId: string;
@@ -10,20 +10,18 @@ interface FriendListProps {
 
 export default function FriendList({ userId }: FriendListProps) {
     const [visible, setVisible] = useState(false)
+    const [searchInput, setSearchInput] = useState<string>('')
     const { friends } = useFriendListener(userId);
+
     console.log("friend list:", friends)
     // const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
+    const handleSearchInputChange = (value: string) => setSearchInput(value)
     const handleAddFriend = () => {
         console.log('trying to add friend')
     }
+
     const handler = () => setVisible(true);
-
-    const handleModalOpen = () => {
-        setVisible(true)
-        console.log('Modal opened');
-
-    }
     const handleModalClose = () => setVisible(false)
 
     return (
@@ -34,7 +32,15 @@ export default function FriendList({ userId }: FriendListProps) {
                     label="Add Friend"
                     onClose={handleModalClose}
                     visible={visible}
-                /> 
+                >
+                    <p>Search user by email, phone number or user ID.</p>
+                    <InputForm 
+                        onValueChange={handleSearchInputChange}
+                        className=''
+                        value={searchInput}
+                    />
+                    <ButtonTemplate label='Search' className='justify-center'/>
+                </ModalTemplate> 
             )} 
         </div>
     )
