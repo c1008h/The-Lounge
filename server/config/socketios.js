@@ -3,6 +3,7 @@ const { createChatSession, deleteSessionFromRT, chatSessionExists } = require('.
 const { addChatSessionToUser, deleteSessionFromUser, userHasChatSession } = require('../services/firestore/user')
 const { addParticipant } = require('../services/realtimeDatabase/participants')
 const { saveMessage } = require('../services/realtimeDatabase/message')
+const { searchFriend } = require('../services/firestore/friend')
 
 function setupSocket(server) {
     const io = new Server(server, {
@@ -54,24 +55,12 @@ function setupSocket(server) {
             socket.emit('sentMessage', "message saved!")
         })
 
-        
-        // socket.on('startchat', async (data) => {
-        //     const participants = data.participants
-        //     const initiator = data.initiator;   
-        //     const chatSessionId = await createChatSession(participants)
+        socket.on('searchFriend', async (friendId) => {
+            console.log( friendId )
+            const friendFound = await searchFriend(friendId)
 
-        //     console.log("chatsessionID", chatSessionId)
-        //     await Promise.all([
-        //         addChatSessionToUser(initiator, chatSessionId), 
-        //         ...participants.map(userId => addChatSessionToUser(userId, chatSessionId)) 
-        //     ]);
-        //     console.log(`new session created successfully with session id: ${chatSessionId}`)
-
-        //     socket.join(chatSessionId);
-        //     socket.emit('chatSessionId', { chatSessionId });
-
-        //     socket.emit('chatStarted', { initiator, chatSessionId });
-        // })
+            socket.emit('friendFound', friendFound)
+        })
 
         socket.on('joinRoom', async ({ userId, roomId }) => {
             try {

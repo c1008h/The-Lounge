@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useFriendListener } from '@/hooks'
 import { addFriend } from '@/features/friends/friendSlices'
-import { addAFriend, deleteAFriend } from '@/context'
+import { useFriend } from '@/context'
+// import { addAFriend, deleteAFriend, searchFriend } from '@/context'
 import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
 
 interface FriendListProps {
@@ -11,15 +12,23 @@ interface FriendListProps {
 export default function FriendList({ userId }: FriendListProps) {
     const [visible, setVisible] = useState(false)
     const [searchInput, setSearchInput] = useState<string>('')
+    const { searchFriend, isFriendFound } = useFriend()
     const { friends } = useFriendListener(userId);
 
-    console.log("friend list:", friends)
+    // console.log("friend list:", friends)
     // const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     const handleSearchInputChange = (value: string) => setSearchInput(value)
+
     const handleAddFriend = () => {
-        console.log('trying to add friend')
+        const trimmedInput = searchInput.trim();
+        if (!trimmedInput) return
+
+        console.log("trimmedInput:", trimmedInput)
+        searchFriend(trimmedInput)
     }
+
+    console.log("is friend found:", isFriendFound)
 
     const handler = () => setVisible(true);
     const handleModalClose = () => setVisible(false)
@@ -39,7 +48,7 @@ export default function FriendList({ userId }: FriendListProps) {
                         className=''
                         value={searchInput}
                     />
-                    <ButtonTemplate label='Search' className='justify-center'/>
+                    <ButtonTemplate label='Search' className='justify-center' onPress={() => handleAddFriend()}/>
                 </ModalTemplate> 
             )} 
         </div>
