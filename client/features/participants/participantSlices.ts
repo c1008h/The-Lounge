@@ -24,6 +24,9 @@ export const participantSlice = createSlice({
         },
         clearParticipants: (state) => {
             state.participants = []
+        },
+        initializeParticipants: (state, action: PayloadAction<Participant[]>) => {
+            state.participants = action.payload;
         }
     },
 })
@@ -32,7 +35,8 @@ export const {
     addAParticipant, 
     backspaceParticipant, 
     removeParticipant, 
-    clearParticipants 
+    clearParticipants,
+    initializeParticipants 
 } = participantSlice.actions;
 
 export default participantSlice.reducer;

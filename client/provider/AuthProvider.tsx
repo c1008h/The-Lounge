@@ -20,7 +20,7 @@ interface AuthContextType {
   signUpWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
   signInWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
   logout: () => Promise<void>;
-  currentUser: User | null;
+  currentUser: User | any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential?.accessToken;
 
-      dispatch(loginUser(user));
+      // dispatch(loginUser(user));
 
       // console.log("result:", result)
       // console.log('credential', credential)
@@ -103,9 +103,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredentials.user
-      dispatch(loginUser(user));
+      // dispatch(loginUser(user));
 
-      console.log("USER:", userCredentials)
+      // console.log("USER:", userCredentials)
 
       const userDocData = {
         uid: user.uid,
@@ -137,9 +137,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const userCredentials = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredentials.user
-      dispatch(loginUser(user));
+      // dispatch(loginUser(user));
 
-      console.log("USER:", userCredentials)
+      // console.log("USER:", userCredentials)
 
       return userCredentials;
     } catch (error) {
@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
-      dispatch(logoutUser())
+      // dispatch(logoutUser())
       await signOut(auth)
     } catch (error) {
       console.error("Trouble signing out:", error)
