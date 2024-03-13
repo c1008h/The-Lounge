@@ -9,7 +9,7 @@ interface FriendContextType {
     deleteAFriend: (userId: string, friendId: string) => void;
     isFriendFound: Friend | null;
     successfullyAdded: boolean | null;
-    acceptFriendsRequest: (userId: string, friend: Friend) => void;
+    acceptFriendsRequest: (userId: string, friendId: string) => void;
     declineFriendRequest: (userId: string, friendId: string) => void;
 }
 
@@ -46,8 +46,9 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
         if (socket) socket.emit('deleteFriend', userId, friendId);
     }, [socket])
 
-    const acceptFriendsRequest = useCallback((userId: string, friend: Friend) => {
-        if (socket) socket.emit('acceptFriendRequest', userId, friend)
+    const acceptFriendsRequest = useCallback((userId: string, friendId: string) => {
+        console.log('accept friend request triggered in context')
+        if (socket) socket.emit('acceptFriendRequest', userId, friendId)
     }, [socket])
 
     const declineFriendRequest = useCallback((userId: string, friendId: string) => {
@@ -82,12 +83,12 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
         }
         const handleRemoveFriend = (userId: string, friendId: string) => deleteAFriend(userId, friendId);
 
-        const handleAcceptFriendRequest = (userId: string, friend: Friend) => {
-            console.log("friend updated")
+        const handleAcceptFriendRequest = (result: boolean, userId: string, friendId: string) => {
+            if (result) console.log("friend request accepted")
         }
 
-        const handleDeclineFriendRequest = (userId: string, friendId: string) => {
-            console.log('friend request declined')
+        const handleDeclineFriendRequest = (result: boolean) => {
+            if (result) console.log('friend request declined')
         }
 
         socket.on('friendFound', handleFriendFound)

@@ -71,8 +71,8 @@ function setupSocket(server) {
             socket.emit('friendAdded', result)
         })
 
-        socket.on('acceptFriendRequest', async (userId, friend) => {
-            const result = await acceptRequest(userId, friend)
+        socket.on('acceptFriendRequest', async (userId, friendId) => {
+            const result = await acceptRequest(userId, friendId)
             socket.emit('acceptedFriendRequest', result)
         })
 

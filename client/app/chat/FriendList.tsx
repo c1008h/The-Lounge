@@ -23,6 +23,7 @@ export default function FriendList({ userId }: FriendListProps) {
         addAFriend, 
         isFriendFound, 
         successfullyAdded,
+        acceptFriendsRequest,
         declineFriendRequest
     } = useFriend()
     const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
@@ -78,6 +79,7 @@ export default function FriendList({ userId }: FriendListProps) {
                 return <div className='flex flex-row justify-evenly'>
                     <FaCheck 
                         style={{ width: '25px', height: '25px' }}
+                        onClick={() => acceptFriendsRequest(userId, isFriendFound.uid)}
                     />
                     <FaRegCircleXmark 
                         style={{ width: '25px', height: '25px' }}
@@ -110,7 +112,10 @@ export default function FriendList({ userId }: FriendListProps) {
                     <div key={requested.uid} className='flex flex-row justify-between'>
                         <p>{requested.displayName ? requested.displayName : requested.email ? requested.email : requested.phoneNumber}</p>
                         <div className='flex flex-row'>
-                            <FaCheck style={{ width: '25px', height: '25px' }}/>
+                            <FaCheck 
+                                style={{ width: '25px', height: '25px' }}
+                                onClick={() => acceptFriendsRequest(userId, requested.uid)}
+                            />
                             <FaRegCircleXmark 
                                 style={{ width: '25px', height: '25px' }}
                                 onClick={() => declineFriendRequest(userId, requested.uid)}
@@ -125,6 +130,10 @@ export default function FriendList({ userId }: FriendListProps) {
                     <div key={pending.uid} className='flex flex-row justify-between'>
                         <p>{pending.displayName ? pending.displayName : pending.email ? pending.email : pending.phoneNumber}</p>
                         <MdOutlinePending style={{ width: '25px', height: '25px' }} />
+                        <FaRegCircleXmark 
+                            style={{ width: '25px', height: '25px' }}
+                            // onClick={() => declineFriendRequest(userId, requested.uid)}
+                        />
                     </div>
                 )))}
             </div>

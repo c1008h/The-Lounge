@@ -104,22 +104,51 @@ const isFriendRequestReceived = async (userId, friendId) => {
     }
 }
 
-const acceptRequest = async (userId, friend) => {
+const acceptRequest = async (userId, friendId) => {
+    console.log('user id:', userId)
+    console.log('friend id:', friendId)
     try {
-        const userDoc = await userRef.doc(userId).get()
-        const friendDoc = await userRef.doc(friend.uid).get();
+        const userQuerySnapshot = await userRef.where("uid", "==", userId).limit(1).get();
+        const friendQuerySnapshot = await userRef.where("uid", "==", friendId).limit(1).get();
 
-        await userDoc.update({
-            friendRequests: admin.firestore.FieldValue.arrayRemove(friend.uid),
-            friends: admin.firestore.FieldValue.arrayUnion(friend)
-        })
+        if (userQuerySnapshot.empty || friendQuerySnapshot.empty) {
+            console.error("User or friend not found.");
+            return { success: false, error: "User or friend not found" };
+        }
 
-        await friendDoc.update({
-            sentFriendRequests: admin.firestore.FieldValue.arrayRemove(userId), 
-            friends: admin.firestore.FieldValue.arrayUnion(userId)
-        })
+        const userDoc = userQuerySnapshot.docs[0];
+        const friendDoc = friendQuerySnapshot.docs[0];
+        const userData = userDoc.data();
+        const friendData = friendDoc.data();
+
+        const updatedUserFriendRequests = userData.friendRequests.filter(uid => uid !== friendId);
+        const updatedFriendSentRequests = friendData.sentFriendRequests.filter(uid => uid !== userId);
+        
+        const friendToAddToUser = {
+            uid: friendData.uid,
+            displayName: friendData.displayName || null,
+            phoneNumber: friendData.phoneNumber || null,
+            email: friendData.email || null,
+        };
+
+        const userToAddToFriend = {
+            uid: userData.uid,
+            displayName: userData.displayName || null,
+            phoneNumber: userData.phoneNumber || null,
+            email: userData.email || null,
+        };
+
+        await userDoc.ref.update({
+            friendRequests: updatedUserFriendRequests,
+            friends: admin.firestore.FieldValue.arrayUnion(friendToAddToUser),
+        });
+
+        await friendDoc.ref.update({
+            sentFriendRequests: updatedFriendSentRequests,
+            friends: admin.firestore.FieldValue.arrayUnion(userToAddToFriend),
+        });
+        console.log("Successfully accepted friend request!")
         return { success: true };
-
     } catch (error) {
         console.error('Error accepting friend request:', error);
         return { success: false, error: error.message };
@@ -128,25 +157,94 @@ const acceptRequest = async (userId, friend) => {
 
 const declineRequest = async (userId, friendId) => {
     try {
+        // console.log("User id in friend service:", userId)
+        // console.log("Friend id in friend service:", friendId)
+        const userQuerySnapshot = await userRef.where("uid", "==", userId).limit(1).get();
+        const friendQuerySnapshot = await userRef.where("uid", "==", friendId).limit(1).get();
 
-        console.log("User id in friend service:", userId)
-        console.log("Friend id in friend service:", friendId)
+        if (userQuerySnapshot.empty || friendQuerySnapshot.empty) {
+            console.error("User or friend not found.");
+            return { success: false, error: "User or friend not found" };
+        }
+        
+        const userDoc = userQuerySnapshot.docs[0];
+        const userFriendRequests = userDoc.data().friendRequests.filter(request => request.uid !== friendId);
+        await userDoc.ref.update({
+            friendRequests: userFriendRequests,
+        });
 
-        const userDoc = await userRef.doc(userId).get()
-        const friendDoc = await userRef.doc(friendId).get();
-
-        await userDoc.update({
-            friendRequests: admin.firestore.FieldValue.arrayRemove(friendId),
-        })
-
-        await friendDoc.update({
-            sentFriendRequests: admin.firestore.FieldValue.arrayRemove(userId), 
-        })
+        const friendDoc = friendQuerySnapshot.docs[0];
+        const friendSentRequests = friendDoc.data().sentFriendRequests.filter(request => request.uid !== userId);
+        await friendDoc.ref.update({
+            sentFriendRequests: friendSentRequests,
+        });
 
         console.log("Successfully declined friend request!")
         return { success: true };
     } catch (error) {
+        console.error('Error declining frined request', error)
+    }
+}
+
+const cancelRequest = async (userId, friendId) => {
+    try {
+        // console.log("User id in friend service:", userId)
+        // console.log("Friend id in friend service:", friendId)
+        const userQuerySnapshot = await userRef.where("uid", "==", userId).limit(1).get();
+        const friendQuerySnapshot = await userRef.where("uid", "==", friendId).limit(1).get();
+
+        if (userQuerySnapshot.empty || friendQuerySnapshot.empty) {
+            console.error("User or friend not found.");
+            return { success: false, error: "User or friend not found" };
+        }
         
+        const userDoc = userQuerySnapshot.docs[0];
+        const userFriendRequests = userDoc.data().sentFriendRequests.filter(request => request.uid !== friendId);
+        await userDoc.ref.update({
+            sentFriendRequests: userFriendRequests,
+        });
+
+        const friendDoc = friendQuerySnapshot.docs[0];
+        const friendSentRequests = friendDoc.data().friendRequests.filter(request => request.uid !== userId);
+        await friendDoc.ref.update({
+            friendRequests: friendSentRequests,
+        });
+
+        console.log("Successfully cancelled friend request!")
+        return { success: true };
+    } catch (error) {
+        console.error('Error declining frined request', error)
+    }
+}
+
+const deleteFriend = async (userId, friendId) => {
+    try {
+        // console.log("User id in friend service:", userId)
+        // console.log("Friend id in friend service:", friendId)
+        const userQuerySnapshot = await userRef.where("uid", "==", userId).limit(1).get();
+        const friendQuerySnapshot = await userRef.where("uid", "==", friendId).limit(1).get();
+
+        if (userQuerySnapshot.empty || friendQuerySnapshot.empty) {
+            console.error("User or friend not found.");
+            return { success: false, error: "User or friend not found" };
+        }
+        
+        const userDoc = userQuerySnapshot.docs[0];
+        const userFriendRequests = userDoc.data().sentFriendRequests.filter(request => request.uid !== friendId);
+        await userDoc.ref.update({
+            sentFriendRequests: userFriendRequests,
+        });
+
+        const friendDoc = friendQuerySnapshot.docs[0];
+        const friendSentRequests = friendDoc.data().friendRequests.filter(request => request.uid !== userId);
+        await friendDoc.ref.update({
+            friendRequests: friendSentRequests,
+        });
+
+        console.log("Successfully cancelled friend request!")
+        return { success: true };
+    } catch (error) {
+        console.error('Error declining frined request', error)
     }
 }
 
@@ -156,5 +254,7 @@ module.exports = {
     isFriendRequestSent,
     isFriendRequestReceived,
     acceptRequest,
-    declineRequest
+    declineRequest,
+    cancelRequest,
+    deleteFriend
 }

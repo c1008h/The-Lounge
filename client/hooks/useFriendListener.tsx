@@ -26,7 +26,7 @@ export const useFriendListener = (userId: string) => {
                 const friendsData: Friend[] = []
                 const friendRequestsData: Friend[] = [];
                 const pendingFriendsData: Friend[] = [];
-                
+
                 querySnapshot.forEach((doc) => {
                     const userData = doc.data();
                     if (userData.friends) {
@@ -51,7 +51,7 @@ export const useFriendListener = (userId: string) => {
         } finally {
             setLoading(false);
         }
-    }, [userId])
+    }, [userId, setFriends, setFriendRequests, setPendingFriends, setLoading, setError]);
 
     useEffect(() => {
         fetchFriends();
