@@ -12,7 +12,8 @@ export default function Home() {
     <div className="flex flex-col justify-center items-center min-h-screen py-20 bg-gradient-to-b from-blue-300 to-blue-500">
       <Head>
         <title>Chat with Friends</title>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50%'>🚀</text></svg>" />
+        {/* <link rel="icon" href="/favicon.ico" /> */}
       </Head>
       <div className="text-center">
         <h1 className="text-4xl font-bold text-white mb-6">Welcome to the Chatroom</h1>

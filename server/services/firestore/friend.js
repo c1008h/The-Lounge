@@ -104,9 +104,57 @@ const isFriendRequestReceived = async (userId, friendId) => {
     }
 }
 
+const acceptRequest = async (userId, friend) => {
+    try {
+        const userDoc = await userRef.doc(userId).get()
+        const friendDoc = await userRef.doc(friend.uid).get();
+
+        await userDoc.update({
+            friendRequests: admin.firestore.FieldValue.arrayRemove(friend.uid),
+            friends: admin.firestore.FieldValue.arrayUnion(friend)
+        })
+
+        await friendDoc.update({
+            sentFriendRequests: admin.firestore.FieldValue.arrayRemove(userId), 
+            friends: admin.firestore.FieldValue.arrayUnion(userId)
+        })
+        return { success: true };
+
+    } catch (error) {
+        console.error('Error accepting friend request:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+const declineRequest = async (userId, friendId) => {
+    try {
+
+        console.log("User id in friend service:", userId)
+        console.log("Friend id in friend service:", friendId)
+
+        const userDoc = await userRef.doc(userId).get()
+        const friendDoc = await userRef.doc(friendId).get();
+
+        await userDoc.update({
+            friendRequests: admin.firestore.FieldValue.arrayRemove(friendId),
+        })
+
+        await friendDoc.update({
+            sentFriendRequests: admin.firestore.FieldValue.arrayRemove(userId), 
+        })
+
+        console.log("Successfully declined friend request!")
+        return { success: true };
+    } catch (error) {
+        
+    }
+}
+
 module.exports = {
     searchFriend, 
     addFriend,
     isFriendRequestSent,
-    isFriendRequestReceived
+    isFriendRequestReceived,
+    acceptRequest,
+    declineRequest
 }

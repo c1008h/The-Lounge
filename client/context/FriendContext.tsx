@@ -9,6 +9,8 @@ interface FriendContextType {
     deleteAFriend: (userId: string, friendId: string) => void;
     isFriendFound: Friend | null;
     successfullyAdded: boolean | null;
+    acceptFriendsRequest: (userId: string, friend: Friend) => void;
+    declineFriendRequest: (userId: string, friendId: string) => void;
 }
 
 const FriendContext = createContext<FriendContextType | undefined>(undefined);
@@ -41,7 +43,15 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
     const deleteAFriend = useCallback((userId: string, friendId: string) => {
         setFriends(friends.filter((f) => f.uid !== friendId));
 
-        if (socket) socket.emit('deleteFriend', friendId);
+        if (socket) socket.emit('deleteFriend', userId, friendId);
+    }, [socket])
+
+    const acceptFriendsRequest = useCallback((userId: string, friend: Friend) => {
+        if (socket) socket.emit('acceptFriendRequest', userId, friend)
+    }, [socket])
+
+    const declineFriendRequest = useCallback((userId: string, friendId: string) => {
+        if (socket) socket.emit('declineFriendRequest', userId, friendId)
     }, [socket])
 
     useEffect(() => {
@@ -53,6 +63,7 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
         
         const handleFriendAdded = (result: boolean, userId: string, friend: Friend) => {
             // dispatch(selectSessionToState(sessionId))
+            console.log('friend uid:', friend.uid)
             const newFriend = {
                 uid: friend.uid, 
                 name: friend.name || null, 
@@ -71,19 +82,31 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
         }
         const handleRemoveFriend = (userId: string, friendId: string) => deleteAFriend(userId, friendId);
 
+        const handleAcceptFriendRequest = (userId: string, friend: Friend) => {
+            console.log("friend updated")
+        }
+
+        const handleDeclineFriendRequest = (userId: string, friendId: string) => {
+            console.log('friend request declined')
+        }
+
         socket.on('friendFound', handleFriendFound)
         socket.on('friendAdded', handleFriendAdded);
         socket.on('friendRemoved', handleRemoveFriend);
+        socket.on('acceptedFriendRequest', handleAcceptFriendRequest)
+        socket.on('declinedFriendRequest', handleDeclineFriendRequest)
 
         return () => {
             socket.off('friendFound', handleFriendFound)
             socket.off('friendAdded', handleFriendAdded);
             socket.off('friendRemoved', handleRemoveFriend);
+            socket.off('acceptedFriendRequest', handleAcceptFriendRequest)
+
         }
     }, [socket, dispatch, addAFriend, deleteAFriend])
   
     return (
-        <FriendContext.Provider value={{ friends, searchFriend, addAFriend, deleteAFriend, isFriendFound, successfullyAdded }}>
+        <FriendContext.Provider value={{ friends, searchFriend, addAFriend, deleteAFriend, isFriendFound, successfullyAdded, acceptFriendsRequest, declineFriendRequest }}>
             {children}
         </FriendContext.Provider>
     );

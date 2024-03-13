@@ -18,7 +18,13 @@ export default function FriendList({ userId }: FriendListProps) {
     const [searchMade, setSearchMade] = useState(false)
     const [isPending, setIsPending] = useState(false)
     const [searchInput, setSearchInput] = useState<string>('')
-    const { searchFriend, addAFriend, isFriendFound, successfullyAdded } = useFriend()
+    const { 
+        searchFriend,
+        addAFriend, 
+        isFriendFound, 
+        successfullyAdded,
+        declineFriendRequest
+    } = useFriend()
     const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
     const [friendStatus, setFriendStatus] = useState<'pending' | 'alreadyFriends' | 'requestedInbox' | 'notFound'>('notFound');
 
@@ -62,24 +68,66 @@ export default function FriendList({ userId }: FriendListProps) {
     const handleModalClose = () => setVisible(false)
 
     const renderIcon = () => {
+        console.log("Friend status:", friendStatus)
         switch (friendStatus) {
             case 'pending':
                 return <MdOutlinePending style={{ width: '25px', height: '25px' }} />;
             case 'alreadyFriends':
                 return <FaUserFriends style={{ width: '25px', height: '25px' }}/>
             case 'requestedInbox':
-                return <>
-                    <FaCheck style={{ width: '25px', height: '25px' }}/>
-                    <FaRegCircleXmark style={{ width: '25px', height: '25px' }}/>
-                </>
+                return <div className='flex flex-row justify-evenly'>
+                    <FaCheck 
+                        style={{ width: '25px', height: '25px' }}
+                    />
+                    <FaRegCircleXmark 
+                        style={{ width: '25px', height: '25px' }}
+                        onClick={() => declineFriendRequest(userId, isFriendFound.uid)}
+                    />
+                </div>
             default:
-                return <IoPersonAddSharp style={{ width: '25px', height: '25px' }} onClick={() => handleAddFriend()} />
+                return <IoPersonAddSharp 
+                            style={{ width: '25px', height: '25px' }} 
+                            onClick={() => handleAddFriend()} 
+                        />
         }
     }
 
     return (
-        <div>
-            <ButtonTemplate label='Add Friend' className='justify-center' onPress={handler}/>
+        <>
+        {/* // //</><div className='w-screen flex flex-col items-center justify-center space-y-4'> */}
+        <ButtonTemplate label='Add Friend' className='justify-center' onPress={handler}/>
+            <div className="section bg-gray-200 rounded p-4">
+                <h3 className="text-lg font-semibold">ALL FRIENDS - {friends.length}</h3>
+                {friends && friends.map(friend => (
+                    <div key={friend.uid}>
+                        <p>{friend.displayName ? friend.displayName : friend.email ? friend.email : friend.phoneNumber}</p>
+                    </div>
+                ))}
+            </div>
+            <div className="section bg-gray-200 p-4">
+                <h3 className="text-lg font-semibold">REQUEST - {friendRequests.length}</h3>
+                {friendRequests && friendRequests.map((requested => (
+                    <div key={requested.uid} className='flex flex-row justify-between'>
+                        <p>{requested.displayName ? requested.displayName : requested.email ? requested.email : requested.phoneNumber}</p>
+                        <div className='flex flex-row'>
+                            <FaCheck style={{ width: '25px', height: '25px' }}/>
+                            <FaRegCircleXmark 
+                                style={{ width: '25px', height: '25px' }}
+                                onClick={() => declineFriendRequest(userId, requested.uid)}
+                            />
+                        </div>
+                    </div>
+                )))}
+            </div>
+            <div className="section bg-gray-200 rounded p-4">
+                <h3 className="text-lg font-semibold">PENDING - {pendingFriends.length}</h3>
+                {pendingFriends && pendingFriends.map((pending => (
+                    <div key={pending.uid} className='flex flex-row justify-between'>
+                        <p>{pending.displayName ? pending.displayName : pending.email ? pending.email : pending.phoneNumber}</p>
+                        <MdOutlinePending style={{ width: '25px', height: '25px' }} />
+                    </div>
+                )))}
+            </div>
             {visible && (
                 <ModalTemplate
                     label="Add Friend"
@@ -119,6 +167,6 @@ export default function FriendList({ userId }: FriendListProps) {
                     <ButtonTemplate label='Search' className='justify-center' onPress={() => handleSearchFriend()}/>
                 </ModalTemplate> 
             )} 
-        </div>
+        </>
     )
 }

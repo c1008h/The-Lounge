@@ -74,6 +74,8 @@ export const useSessionsListener = (userId: string) => {
     }, [userId]);
 
     useEffect(() => {
+        if (!sessions || sessions.length === 0) return;
+        
         setSessionDetails(prevSessionDetails => {
             const updatedSessionDetails = prevSessionDetails.filter(session => sessions.includes(session.sessionId));
             return updatedSessionDetails;
