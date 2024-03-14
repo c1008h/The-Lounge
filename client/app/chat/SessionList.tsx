@@ -7,21 +7,24 @@ import { useParticipantsListener } from '@/hooks'
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
 
 interface SessionProps {
+    userId: string;
     sessionId: string;
     lastmessage: string;
     participants: string[];
     timestamp: Date | number | string;
 }
 interface SessionListProps {
-    sessions: SessionProps[]
+    sessions: SessionProps[],
+    handleAddNewSession: () => void;
+    userId: string;
 }
-export default function SessionList({ sessions }: SessionListProps) {
-    const { addASession, selectSession, deleteSession, leaveSession, currentSessionId } = useSession()
+export default function SessionList({ userId, sessions, handleAddNewSession }: SessionListProps) {
+    const { selectSession, deleteSession, leaveSession, currentSessionId } = useSession()
     const { participants } = useParticipantsListener(currentSessionId);
     const dispatch = useDispatch(); 
 
     useEffect(() => {
-        console.log('sessions:', sessions)
+        // console.log('sessions:', sessions)
 
         if (sessions.length > 0) {
             const firstSessionId = sessions[0].sessionId;
@@ -40,6 +43,7 @@ export default function SessionList({ sessions }: SessionListProps) {
         if (!sessionId) return
         deleteSession(sessionId, userId)
     }
+
     return (
         <>
             <ButtonTemplate label='NEW CHAT' className='m-4' onPress={() => handleAddNewSession()}/>

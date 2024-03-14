@@ -51,7 +51,7 @@ export default function Page() {
   }, [isAuthenticated, currentUser, userState, router])
 
   // console.log(`Participants in this chat session ${activeSessionID}: ${participants}`)
-  console.log("USER UID", uid)
+  // console.log("USER UID", uid)
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
   

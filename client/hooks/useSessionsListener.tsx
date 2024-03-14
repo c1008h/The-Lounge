@@ -61,7 +61,7 @@ export const useSessionsListener = (userId: string) => {
                         participants: sessionData[sessionId]?.participants || []
                     }
                 })
-                console.log("UPDATED SESSION DETAILS", updatedSessionDetails)
+                // console.log("UPDATED SESSION DETAILS", updatedSessionDetails)
                 setSessionDetails(updatedSessionDetails);
             } else {
                 setSessionDetails([]);

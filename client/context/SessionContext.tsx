@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
-import { onValue, ref, set, push } from 'firebase/database'; 
-import { sessionsRT } from '@/services/firebaseConfig';
 import { Session } from '@/interfaces/Session';
 import { useSocket } from '@/hooks/useSocket';
 interface SessionContextType {
@@ -12,7 +10,6 @@ interface SessionContextType {
     leaveSession: (sessionId: string) => void;
     selectSession: (sessionId: string) => void;
     currentSessionId: string;
-    // selectActiveSession: () => void;
 
 }
 
@@ -49,23 +46,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     }, [socket, sessions])
 
     const selectSession = useCallback((sessionId: string) => {
+        console.log('current sessnion in context:', sessionId)
         setCurrentSessionId(sessionId)
         dispatch(selectSessionToState(sessionId))
     }, [dispatch])
-
-    // const selectActiveSession = useCallback(() => {
-    //     if (sessions.length > 0) {
-    //         const firstSessionId = sessions[0].id;
-    //         console.log("first session ID in context to select:", firstSessionId)
-    //         setCurrentSessionId(firstSessionId);
-    //         dispatch(selectSessionToState(firstSessionId));
-    //         dispatch(initializeParticipants(participants))
-    //     }
-    // }, [sessions, dispatch, participants]);
-
-    // useEffect(() => {
-    //     selectActiveSession();
-    // }, [selectActiveSession]);
 
     useEffect(() => {
         if (!socket) return

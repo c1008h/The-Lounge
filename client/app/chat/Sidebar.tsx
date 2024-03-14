@@ -39,7 +39,7 @@ export default function Sidebar({
     //     return null; 
     // }
     
-    console.log('uid', userId)
+    // console.log('uid', userId)
 
     return (
         <div className="flex flex-col h-screen w-1/3"> 
@@ -71,6 +71,7 @@ export default function Sidebar({
                 <SessionList 
                     handleAddNewSession={handleAddNewSession}
                     sessions={sessions}
+                    userId={userId}
                 />
             )}    
         </div>
