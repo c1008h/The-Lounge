@@ -29,7 +29,8 @@ export default function FriendList({ userId }: FriendListProps) {
         isFriendFound, 
         successfullyAdded,
         acceptFriendsRequest,
-        declineFriendRequest
+        declineFriendRequest,
+        cancelFriendRequest
     } = useFriend()
     const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
     const [friendStatus, setFriendStatus] = useState<'pending' | 'alreadyFriends' | 'requestedInbox' | 'notFound'>('notFound');
@@ -166,7 +167,7 @@ export default function FriendList({ userId }: FriendListProps) {
                         <MdOutlinePending style={{ width: '25px', height: '25px' }} />
                         <FaRegCircleXmark 
                             style={{ width: '25px', height: '25px' }}
-                            // onClick={() => declineFriendRequest(userId, requested.uid)}
+                            onClick={() => cancelFriendRequest(userId, pending.uid)}
                         />
                     </div>
                 )))}

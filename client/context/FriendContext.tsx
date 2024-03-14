@@ -11,6 +11,7 @@ interface FriendContextType {
     successfullyAdded: boolean | null;
     acceptFriendsRequest: (userId: string, friendId: string) => void;
     declineFriendRequest: (userId: string, friendId: string) => void;
+    cancelFriendRequest: (userId: string, friendId: string) => void;
 }
 
 const FriendContext = createContext<FriendContextType | undefined>(undefined);
@@ -55,6 +56,10 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
         if (socket) socket.emit('declineFriendRequest', userId, friendId)
     }, [socket])
 
+    const cancelFriendRequest = useCallback((userId: string, friendId: string) => {
+        if (socket) socket.emit('cancelFriendRequest', userId, friendId)
+    }, [socket])
+
     useEffect(() => {
         if (!socket) return
 
@@ -90,24 +95,31 @@ export const FriendProvider = ({ children }: { children: ReactNode }) => {
         const handleDeclineFriendRequest = (result: boolean) => {
             if (result) console.log('friend request declined')
         }
+        const handleCancelFriendRequest = (result: boolean) => {
+            if (result) console.log('cancelled friend request')
+        }
 
         socket.on('friendFound', handleFriendFound)
         socket.on('friendAdded', handleFriendAdded);
         socket.on('friendRemoved', handleRemoveFriend);
         socket.on('acceptedFriendRequest', handleAcceptFriendRequest)
         socket.on('declinedFriendRequest', handleDeclineFriendRequest)
+        socket.on('canceledFriendRequest', handleCancelFriendRequest)
+
 
         return () => {
             socket.off('friendFound', handleFriendFound)
             socket.off('friendAdded', handleFriendAdded);
             socket.off('friendRemoved', handleRemoveFriend);
             socket.off('acceptedFriendRequest', handleAcceptFriendRequest)
+            socket.off('canceledFriendRequest', handleCancelFriendRequest)
+
 
         }
     }, [socket, dispatch, addAFriend, deleteAFriend])
   
     return (
-        <FriendContext.Provider value={{ friends, searchFriend, addAFriend, deleteAFriend, isFriendFound, successfullyAdded, acceptFriendsRequest, declineFriendRequest }}>
+        <FriendContext.Provider value={{ friends, searchFriend, addAFriend, deleteAFriend, isFriendFound, successfullyAdded, acceptFriendsRequest, declineFriendRequest, cancelFriendRequest }}>
             {children}
         </FriendContext.Provider>
     );

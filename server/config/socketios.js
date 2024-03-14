@@ -8,7 +8,8 @@ const {
     addFriend, 
     acceptRequest, 
     declineRequest,
-    deleteFriend 
+    deleteFriend,
+    cancelRequest 
 } = require('../services/firestore/friend')
 
 function setupSocket(server) {
@@ -76,10 +77,8 @@ function setupSocket(server) {
             console.log("successfully added:", result)
             socket.emit('friendAdded', result)
         })
-        socket.on('deleteFriend', async (userId, friend) => {
-            console.log(friend)
-            console.log('userId:', userId)
 
+        socket.on('deleteFriend', async (userId, friend) => {
             const result = await deleteFriend(userId, friend)
             console.log("successfully deleted:", result)
             socket.emit('friendDeleted', result)
@@ -93,6 +92,12 @@ function setupSocket(server) {
         socket.on('declineFriendRequest', async (userId, friend) => {
             const result = await declineRequest(userId, friend)
             socket.emit('friendRemoved', result)
+        })
+
+        socket.on('cancelFriendRequest', async (userId, friend) => {
+            const result = await cancelRequest(userId, friend)
+            console.log("successfully deleted:", result)
+            socket.emit('canceledFriendRequest', result)
         })
 
         socket.on('joinRoom', async ({ userId, roomId }) => {
