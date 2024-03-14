@@ -121,13 +121,10 @@ const acceptRequest = async (userId, friendId) => {
         const userData = userDoc.data();
         const friendData = friendDoc.data();
 
-
         console.log('Original friendRequests:', userData.friendRequests);
-console.log('Original sentFriendRequests:', friendData.sentFriendRequests);
+        console.log('Original sentFriendRequests:', friendData.sentFriendRequests);
 
-        const updatedUserFriendRequests = userData.friendRequests.filter(uid => uid !== friendId);
-        const updatedFriendSentRequests = friendData.sentFriendRequests.filter(uid => uid !== userId);
-        
+        const updatedUserFriendRequests = userData.friendRequests.filter(uid => uid.uid !== friendId);
         const friendToAddToUser = {
             uid: friendData.uid,
             displayName: friendData.displayName || null,
@@ -135,6 +132,12 @@ console.log('Original sentFriendRequests:', friendData.sentFriendRequests);
             email: friendData.email || null,
         };
 
+        await userDoc.ref.update({
+            friendRequests: updatedUserFriendRequests,
+            friends: admin.firestore.FieldValue.arrayUnion(friendToAddToUser),
+        });
+
+        const updatedFriendSentRequests = friendData.sentFriendRequests.filter(uid => uid.uid !== userId);
         const userToAddToFriend = {
             uid: userData.uid,
             displayName: userData.displayName || null,
@@ -142,16 +145,13 @@ console.log('Original sentFriendRequests:', friendData.sentFriendRequests);
             email: userData.email || null,
         };
 
-        await userDoc.ref.update({
-            friendRequests: updatedUserFriendRequests,
-            friends: admin.firestore.FieldValue.arrayUnion(friendToAddToUser),
-        });
-
         await friendDoc.ref.update({
             sentFriendRequests: updatedFriendSentRequests,
             friends: admin.firestore.FieldValue.arrayUnion(userToAddToFriend),
         });
+
         console.log("Successfully accepted friend request!")
+
         return { success: true };
     } catch (error) {
         console.error('Error accepting friend request:', error);
