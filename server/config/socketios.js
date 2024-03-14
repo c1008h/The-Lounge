@@ -3,7 +3,13 @@ const { createChatSession, deleteSessionFromRT, chatSessionExists } = require('.
 const { addChatSessionToUser, deleteSessionFromUser, userHasChatSession } = require('../services/firestore/user')
 const { addParticipant } = require('../services/realtimeDatabase/participants')
 const { saveMessage } = require('../services/realtimeDatabase/message')
-const { searchFriend, addFriend, acceptRequest, declineRequest } = require('../services/firestore/friend')
+const { 
+    searchFriend, 
+    addFriend, 
+    acceptRequest, 
+    declineRequest,
+    deleteFriend 
+} = require('../services/firestore/friend')
 
 function setupSocket(server) {
     const io = new Server(server, {
@@ -70,6 +76,14 @@ function setupSocket(server) {
             console.log("successfully added:", result)
             socket.emit('friendAdded', result)
         })
+        socket.on('deleteFriend', async (userId, friend) => {
+            console.log(friend)
+            console.log('userId:', userId)
+
+            const result = await deleteFriend(userId, friend)
+            console.log("successfully deleted:", result)
+            socket.emit('friendDeleted', result)
+        })
 
         socket.on('acceptFriendRequest', async (userId, friendId) => {
             const result = await acceptRequest(userId, friendId)
@@ -78,7 +92,7 @@ function setupSocket(server) {
 
         socket.on('declineFriendRequest', async (userId, friend) => {
             const result = await declineRequest(userId, friend)
-            socket.emit('declinedFriendRequest', result)
+            socket.emit('friendRemoved', result)
         })
 
         socket.on('joinRoom', async ({ userId, roomId }) => {

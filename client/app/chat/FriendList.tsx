@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useFriendListener } from '@/hooks'
 import { addFriend } from '@/features/friends/friendSlices'
 import { useFriend } from '@/context'
-import { ButtonTemplate, ModalTemplate, InputForm, BoxTemplate } from '@/components';
+import { ButtonTemplate, ModalTemplate, InputForm, BoxTemplate, DropDownMenu } from '@/components';
 import { IoPersonAddSharp } from "react-icons/io5";
 import { MdOutlinePending } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import { FaUserFriends } from "react-icons/fa";
 import { FaRegCircleXmark } from "react-icons/fa6";
+import { LiaUserEditSolid } from "react-icons/lia";
+import { FaRegMessage } from "react-icons/fa6";
 
 interface FriendListProps {
     userId: string;
@@ -15,12 +17,15 @@ interface FriendListProps {
 
 export default function FriendList({ userId }: FriendListProps) {
     const [visible, setVisible] = useState(false)
+    const [showDropdown, setShowDropdown] = useState<boolean>(false);
+    const buttonRef = useRef<HTMLDivElement>(null);
     const [searchMade, setSearchMade] = useState(false)
     const [isPending, setIsPending] = useState(false)
     const [searchInput, setSearchInput] = useState<string>('')
     const { 
         searchFriend,
         addAFriend, 
+        deleteAFriend,
         isFriendFound, 
         successfullyAdded,
         acceptFriendsRequest,
@@ -29,6 +34,17 @@ export default function FriendList({ userId }: FriendListProps) {
     const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
     const [friendStatus, setFriendStatus] = useState<'pending' | 'alreadyFriends' | 'requestedInbox' | 'notFound'>('notFound');
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+    
     // console.log("friend list:", friends)
 
     const handleSearchInputChange = (value: string) => setSearchInput(value)
@@ -101,8 +117,26 @@ export default function FriendList({ userId }: FriendListProps) {
             <div className="section bg-gray-200 rounded p-4">
                 <h3 className="text-lg font-semibold">ALL FRIENDS - {friends.length}</h3>
                 {friends && friends.map(friend => (
-                    <div key={friend.uid}>
+                    <div key={friend.uid} className='flex flex-row justify-between items-center'>
                         <p>{friend.displayName ? friend.displayName : friend.email ? friend.email : friend.phoneNumber}</p>
+                        <div className='flex flex-row items-center'>
+                            <FaRegMessage 
+                                style={{ width: '25px', height: '25px', marginLeft:'5px' }}
+                            />
+                            <LiaUserEditSolid 
+                                style={{ width: '25px', height: '25px', marginLeft:'5px'}}
+                                onClick={() => deleteAFriend(userId, friend.uid)}
+                            />
+                        </div>
+                        {/* {showDropdown && ( */}
+        {/* // <div className="absolute mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+        // <button onClick={() => handleEditFriendDisplayName(friend.uid)}>Edit</button>
+        //                         <button onClick={() => handleDeleteFriend(friend.uid)}>Delete</button>
+        //                         <button >Block</button>
+
+        //                     </div>
+        // <DropDownMenu />
+                        )} */}
                     </div>
                 ))}
             </div>

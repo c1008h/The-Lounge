@@ -121,6 +121,10 @@ const acceptRequest = async (userId, friendId) => {
         const userData = userDoc.data();
         const friendData = friendDoc.data();
 
+
+        console.log('Original friendRequests:', userData.friendRequests);
+console.log('Original sentFriendRequests:', friendData.sentFriendRequests);
+
         const updatedUserFriendRequests = userData.friendRequests.filter(uid => uid !== friendId);
         const updatedFriendSentRequests = friendData.sentFriendRequests.filter(uid => uid !== userId);
         
@@ -230,15 +234,15 @@ const deleteFriend = async (userId, friendId) => {
         }
         
         const userDoc = userQuerySnapshot.docs[0];
-        const userFriendRequests = userDoc.data().sentFriendRequests.filter(request => request.uid !== friendId);
+        const userFriends = userDoc.data().friends.filter(friendUid => friendUid !== friendId);
         await userDoc.ref.update({
-            sentFriendRequests: userFriendRequests,
+            friends: userFriends,
         });
 
         const friendDoc = friendQuerySnapshot.docs[0];
-        const friendSentRequests = friendDoc.data().friendRequests.filter(request => request.uid !== userId);
+        const friendsFriends = friendDoc.data().friends.filter(userId => userId !== userId);
         await friendDoc.ref.update({
-            friendRequests: friendSentRequests,
+            friends: friendsFriends,
         });
 
         console.log("Successfully cancelled friend request!")

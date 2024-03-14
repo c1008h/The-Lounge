@@ -13,3 +13,5 @@ export {default as Loading} from './Loading';
 export {default as Error} from './Error';
 
 export {default as ModalTemplate} from './modals/ModalTemplate'
+
+export {default as DropDownMenu} from './DropDownMenu'
