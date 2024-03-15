@@ -3,25 +3,30 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation';
 import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
 import { useSession } from '@/context';
+import { useAnonParticipantsListener } from '@/hooks';
 
 export default function Anon({ params }: { params: { slug: string } }) {
-  const [userId, setUserId] = useState<string | null>(null)
   const [showModal, setShowModal] = useState<boolean>(false)
-  const [displayName, setDisplayName] = useState<string>()
-  const { currentAnonSessionId } = useSession()
+  const [showError, setShowError] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
+  const [displayName, setDisplayName] = useState<string>()
+
+  const { currentAnonSessionId, addUserToAnon, tempUser } = useSession()
+  const { participants } = useAnonParticipantsListener(params.slug)
+
+  const router = useRouter()
 
   const [isSessionDeleted, setIsSessionDeleted] = useState(false);
   const [message, setMessage] = useState('');
   const [isLinkCopied, setIsLinkCopied] = useState(false);
 
-  console.log("this is param:", params.slug)
   useEffect(() => {
-    // const tempId = generateTempId();
-    // setUserId(tempId)
+
     setShowModal(true)
   }, [])
-
+  // console.log("Current anon session id", currentAnonSessionId)
+console.log('participants:', participants)
   // Function to delete the session
   const deleteSession = () => {
     // Perform the logic to delete the session here
@@ -44,10 +49,27 @@ export default function Anon({ params }: { params: { slug: string } }) {
     router.push('/');
     return null; // Render nothing while redirecting
   }
+  // const numberOfPeople = 5
 
-  // Mock data for the number of people in the chatroom
-  const numberOfPeople = 5; // Replace with actual count
-  // const sessionId = 1234
+  const numberOfPeople = participants.length; 
+
+  const handleAddUser = () => {
+    try {
+      setShowError(false)
+      setLoading(true)
+      addUserToAnon(displayName, params.slug)
+
+      if (tempUser) {
+        setShowModal(false)
+      } else {
+        setShowError(true)
+      }
+    } catch (error) {
+      console.error("Error adding user:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (showModal) {
     return (
@@ -59,7 +81,8 @@ export default function Anon({ params }: { params: { slug: string } }) {
         <div className='flex flex-row items-center'>
           <InputForm onValueChange={(value: string) => setDisplayName(value)} value={displayName} placeholder={'Enter your name'}/>
         </div>
-        {/* <ButtonTemplate label='Save' className='justify-center' onPress={() => handleSearchFriend()}/> */}
+        {showError && <p>Error saving. Try again!</p>}
+        <ButtonTemplate label='Save' className='justify-center' onPress={handleAddUser}/>
       </ModalTemplate>)
   }
 
@@ -72,7 +95,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
         </div>
         <div>
           {/* Instructions for sharing the chatroom link */}
-          Share this link with friends to chat: {`${window.location.origin}/chatroom/${currentAnonSessionId}`}
+          Share this link with friends to chat: {`${window.location.origin}/${params.slug}`}
           <button onClick={copyLinkToClipboard} className="ml-2 px-2 py-1 bg-gray-600 text-white rounded-md">{isLinkCopied ? 'Copied!' : 'Copy Link'}</button>
         </div>
       </div>

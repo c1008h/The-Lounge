@@ -24,12 +24,14 @@ function setupSocket(server) {
 
     io.on('connection', (socket) => {
         console.log('a user connected');
-        socket.on('createAnonSession', async (data) => {
-            // const chatSessionId = await createChatSession(data)
-            // await addChatSessionToUser(data, chatSessionId)
+        socket.on('createAnonSession', async () => {
             const sessionId = await createSessionAnon()
-
+            console.log('session created in server:', sessionId)
             socket.emit('anonSessionCreated', sessionId)
+        })
+        socket.on('addAnonToSession', async (user, sessionId) => {
+            const userId = await addToAnonSession(user, sessionId)
+            socket.emit('anonAddedToSession', userId)
         })
 
         socket.on('addSession', async (data) => {

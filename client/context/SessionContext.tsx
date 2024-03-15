@@ -3,6 +3,8 @@ import { useDispatch } from 'react-redux';
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
 import { Session } from '@/interfaces/Session';
 import { useSocket } from '@/hooks/useSocket';
+import { TempUserProps } from '@/interfaces/TempUser'
+
 interface SessionContextType {
     sessions: Session[];
     addASession: (uid: string) => void;
@@ -12,7 +14,8 @@ interface SessionContextType {
     currentSessionId: string;
     createAnonSession: () => void;
     currentAnonSessionId: string;
-
+    addUserToAnon: (user: string, sessionId: string) => void;
+    tempUser: TempUserProps;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -30,10 +33,16 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [currentSessionId, setCurrentSessionId] = useState<string>()
     const [currentAnonSessionId, setCurrentAnonSessionId] = useState<string>()
+    const [tempUser, setTempUser] = useState<TempUserProps>()
     const dispatch = useDispatch(); 
 
     const createAnonSession = useCallback(() => {
         if (socket) socket.emit('createAnonSession', 'create anon session for strangers')
+    }, [socket])
+
+    const addUserToAnon = useCallback((user: string, sessionId: string) => {
+        console.log("session id received context:", sessionId)
+        if (socket) socket.emit('addAnonToSession', user, sessionId)
     }, [socket])
 
     const addASession = useCallback((uid: string) => {
@@ -71,30 +80,32 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         }
         const handleRemoveSession = (sessionId: string, userId: string) => deleteSession(sessionId, userId);
 
-        const handleCreateAnonSession =(tempSession: string, tempUser: string) => {
-            console.log('handle creaing anon session')
+        const handleCreateAnonSession = (tempSession: string) => {
+            console.log('temp session', tempSession)
             setCurrentAnonSessionId(tempSession);
-
-            // return tempSession
         }
 
+        const handleAddToAnon = (tempUser: TempUserProps) => {
+            setTempUser(tempUser)
+        }
 
         socket.on('sessionAdded', handleSessionAdded);
         socket.on('sessionRemoved', handleRemoveSession);
         socket.on('leaveSession', handleRemoveSession)
         socket.on('anonSessionCreated', handleCreateAnonSession)
+        socket.on('anonAddedToSession', handleAddToAnon)
 
         return () => {
             socket.off('sessionAdded', handleSessionAdded);
             socket.off('sessionRemoved', handleRemoveSession);
             socket.off('sessionLeft', handleRemoveSession)
             socket.off('anonSessionCreated', handleCreateAnonSession)
-
+            socket.off('anonAddedToSession', handleAddToAnon)
         }
     }, [socket, dispatch, deleteSession, leaveSession])
   
     return (
-        <SessionContext.Provider value={{ sessions,  addASession, deleteSession, leaveSession, currentSessionId, currentAnonSessionId, selectSession, createAnonSession }}>
+        <SessionContext.Provider value={{ sessions,  addASession, deleteSession, leaveSession, currentSessionId, currentAnonSessionId, selectSession, createAnonSession, addUserToAnon, tempUser }}>
             {children}
         </SessionContext.Provider>
     );

@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 export default function Home() {
   const { createAnonSession, currentAnonSessionId } = useSession()
   const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState()
+  const [error, setError] = useState<string>()
 
   const router = useRouter()
 
@@ -23,6 +23,8 @@ export default function Home() {
 
       if (currentAnonSessionId) {
         router.push(`/${currentAnonSessionId}`);
+      } else {
+        setError("Session is wasn't created")
       }
 
     } catch (error) {

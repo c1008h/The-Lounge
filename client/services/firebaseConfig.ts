@@ -25,6 +25,7 @@ const database = getDatabase(app);
 const userCollection: CollectionReference = collection(db,'users')
 
 const sessionsRT: DatabaseReference = ref(database, '/sessions');
+const anonRT: DatabaseReference = ref(database, '/anon');
 
 export { 
   app, 
@@ -32,5 +33,6 @@ export {
   db, 
   userCollection, 
   database,
-  sessionsRT 
+  sessionsRT,
+  anonRT 
 }

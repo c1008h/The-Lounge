@@ -4,7 +4,7 @@ const { createUniqueId } = require('../../utils/tempIdGenerator')
 const createSessionAnon = async () => {
     try {
         const userId = createUniqueId()
-        
+
         const anonSession = anonSessionRef.push();
         const chatSessionId = anonSession.key;
         const timestamp = Date.now();
@@ -12,7 +12,7 @@ const createSessionAnon = async () => {
 
         const chatSessionData = {
             created: formattedDate,
-            participants: [userId]
+            // participants: [userId]
         }
 
         await anonSessionRef.once('value', snapshot => {
@@ -32,9 +32,13 @@ const createSessionAnon = async () => {
     }
 }
 
-const addToAnonSession = async (user, sessionId) => {
+const addToAnonSession = async (displayName, sessionId) => {
     try {
-        if (!sessionId || !user) throw error ("empty session id or empty participant")
+        const userId = createUniqueId()
+        console.log('display name:', displayName)
+        console.log('session id:', sessionId)
+
+        if (!sessionId || !displayName) throw error ("empty session id or empty participant")
         
         const chatSessionDataSnapshot = await anonSessionRef.child(sessionId).once('value');
         const chatSessionData = chatSessionDataSnapshot.val();
@@ -45,12 +49,13 @@ const addToAnonSession = async (user, sessionId) => {
             participants = chatSessionData.participants
         }
         
-        participants.push(user)
+        participants.push({ uid: userId, displayName: displayName })
 
-        await anonSessionRef.child(sessionId).update({ user });
+        await anonSessionRef.child(sessionId).update({ participants });
 
-        console.log('Participant added to chat session:', user);
+        console.log('Participant added to anon chat session:', userId);
 
+        return userId
     } catch (error) {
         console.error('Error adding participant to session:', error);
         throw error;
