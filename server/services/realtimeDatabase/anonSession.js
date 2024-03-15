@@ -1,9 +1,12 @@
-const { chatSessionsRef, realTimeDb  } = require('../../config/firebaseConfig')
+const { anonSessionRef, realTimeDb  } = require('../../config/firebaseConfig')
+const { createUniqueId } = require('../../utils/tempIdGenerator')
 
 const createSessionAnon = async () => {
     try {
-        const chatSessionRef = chatSessionsRef.push();
-        const chatSessionId = chatSessionRef.key;
+        const userId = createUniqueId()
+        
+        const anonSession = anonSessionRef.push();
+        const chatSessionId = anonSession.key;
         const timestamp = Date.now();
         const formattedDate = new Date(timestamp).toISOString();
 
@@ -12,14 +15,13 @@ const createSessionAnon = async () => {
             participants: [userId]
         }
 
-        await chatSessionsRef.once('value', snapshot => {
+        await anonSessionRef.once('value', snapshot => {
             if (!snapshot.exists()) {
-                chatSessionsRef.set({});
+                anonSessionRef.set({});
             }
         });
 
-        // await chatSessionRef.set(chatSessionData)
-        await chatSessionsRef.child(chatSessionId).set(chatSessionData);
+        await anonSessionRef.child(chatSessionId).set(chatSessionData);
 
         console.log('New chat session created with ID:', chatSessionId);
 
@@ -30,6 +32,36 @@ const createSessionAnon = async () => {
     }
 }
 
+const addToAnonSession = async (user, sessionId) => {
+    try {
+        if (!sessionId || !user) throw error ("empty session id or empty participant")
+        
+        const chatSessionDataSnapshot = await anonSessionRef.child(sessionId).once('value');
+        const chatSessionData = chatSessionDataSnapshot.val();
+
+        let participants = [];
+
+        if (chatSessionData && chatSessionData.participants) {
+            participants = chatSessionData.participants
+        }
+        
+        participants.push(user)
+
+        await anonSessionRef.child(sessionId).update({ user });
+
+        console.log('Participant added to chat session:', user);
+
+    } catch (error) {
+        console.error('Error adding participant to session:', error);
+        throw error;
+    }
+}
+
+const deleteSession = async (sessionId) => {
+
+}
+
 module.exports = {
-    createSessionAnon
+    createSessionAnon,
+    addToAnonSession
 };

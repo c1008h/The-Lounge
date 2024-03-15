@@ -11,6 +11,7 @@ const {
     deleteFriend,
     cancelRequest 
 } = require('../services/firestore/friend')
+const { createSessionAnon, addToAnonSession } = require('../services/realtimeDatabase/anonSession')
 
 function setupSocket(server) {
     const io = new Server(server, {
@@ -26,8 +27,9 @@ function setupSocket(server) {
         socket.on('createAnonSession', async (data) => {
             // const chatSessionId = await createChatSession(data)
             // await addChatSessionToUser(data, chatSessionId)
+            const sessionId = await createSessionAnon()
 
-            socket.emit('anonSessionCreated', chatSessionId)
+            socket.emit('anonSessionCreated', sessionId)
         })
 
         socket.on('addSession', async (data) => {

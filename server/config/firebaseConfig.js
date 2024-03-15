@@ -12,6 +12,7 @@ const db = admin.firestore();
 const realTimeDb = admin.database()
 
 const chatSessionsRef = realTimeDb.ref("sessions")
+const anonSessionRef = realTimeDb.ref('anon')
 
 const userRef = db.collection('users')
 
@@ -20,4 +21,5 @@ module.exports = {
   realTimeDb,
   chatSessionsRef,
   userRef,
+  anonSessionRef
 };

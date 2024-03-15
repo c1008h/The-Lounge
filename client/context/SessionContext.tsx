@@ -10,6 +10,8 @@ interface SessionContextType {
     leaveSession: (sessionId: string) => void;
     selectSession: (sessionId: string) => void;
     currentSessionId: string;
+    createAnonSession: () => void;
+    currentAnonSessionId: string;
 
 }
 
@@ -27,6 +29,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket()
     const [sessions, setSessions] = useState<Session[]>([]);
     const [currentSessionId, setCurrentSessionId] = useState<string>()
+    const [currentAnonSessionId, setCurrentAnonSessionId] = useState<string>()
     const dispatch = useDispatch(); 
 
     const createAnonSession = useCallback(() => {
@@ -70,7 +73,11 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
         const handleCreateAnonSession =(tempSession: string, tempUser: string) => {
             console.log('handle creaing anon session')
+            setCurrentAnonSessionId(tempSession);
+
+            // return tempSession
         }
+
 
         socket.on('sessionAdded', handleSessionAdded);
         socket.on('sessionRemoved', handleRemoveSession);
@@ -87,7 +94,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     }, [socket, dispatch, deleteSession, leaveSession])
   
     return (
-        <SessionContext.Provider value={{ sessions,  addASession, deleteSession, leaveSession, currentSessionId, selectSession }}>
+        <SessionContext.Provider value={{ sessions,  addASession, deleteSession, leaveSession, currentSessionId, currentAnonSessionId, selectSession, createAnonSession }}>
             {children}
         </SessionContext.Provider>
     );

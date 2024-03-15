@@ -1,19 +1,21 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation';
-import { generateTempId } from '@/utils/generateTempId';
 import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
+import { useSession } from '@/context';
 
-export default function Anon() {
+export default function Anon({ params }: { params: { slug: string } }) {
   const [userId, setUserId] = useState<string | null>(null)
   const [showModal, setShowModal] = useState<boolean>(false)
   const [displayName, setDisplayName] = useState<string>()
-  const router = useRouter();
-  // const { sessionId } = router.query;
+  const { currentAnonSessionId } = useSession()
+
+
   const [isSessionDeleted, setIsSessionDeleted] = useState(false);
   const [message, setMessage] = useState('');
   const [isLinkCopied, setIsLinkCopied] = useState(false);
 
+  console.log("this is param:", params.slug)
   useEffect(() => {
     // const tempId = generateTempId();
     // setUserId(tempId)
@@ -30,7 +32,7 @@ export default function Anon() {
 
   // Function to copy the share link to the clipboard
   const copyLinkToClipboard = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/${sessionId}`);
+    navigator.clipboard.writeText(`${window.location.origin}/${currentAnonSessionId}`);
     setIsLinkCopied(true);
     setTimeout(() => {
       setIsLinkCopied(false);
@@ -45,7 +47,7 @@ export default function Anon() {
 
   // Mock data for the number of people in the chatroom
   const numberOfPeople = 5; // Replace with actual count
-  const sessionId = 1234
+  // const sessionId = 1234
 
   if (showModal) {
     return (
@@ -57,7 +59,7 @@ export default function Anon() {
         <div className='flex flex-row items-center'>
           <InputForm onValueChange={(value: string) => setDisplayName(value)} value={displayName} placeholder={'Enter your name'}/>
         </div>
-        <ButtonTemplate label='Save' className='justify-center' onPress={() => handleSearchFriend()}/>
+        {/* <ButtonTemplate label='Save' className='justify-center' onPress={() => handleSearchFriend()}/> */}
       </ModalTemplate>)
   }
 
@@ -70,7 +72,7 @@ export default function Anon() {
         </div>
         <div>
           {/* Instructions for sharing the chatroom link */}
-          Share this link with friends to chat: {`${window.location.origin}/chatroom/${sessionId}`}
+          Share this link with friends to chat: {`${window.location.origin}/chatroom/${currentAnonSessionId}`}
           <button onClick={copyLinkToClipboard} className="ml-2 px-2 py-1 bg-gray-600 text-white rounded-md">{isLinkCopied ? 'Copied!' : 'Copy Link'}</button>
         </div>
       </div>
