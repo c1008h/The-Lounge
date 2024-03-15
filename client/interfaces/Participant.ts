@@ -1,4 +1,6 @@
 export interface Participant {
     uid: string;
-    name: string;
+    displayName?: string | null;
+    phoneNumber?: string | null;
+    email?: string | null;
 }

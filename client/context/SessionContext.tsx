@@ -29,6 +29,9 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const [currentSessionId, setCurrentSessionId] = useState<string>()
     const dispatch = useDispatch(); 
 
+    const createAnonSession = useCallback(() => {
+        if (socket) socket.emit('createAnonSession', 'create anon session for strangers')
+    }, [socket])
 
     const addASession = useCallback((uid: string) => {
         if (socket) socket.emit('addSession', uid);
@@ -65,14 +68,21 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         }
         const handleRemoveSession = (sessionId: string, userId: string) => deleteSession(sessionId, userId);
 
+        const handleCreateAnonSession =(tempSession: string, tempUser: string) => {
+            console.log('handle creaing anon session')
+        }
+
         socket.on('sessionAdded', handleSessionAdded);
         socket.on('sessionRemoved', handleRemoveSession);
         socket.on('leaveSession', handleRemoveSession)
+        socket.on('anonSessionCreated', handleCreateAnonSession)
 
         return () => {
             socket.off('sessionAdded', handleSessionAdded);
             socket.off('sessionRemoved', handleRemoveSession);
             socket.off('sessionLeft', handleRemoveSession)
+            socket.off('anonSessionCreated', handleCreateAnonSession)
+
         }
     }, [socket, dispatch, deleteSession, leaveSession])
   

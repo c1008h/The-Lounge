@@ -8,9 +8,10 @@ interface InputFormProps {
     className?: string;
     value: string;
     style?:  React.CSSProperties,
+    placeholder?: string;
 }
 
-export default function InputForm({style, value, onKeyDown, className, onValueChange, onChange}: InputFormProps) {
+export default function InputForm({style, value, placeholder='',onKeyDown, className, onValueChange, onChange}: InputFormProps) {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => onValueChange?.(event.target.value);
 
     return (
@@ -20,6 +21,7 @@ export default function InputForm({style, value, onKeyDown, className, onValueCh
             className={className}
             value={value}
             onKeyDown={onKeyDown}
+            placeholder={placeholder}
         />
     )
 }

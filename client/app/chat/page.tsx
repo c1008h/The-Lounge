@@ -5,12 +5,12 @@ import Image from "next/image";
 import { useDispatch, useSelector } from 'react-redux';
 import { CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, Error, InputForm, Loading } from '@/components'
 import { useParticipants, useSession, useChat } from '@/context';
-import { useSessionsListener, useParticipantsListener, useChatListener } from '@/hooks';
+import { useSessionsListener, useParticipantsListener, useChatListener, useFriendListener } from '@/hooks';
 import { useAuth } from '@/provider/AuthProvider';
 import Sidebar from './Sidebar';
 import { Participant } from '@/interfaces/Participant';
+import { Friend } from '@/interfaces/Friend';
 import { addAParticipant, backspaceParticipant, clearParticipants } from '@/features/participants/participantSlices';
-import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
 import { RootState } from '@/features/store';
 
 export default function Page() {
@@ -18,6 +18,7 @@ export default function Page() {
   const [uid, setUid] = useState<string>()
   const [addToChat, setAddToChat] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState('');
+  const [filteredFriends, setFilteredFriends] = useState<Friend[]>([])
 
   const dispatch = useDispatch(); 
   const router = useRouter();
@@ -28,8 +29,9 @@ export default function Page() {
   const userState = useSelector((state:RootState) => state.auth.user)
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
+  const { friends } = useFriendListener(currentUser.uid)
   const { addASession, deleteSession, leaveSession, currentSessionId } = useSession()
-  const { sessions, loading: sessionLoading, error: sessionError, sessionDetails } = useSessionsListener(uid)
+  const { sessions, loading: sessionLoading, error: sessionError, sessionDetails } = useSessionsListener(currentUser.uid)
 
   const { addParticipant, removeParticipant, removeSpecificParticipant } = useParticipants();
   const { participants, error: participantError } = useParticipantsListener(activeSessionID);
@@ -50,10 +52,23 @@ export default function Page() {
     }
   }, [isAuthenticated, currentUser, userState, router])
 
+  useEffect(() => {
+    if (inputValue.length > 2) {
+      const lowercasedInput = inputValue.toLowerCase().trim()
+      const filtered = friends.filter(friend =>
+        friend.displayName?.toLowerCase().includes(lowercasedInput) ||
+        friend.email?.toLowerCase().includes(lowercasedInput) ||
+        friend.phoneNumber?.includes(inputValue.trim()) ||
+        friend.uid.includes(inputValue.trim())
+      )
+      setFilteredFriends(filtered)
+    } else {
+      setFilteredFriends([])
+    }
+  }, [inputValue, friends])
+
   // console.log(`Participants in this chat session ${activeSessionID}: ${participants}`)
   // console.log("USER UID", uid)
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value);
   
   const handleNewChat = () => {
     if(!uid) return
@@ -62,7 +77,7 @@ export default function Page() {
     addASession(uid)
   }
 
-  const handleAddParticipant = () => {
+  const handleAddParticipant = (friend: Friend) => {
     const participantName = inputValue.trim();
     console.log("PART NAME:", participantName)
     const isAlreadyAdded = participantList.some(p => p.name === participantName);
@@ -74,7 +89,13 @@ export default function Page() {
     // WRITE LOGIC FOR IF USER INPUTS THE SAME PERSON
     // SHOULD EMPTY INPUT VALUE AND NOT DUPLICATE 
     if (participantName && activeSessionID) {
-      const newParticipant = { uid: '0DVpCJ7HYHMLRNT30wJd4YwV2oI3', name: participantName};
+      // const newParticipant = { uid: '0DVpCJ7HYHMLRNT30wJd4YwV2oI3', name: participantName};
+      const newParticipant = { 
+        uid: friend.uid, 
+        displayName: friend.displayName || null, 
+        email: friend.email || null, 
+        phoneNumber: friend.phoneNumber || null 
+      };
 
       dispatch(addAParticipant(newParticipant));
       addParticipant(activeSessionID, newParticipant);
@@ -100,14 +121,22 @@ export default function Page() {
       sendMessage(activeSessionID, messageData)
     }
   }
-
-  const handleSelectSession = (sessionId: string) => {
-    console.log("Session selected:", sessionId);
-    dispatch(selectSessionToState(sessionId))
-  }
-
-  if (sessionLoading) return <Loading message={'Loading sessions...'} />
+  const handleSelectFriend = (friend: Friend) => {
+    if (activeSessionID) {
+      const newParticipant = { 
+        uid: friend.uid, 
+        displayName: friend.displayName || null, 
+        email: friend.email || null, 
+        phoneNumber: friend.phoneNumber || null 
+      };
+      dispatch(addAParticipant(newParticipant));
+      addParticipant(activeSessionID, newParticipant);
+      setInputValue(''); // Clear input
+      setFilteredFriends([]); // Clear filtered friends list
+    }
+  };
   
+  if (sessionLoading) return <Loading message={'Loading sessions...'} />
   if (sessionError) {
     console.error(sessionError);
     return <Error message={'Error loading sessions. Please try again later.'} error={sessionError}/>
@@ -131,7 +160,7 @@ export default function Page() {
                 <label className='mr-2' htmlFor="participantInput">To: </label>
                 {participantList && participantList.map((participant: Participant, index: number) => (
                   <div key={index} className='participant-block mr-2 mb-2 bg-gray-300 text-gray-700 p-2 rounded-lg flex items-center'>
-                    {participant.name}
+                    <p>{participant.displayName ? participant.displayName : participant.email ? participant.email : participant.phoneNumber}</p>
                   </div>
                 ))}
                 <input 
@@ -148,6 +177,15 @@ export default function Page() {
                     }
                   }}
                 />
+                {filteredFriends.length > 0 && (
+                  <div className="absolute bg-white border mt-1 max-h-60 overflow-auto z-10">
+                    {filteredFriends.map(friend => (
+                      <div className='' key={friend.uid} onClick={() => handleSelectFriend(friend)}>
+                        <p>{friend.displayName ? friend.displayName : friend.email ? friend.email : friend.phoneNumber}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <ButtonTemplate
                   // onPress={() =>       
                   //   // addParticipant(activeSessionID, newParticipant);

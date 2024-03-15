@@ -4,5 +4,4 @@ export interface Friend {
     email?: string | null;
     phoneNumber?: string | null;
     displayName?: string | null;
-    pending?: boolean | null;
 }
