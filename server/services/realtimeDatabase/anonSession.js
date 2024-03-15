@@ -44,12 +44,13 @@ const addToAnonSession = async (displayName, sessionId) => {
         const chatSessionDataSnapshot = await anonSessionRef.child(sessionId).once('value');
         const chatSessionData = chatSessionDataSnapshot.val();
 
-        let participants = [];
+        // let participants = [];
 
-        if (chatSessionData && chatSessionData.participants) {
-            participants = chatSessionData.participants
-        }
-        
+        // if (chatSessionData && chatSessionData.participants) {
+        //     participants = chatSessionData.participants
+        // }
+        let participants = Array.isArray(chatSessionData?.participants) ? chatSessionData.participants : [];
+
         participants.push({ uid: userId, displayName: displayName })
 
         await anonSessionRef.child(sessionId).update({ participants });

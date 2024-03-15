@@ -120,8 +120,8 @@ export default function Anon({ params }: { params: { slug: string } }) {
         {/* Chat messages will be displayed here */}
         <div className="flex flex-col space-y-2">
           {messages?.map((message, index) => (
-            <div key={index} className={`flex ${message.sender === userId ? 'justify-end' : 'justify-start'}`}>
-              <div className={`py-2 px-4 rounded-lg max-w-3/4 ${message.sender === userId ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
+            <div key={index} className={`flex ${message.sender === tempUser ? 'justify-end' : 'justify-start'}`}>
+              <div className={`py-2 px-4 rounded-lg max-w-3/4 ${message.sender === tempUser ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
                 <p>{message.message}</p>
                 <p>{message.timestamp}</p>
               </div>
