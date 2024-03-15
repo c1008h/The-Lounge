@@ -1,5 +1,6 @@
-const { anonSessionRef, realTimeDb  } = require('../../config/firebaseConfig')
+const { anonSessionRef  } = require('../../config/firebaseConfig')
 const { createUniqueId } = require('../../utils/tempIdGenerator')
+const admin = require('firebase-admin');
 
 const createSessionAnon = async () => {
     try {
@@ -7,11 +8,11 @@ const createSessionAnon = async () => {
 
         const anonSession = anonSessionRef.push();
         const chatSessionId = anonSession.key;
-        const timestamp = Date.now();
-        const formattedDate = new Date(timestamp).toISOString();
+        // const timestamp = Date.now();
+        // const formattedDate = new Date(timestamp).toISOString();
 
         const chatSessionData = {
-            created: formattedDate,
+            created: admin.database.ServerValue.TIMESTAMP
             // participants: [userId]
         }
 
@@ -62,11 +63,44 @@ const addToAnonSession = async (displayName, sessionId) => {
     }
 }
 
+const saveAnonMessage = async (sessionId, msg) => {
+    try {
+        if (!msg || !sessionId) return
+
+        // console.log("message in saveMessage function:", msg)
+        // console.log("sessionId in saveMessage function:", sessionId)
+    
+        const anonRef = anonSessionRef.child(sessionId);
+        const chatSessionDataSnapshot = await anonRef.once('value');
+        const chatSessionData = chatSessionDataSnapshot.val();
+
+        let messages = chatSessionData && chatSessionData.messages ? [...chatSessionData.messages] : [];
+
+        // if (chatSessionData && chatSessionData.messages) {
+        //     messages = chatSessionData.messages;
+        // }
+
+        messages.push({
+            message: msg.message,
+            sender: msg.sender,
+            timestamp: admin.database.ServerValue.TIMESTAMP
+        });
+
+        await anonRef.update({ messages });
+
+        console.log('Message saved to Firebase chat session');
+    } catch (error) {
+        console.error('Error saving message to Firebase:', error);
+        throw error; 
+    }
+}
+
 const deleteSession = async (sessionId) => {
 
 }
 
 module.exports = {
     createSessionAnon,
-    addToAnonSession
+    addToAnonSession,
+    saveAnonMessage
 };

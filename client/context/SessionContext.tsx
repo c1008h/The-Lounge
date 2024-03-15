@@ -14,7 +14,7 @@ interface SessionContextType {
     currentSessionId: string;
     createAnonSession: () => void;
     currentAnonSessionId: string;
-    addUserToAnon: (user: string, sessionId: string) => void;
+    addUserToAnon: (user: string, sessionId: string) => TempUserProps;
     tempUser: TempUserProps;
 }
 
@@ -43,6 +43,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const addUserToAnon = useCallback((user: string, sessionId: string) => {
         console.log("session id received context:", sessionId)
         if (socket) socket.emit('addAnonToSession', user, sessionId)
+        return user
     }, [socket])
 
     const addASession = useCallback((uid: string) => {

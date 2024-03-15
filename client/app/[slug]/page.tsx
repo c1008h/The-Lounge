@@ -2,19 +2,23 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation';
 import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
-import { useSession } from '@/context';
-import { useAnonParticipantsListener } from '@/hooks';
+import { useSession, useChat } from '@/context';
+import { useAnonParticipantsListener, useAnonChatListener } from '@/hooks';
+import { TempUserProps } from '@/interfaces/TempUser';
 
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)
   const [showError, setShowError] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
 
-  const [displayName, setDisplayName] = useState<string>()
+  const [displayName, setDisplayName] = useState<string>('')
+  const [userId, setUserId] = useState<TempUserProps>()
 
   const { currentAnonSessionId, addUserToAnon, tempUser } = useSession()
-  const { participants } = useAnonParticipantsListener(params.slug)
+  const { sendAnonMessage } = useChat()
 
+  const { participants } = useAnonParticipantsListener(params.slug)
+  const { messages, error } = useAnonChatListener(params.slug)
   const router = useRouter()
 
   const [isSessionDeleted, setIsSessionDeleted] = useState(false);
@@ -22,12 +26,10 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const [isLinkCopied, setIsLinkCopied] = useState(false);
 
   useEffect(() => {
-
     setShowModal(true)
   }, [])
   // console.log("Current anon session id", currentAnonSessionId)
-console.log('participants:', participants)
-  // Function to delete the session
+
   const deleteSession = () => {
     // Perform the logic to delete the session here
     // For example, make an API call to delete the session from the database
@@ -35,7 +37,6 @@ console.log('participants:', participants)
     setIsSessionDeleted(true);
   };
 
-  // Function to copy the share link to the clipboard
   const copyLinkToClipboard = () => {
     navigator.clipboard.writeText(`${window.location.origin}/${currentAnonSessionId}`);
     setIsLinkCopied(true);
@@ -45,21 +46,19 @@ console.log('participants:', participants)
   };
 
   if (isSessionDeleted) {
-    // Redirect the user to another page after deleting the session
     router.push('/');
-    return null; // Render nothing while redirecting
+    return null; 
   }
-  // const numberOfPeople = 5
 
-  const numberOfPeople = participants.length; 
-
-  const handleAddUser = () => {
+  console.log('temp user:', tempUser)
+  const handleAddUser = async () => {
     try {
       setShowError(false)
       setLoading(true)
-      addUserToAnon(displayName, params.slug)
+      const user = addUserToAnon(displayName, params.slug)
+      setUserId(user)
 
-      if (tempUser) {
+      if (user) {
         setShowModal(false)
       } else {
         setShowError(true)
@@ -68,6 +67,24 @@ console.log('participants:', participants)
       console.error("Error adding user:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSendMessage =  () => {
+    if (!message || !tempUser) return
+    try {
+      const messageData = {
+        message: message.trim(),
+        sender: tempUser
+      }
+
+      sendAnonMessage(params.slug, messageData)
+    
+    } catch (error) {
+      console.error("Error sending message:", error)
+
+    } finally {
+      setMessage('')
     }
   }
 
@@ -91,7 +108,7 @@ console.log('participants:', participants)
       <div className="bg-gray-800 text-white p-4 flex justify-between flex-col">
         <div className='flex flex-row justify-between'>
           <div>Chat Room</div>
-          <div>{numberOfPeople} {numberOfPeople === 1 ? 'person' : 'people'} in the chat</div>
+          <div>{participants?.length} {participants?.length === 1 ? 'person' : 'people'} in the chat</div>
         </div>
         <div>
           {/* Instructions for sharing the chatroom link */}
@@ -102,12 +119,21 @@ console.log('participants:', participants)
       <div className="flex-1 overflow-y-auto p-4">
         {/* Chat messages will be displayed here */}
         <div className="flex flex-col space-y-2">
-          <div className="flex justify-end">
+          {messages?.map((message, index) => (
+            <div key={index} className={`flex ${message.sender === userId ? 'justify-end' : 'justify-start'}`}>
+              <div className={`py-2 px-4 rounded-lg max-w-3/4 ${message.sender === userId ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
+                <p>{message.message}</p>
+                <p>{message.timestamp}</p>
+              </div>
+            </div>
+          ))}
+          {/* <div className="flex justify-end">
             <div className="bg-blue-600 text-white py-2 px-4 rounded-lg max-w-3/4">Sample message 1</div>
           </div>
           <div className="flex justify-start">
             <div className="bg-gray-300 py-2 px-4 rounded-lg max-w-3/4">Sample message 2</div>
-          </div>
+          </div> */}
+
           {/* Add more chat messages as needed */}
         </div>
       </div>
@@ -115,7 +141,7 @@ console.log('participants:', participants)
           <input 
             type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your message..." 
             className="mr-2 px-4 py-2 border border-gray-300 rounded-md w-full" />
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md">Send</button>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => handleSendMessage()}>Send</button>
       
       </div>
     </div>

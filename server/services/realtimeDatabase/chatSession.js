@@ -1,14 +1,15 @@
 const { chatSessionsRef, realTimeDb  } = require('../../config/firebaseConfig')
+const admin = require('firebase-admin');
 
 const createChatSession = async (userId) => {
     try {
         const chatSessionRef = chatSessionsRef.push();
         const chatSessionId = chatSessionRef.key;
-        const timestamp = Date.now();
-        const formattedDate = new Date(timestamp).toISOString();
+        // const timestamp = Date.now();
+        // const formattedDate = new Date(timestamp).toISOString();
 
         const chatSessionData = {
-            created: formattedDate,
+            created: admin.database.ServerValue.TIMESTAMP,
             participants: [userId]
         }
 

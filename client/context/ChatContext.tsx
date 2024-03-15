@@ -5,6 +5,7 @@ import { useSocket } from '@/hooks/useSocket';
 interface ChatContextType {
   messages: Message[];
   sendMessage: (sessionId: string, message: Message) => void;
+  sendAnonMessage: (sessionId: string, message: Message) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -25,20 +26,29 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   }, [socket]);
 
+  const sendAnonMessage = useCallback((sessionId: string, newMessage: Message) => {
+    setMessages(prev => [...prev, newMessage]);
+    if (socket) socket.emit('sendAnonMessage', sessionId, newMessage);
+
+  }, [socket]);
+
   useEffect(() => {
     if (!socket) return;
 
     const handleSendMessage = (sessionId: string, msg: Message) => sendMessage(sessionId, msg)
+    const handleSendAnonMessage = (sessionId: string, msg: Message) => sendAnonMessage(sessionId, msg)
 
     socket.on('sentMessage', handleSendMessage)
+    socket.on('sentAnonMessage', handleSendAnonMessage)
 
     return () => {
       socket.off('sentMessage', handleSendMessage)
+      socket.off('sentAnonMessage', handleSendAnonMessage)
     }
-  }, [socket, sendMessage])
+  }, [socket, sendMessage, sendAnonMessage])
 
   return (
-    <ChatContext.Provider value={{ messages, sendMessage }}>
+    <ChatContext.Provider value={{ messages, sendMessage, sendAnonMessage }}>
       {children}
     </ChatContext.Provider>
   );
