@@ -37,14 +37,13 @@ export default function Anon({ params }: { params: { slug: string } }) {
       // const confirmationMessage = 'Are you sure you want to leave?';
       // event.returnValue = confirmationMessage;
       // return confirmationMessage;
-      removeAnon(tempUser, params.slug)
-
+      removeAnon(tempUser, params.slug, participants?.length)
     }
 
     window.addEventListener('beforeunload', handleLeave)
     return () => window.removeEventListener('beforeunload', handleLeave);
 
-  }, [removeAnon, tempUser, params.slug])
+  }, [removeAnon, tempUser, params.slug, participants?.length])
   // console.log("Current anon session id", currentAnonSessionId)
 
   const deleteSession = () => {

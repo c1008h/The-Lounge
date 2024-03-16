@@ -42,22 +42,19 @@ function setupSocket(server) {
             socket.emit('anonAddedToSession', userId, user );
         })
 
-        socket.on('disconnectAnon', async (userId, sessionId, participantCount) => {
+        socket.on('disconnectAnon', async (userId, sessionId, participant) => {
             console.log('user id:', userId)
             console.log('session id:', sessionId)
+            console.log('participant count:', participant)
 
-            await removeAnonFromSession(userId, sessionId);
+            if (participant === 1) {
+                await deleteSession(sessionId)
+                console.log(`Session ${sessionId} deleted due to no participants.`);
+            }
 
-            // if (session) {
-            //     session.participants.delete(userId);
-            //     if (session.participants.size === 0) {
-            //         await deleteSession(sessionId)
-            //         sessions.delete(sessionId);
-            //         console.log(`Session ${sessionId} deleted due to no participants.`);
-            //     }
-            // }
+            await removeAnonFromSession(userId, sessionId, participant);
+
             socket.leave(sessionId);
-
             console.log(`Removed user ${userId} from session ${sessionId}`);
         })
 

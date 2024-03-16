@@ -66,8 +66,8 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
         return true; // Placeholder
     };
 
-    const removeAnon = useCallback((userId: string, sessionId: string) => {
-        if (socket) socket.emit('disconnectAnon', userId, sessionId);
+    const removeAnon = useCallback((userId: string, sessionId: string, participant: number) => {
+        if (socket) socket.emit('disconnectAnon', userId, sessionId, participant);
         
     }, [socket])
 
