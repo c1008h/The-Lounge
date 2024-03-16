@@ -31,12 +31,6 @@ function setupSocket(server) {
         })
 
         socket.on('addAnonToSession', async (user, sessionId) => {
-            // const count = io.engine.clientsCount;
-            // const count2 = io.of(sessionId).sockets.size;
-
-            // console.log('count 1:', count)
-            // console.log('count 2:', count2)
-
             const userId = await addToAnonSession(user, sessionId)
 
             console.log(`User ${user} added to session ${sessionId} with user ID: ${userId}`);
@@ -45,12 +39,12 @@ function setupSocket(server) {
 
             io.in(sessionId).emit('anonAddedToSession', { userId, user, sessionId });
 
-            socket.emit('anonAddedToSession', { userId, user, sessionId });
+            socket.emit('anonAddedToSession', userId, user );
         })
 
-        socket.on('disconnectAnon', async (userId, sessionId) => {
-
-
+        socket.on('disconnectAnon', async (userId, sessionId, participantCount) => {
+            console.log('user id:', userId)
+            console.log('session id:', sessionId)
 
             await removeAnonFromSession(userId, sessionId);
 

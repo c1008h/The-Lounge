@@ -68,8 +68,8 @@ const saveAnonMessage = async (sessionId, msg) => {
     try {
         if (!msg || !sessionId) return
 
-        // console.log("message in saveMessage function:", msg)
-        // console.log("sessionId in saveMessage function:", sessionId)
+        console.log("message in saveMessage function:", msg)
+        console.log("sessionId in saveMessage function:", sessionId)
     
         const anonRef = anonSessionRef.child(sessionId);
         const chatSessionDataSnapshot = await anonRef.once('value');
@@ -77,13 +77,9 @@ const saveAnonMessage = async (sessionId, msg) => {
 
         let messages = chatSessionData && chatSessionData.messages ? [...chatSessionData.messages] : [];
 
-        // if (chatSessionData && chatSessionData.messages) {
-        //     messages = chatSessionData.messages;
-        // }
-
         messages.push({
             message: msg.message,
-            sender: msg.sender,
+            sender: msg.sender.uid,
             timestamp: admin.database.ServerValue.TIMESTAMP
         });
 

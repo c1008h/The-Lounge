@@ -87,8 +87,14 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
             setCurrentAnonSessionId(tempSession);
         }
 
-        const handleAddToAnon = (tempUser: TempUserProps) => {
-            setTempUser(tempUser)
+        const handleAddToAnon = (uid: string, displayName: string) => {
+            console.log('returned temp user id:', uid)
+            console.log('returned temp user display name:', displayName)
+
+            setTempUser({ 
+                displayName: displayName,
+                uid: uid
+            })
         }
 
         socket.on('sessionAdded', handleSessionAdded);
