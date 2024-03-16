@@ -116,7 +116,12 @@ export default function Anon({ params }: { params: { slug: string } }) {
           <InputForm onValueChange={(value: string) => setDisplayName(value)} value={displayName} placeholder={'Enter your name'}/>
         </div>
         {showError && <p>Error saving. Try again!</p>}
-        <ButtonTemplate label='Save' className='justify-center' onPress={handleAddUser}/>
+        <ButtonTemplate 
+          label='Save' 
+          className='justify-center' 
+          onPress={handleAddUser}
+          disabled={displayName.trim().length <= 3}
+        />
       </ModalTemplate>)
   }
 
