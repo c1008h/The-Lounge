@@ -52,7 +52,7 @@ function setupSocket(server) {
                 console.log(`Session ${sessionId} deleted due to no participants.`);
             }
 
-            await removeAnonFromSession(userId, sessionId, participant);
+            await removeAnonFromSession(userId, sessionId);
 
             socket.leave(sessionId);
             console.log(`Removed user ${userId} from session ${sessionId}`);
