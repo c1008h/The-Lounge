@@ -37,7 +37,7 @@ function setupSocket(server) {
 
             socket.join(sessionId);
 
-            io.in(sessionId).emit('anonAddedToSession', { userId, user, sessionId });
+            io.in(sessionId).emit('anonAddedToSession',  userId, user );
 
             socket.emit('anonAddedToSession', userId, user );
         })

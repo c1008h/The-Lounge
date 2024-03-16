@@ -6,6 +6,7 @@ interface ModalTemplateProps {
     visible?: boolean;
     onClose?: () => void;
     children?: React.ReactNode; 
+    canClose: boolean;
 }
 
 export default function ModalTemplate({
@@ -13,12 +14,12 @@ export default function ModalTemplate({
     label,
     onClose,
     children,
+    canClose = false
 }: ModalTemplateProps) {
     return (
         <Modal 
-            onClose={onClose}
+            onClose={canClose ? onClose : undefined}
             isOpen={visible} 
-            closeButton
         >
             <ModalContent>
                 <ModalHeader>{label}</ModalHeader>
