@@ -96,12 +96,38 @@ const saveAnonMessage = async (sessionId, msg) => {
     }
 }
 
-const deleteSession = async (sessionId) => {
+const removeAnonFromSession = async (userId, sessionId) => {
+    try {
+        const sessionSnapshot = await anonSessionRef.child(sessionId).once('value');
+        if (!sessionSnapshot.exists()) {
+            throw new Error('Session does not exist');
+        }
+        const sessionData = sessionSnapshot.val();
+        let participants = sessionData.participants || [];
+        participants = participants.filter(participant => participant.uid !== userId);
+        await anonSessionRef.child(sessionId).child('participants').set(participants);
 
+        console.log('Chat session deleted from real-time database.');
+    } catch (error) {
+        console.error('Error deleting chat session from real-time database:', error);
+        throw error
+    }
+}
+
+const deleteSession = async (sessionId) => {
+    try {
+        await anonSessionRef.child(sessionId).remove();
+        console.log('Chat session deleted from real-time database.');
+    } catch (error) {
+        console.error('Error deleting chat session from real-time database:', error);
+        throw error
+    }
 }
 
 module.exports = {
     createSessionAnon,
     addToAnonSession,
-    saveAnonMessage
+    saveAnonMessage,
+    removeAnonFromSession,
+    deleteSession
 };

@@ -6,6 +6,7 @@ interface ParticipantsContextType {
   addParticipant: (sessionId: string, participant: Participant) => void;
   removeParticipant: () => void;
   removeSpecificParticipant: (uid: string) => void;
+  removeAnon: (userId: string, sessionId: string) => void;
 }
 
 const ParticipantsContext = createContext<ParticipantsContextType | undefined>(undefined);
@@ -65,23 +66,31 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
         return true; // Placeholder
     };
 
+    const removeAnon = useCallback((userId: string, sessionId: string) => {
+        if (socket) socket.emit('disconnectAnon', userId, sessionId);
+        
+    }, [socket])
+
     useEffect(() => {
         if (!socket) return;
 
         const handleAddParticipant = (sessionId: string, participant: Participant) => addParticipant(sessionId, participant);
         const handleRemoveParticipant = (uid: string) => removeSpecificParticipant(uid);
+        const handleRemoveAnon = (userId: string, sessionId: string) => removeAnon(userId, sessionId)
 
         socket.on('participantAdded', handleAddParticipant);
         socket.on('participantRemoved', handleRemoveParticipant);
+        socket.on('anonRemoved', handleRemoveAnon);
 
         return () => {
             socket.off('participantAdded', handleAddParticipant);
             socket.off('participantRemoved', handleRemoveParticipant);
+            socket.off('anonRemoved', handleRemoveAnon);
         }
-    }, [socket, addParticipant, removeParticipant, removeSpecificParticipant])
+    }, [socket, addParticipant, removeParticipant, removeSpecificParticipant, removeAnon])
 
     return (
-        <ParticipantsContext.Provider value={{ participants, addParticipant, removeParticipant, removeSpecificParticipant }}>
+        <ParticipantsContext.Provider value={{ participants, addParticipant, removeParticipant, removeSpecificParticipant, removeAnon }}>
             {children}
         </ParticipantsContext.Provider>
     );
