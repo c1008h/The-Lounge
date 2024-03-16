@@ -83,6 +83,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
         const handleCreateAnonSession = (tempSession: string) => {
             console.log('temp session', tempSession)
+            dispatch(selectSessionToState(tempSession))
             setCurrentAnonSessionId(tempSession);
         }
 

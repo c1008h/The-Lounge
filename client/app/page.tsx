@@ -13,27 +13,15 @@ export default function Home() {
   const { createAnonSession, currentAnonSessionId } = useSession()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>()
-
   const router = useRouter()
 
-  const handleAnonSession = () => {
-    try {
-      setLoading(true)
-      createAnonSession()
-
-      if (currentAnonSessionId) {
-        router.push(`/${currentAnonSessionId}`);
-      } else {
-        setError("Session is wasn't created")
-      }
-
-    } catch (error) {
-      console.error("Error creating anon session:", error)
-      alert("Error creating anon room. Try again.")
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    if (currentAnonSessionId) {
+      router.push(`/${currentAnonSessionId}`);
     }
-  }
+  }, [currentAnonSessionId, router]);
+
+  const handleAnonSession = () => createAnonSession()
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen py-20 bg-gradient-to-b from-blue-300 to-blue-500">

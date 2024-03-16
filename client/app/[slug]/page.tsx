@@ -5,6 +5,8 @@ import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
 import { useSession, useChat, useParticipants } from '@/context';
 import { useAnonParticipantsListener, useAnonChatListener } from '@/hooks';
 import { TempUserProps } from '@/interfaces/TempUser';
+import { useSelector } from 'react-redux'
+import { selectSession } from '@/features/session/sessionSelectors'
 
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)

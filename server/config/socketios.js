@@ -3,14 +3,7 @@ const { createChatSession, deleteSessionFromRT, chatSessionExists } = require('.
 const { addChatSessionToUser, deleteSessionFromUser, userHasChatSession } = require('../services/firestore/user')
 const { addParticipant } = require('../services/realtimeDatabase/participants')
 const { saveMessage } = require('../services/realtimeDatabase/message')
-const { 
-    searchFriend, 
-    addFriend, 
-    acceptRequest, 
-    declineRequest,
-    deleteFriend,
-    cancelRequest 
-} = require('../services/firestore/friend')
+const { searchFriend, addFriend, acceptRequest, declineRequest, deleteFriend, cancelRequest } = require('../services/firestore/friend')
 const { createSessionAnon, addToAnonSession, saveAnonMessage, removeAnonFromSession, deleteSession } = require('../services/realtimeDatabase/anonSession')
 
 const sessions = new Map();
@@ -33,56 +26,50 @@ function setupSocket(server) {
             const sessionId = await createSessionAnon()
             console.log('session created in server:', sessionId)
 
-            sessions.set(sessionId);
-            console.log(`Session ${sessionId} initialized with empty participants set.`);
-
-            socket.join(sessionId)
+            socket.join(sessionId);
             socket.emit('anonSessionCreated', sessionId)
         })
 
         socket.on('addAnonToSession', async (user, sessionId) => {
+            // const count = io.engine.clientsCount;
+            // const count2 = io.of(sessionId).sockets.size;
+
+            // console.log('count 1:', count)
+            // console.log('count 2:', count2)
+
             const userId = await addToAnonSession(user, sessionId)
-            const session = sessions.get(sessionId);
-            sessions.forEach((value, key) => {
-                console.log(`Session ID: ${key}, Details:`, value);
-            });
-            console.log('session from add anon to session socket', session)
-            if (session) {
-                session.participants.add(userId);
-                // Store the mapping of socket ID to user/session details for easy lookup on disconnect
-                userSessions.set(socket.id, { userId, sessionId });
-                console.log(`Added user ${userId} (displayName: ${displayName}) to session ${sessionId}`);
-            }
-            socket.emit('anonAddedToSession', userId)
+
+            console.log(`User ${user} added to session ${sessionId} with user ID: ${userId}`);
+
+            socket.join(sessionId);
+
+            io.in(sessionId).emit('anonAddedToSession', { userId, user, sessionId });
+
+            socket.emit('anonAddedToSession', { userId, user, sessionId });
         })
 
         socket.on('disconnectAnon', async (userId, sessionId) => {
-            const userDetails = userSessions.get(sessionId);
-            console.log("user details:", userDetails)
-            if (userDetails) {
-                const { userId, sessionId } = userDetails;
-                await removeAnonFromSession(userId, sessionId);
-                // Update session tracking to remove the user
-                const session = sessions.get(sessionId);
-                if (session) {
-                    session.participants.delete(userId);
-                    if (session.participants.size === 0) {
-                        await deleteSession(sessionId)
-                        sessions.delete(sessionId);
-                        console.log(`Session ${sessionId} deleted due to no participants.`);
-                    }
-                }
-                userSessions.delete(socket.id);
-                
-                socket.leave(sessionId)
-                console.log(`Removed user ${userId} from session ${sessionId}`);
-            }
-            console.log('user disconnected');
+
+
+
+            await removeAnonFromSession(userId, sessionId);
+
+            // if (session) {
+            //     session.participants.delete(userId);
+            //     if (session.participants.size === 0) {
+            //         await deleteSession(sessionId)
+            //         sessions.delete(sessionId);
+            //         console.log(`Session ${sessionId} deleted due to no participants.`);
+            //     }
+            // }
+            socket.leave(sessionId);
+
+            console.log(`Removed user ${userId} from session ${sessionId}`);
         })
 
         socket.on('sendAnonMessage', async (sessionId, message) => {
             await saveAnonMessage(sessionId, message)
-            socket.emit('sentAnonMessage', "message saved")
+            io.to(sessionId).emit('newAnonMessage', message);
         })
 
         socket.on('addSession', async (data) => {
