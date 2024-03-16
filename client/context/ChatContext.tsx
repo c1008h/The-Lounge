@@ -27,6 +27,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   }, [socket]);
 
   const sendAnonMessage = useCallback((sessionId: string, newMessage: Message) => {
+    console.log('new message:', newMessage)
     setMessages(prev => [...prev, newMessage]);
     if (socket) socket.emit('sendAnonMessage', sessionId, newMessage);
 

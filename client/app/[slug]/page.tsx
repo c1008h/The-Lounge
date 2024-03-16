@@ -139,15 +139,15 @@ export default function Anon({ params }: { params: { slug: string } }) {
           {messages?.map((message, index) => {
             console.log("messageeeee:", message)
             console.log('temp user', tempUser)
-              const senderIsTempUser = message.sender === tempUser.uid;
+              const senderIsTempUser = message.sender === tempUser?.uid;
               const senderDisplayName = senderIsTempUser ? "" : participants.find(p => p.uid === message.sender)?.displayName || "Unknown";
               const formattedTimestamp = new Date(message.timestamp).toLocaleString();
 
             return (
-              <div key={index} className={`flex ${message.sender === tempUser.uid ? 'justify-end' : 'justify-start'}`}>
+              <div key={index} className={`flex ${message.sender === tempUser?.uid ? 'justify-end' : 'justify-start'}`}>
                 <div className="flex flex-col max-w-3/4">
                   <p className={`text-sm ${senderIsTempUser ? 'text-right' : 'text-left'}`}>{senderDisplayName}</p>
-                  <div className={`py-2 px-4 rounded-lg max-w-3/4 ${message.sender === tempUser ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
+                  <div className={`py-2 px-4 rounded-lg max-w-3/4 ${message.sender === tempUser?.uid ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
                     <p>{message.message}</p>
                     <p>{formattedTimestamp}</p>
                   </div>

@@ -94,13 +94,14 @@ const saveAnonMessage = async (sessionId, msg) => {
 
 const removeAnonFromSession = async (userId, sessionId) => {
     try {
+        console.log("userId", userId)
         const sessionSnapshot = await anonSessionRef.child(sessionId).once('value');
         if (!sessionSnapshot.exists()) {
             throw new Error('Session does not exist');
         }
         const sessionData = sessionSnapshot.val();
         let participants = sessionData.participants || [];
-        participants = participants.filter(participant => participant.uid !== userId);
+        participants = participants.filter(participant => participant.uid !== userId.uid);
         await anonSessionRef.child(sessionId).child('participants').set(participants);
 
         console.log('Chat session deleted from real-time database.');
