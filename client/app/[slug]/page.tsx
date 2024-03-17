@@ -33,6 +33,8 @@ export default function Anon({ params }: { params: { slug: string } }) {
   }, [])
 
   useEffect(() => {
+    if (!participants || !participants.length || !tempUser || !tempUser.uid) return
+    console.log("type of participant:", participants.length)
     const handleLeave = () => {
       // const confirmationMessage = 'Are you sure you want to leave?';
       // event.returnValue = confirmationMessage;
