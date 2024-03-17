@@ -10,6 +10,7 @@ export const useSocket = (): { socket: Socket | null } => {
 
   useEffect(() => {
     const newSocket = io(PORT);
+    console.log('port:', PORT)
     setSocket(newSocket);
 
     return () => {
