@@ -33,7 +33,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
   }, [])
 
   useEffect(() => {
-    const handleLeave = (event: BeforeUnloadEvent) => {
+    const handleLeave = () => {
       // const confirmationMessage = 'Are you sure you want to leave?';
       // event.returnValue = confirmationMessage;
       // return confirmationMessage;
