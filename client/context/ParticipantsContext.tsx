@@ -6,7 +6,7 @@ interface ParticipantsContextType {
   addParticipant: (sessionId: string, participant: Participant) => void;
   removeParticipant: () => void;
   removeSpecificParticipant: (uid: string) => void;
-  removeAnon: (userId: string, sessionId: string) => void;
+  removeAnon: (userId: string, sessionId: string, participant: number) => void;
 }
 
 const ParticipantsContext = createContext<ParticipantsContextType | undefined>(undefined);
