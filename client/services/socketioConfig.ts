@@ -2,7 +2,7 @@ import { io } from "socket.io-client"
 
 export default function socketClient() {
     if (typeof process.env.NEXT_PUBLIC_SOCKET_PORT === 'undefined') throw new Error('NEXT_PUBLIC_SOCKET_PORT is not defined');
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_PORT)
+    const socket = io(process.env.NEXT_PUBLIC_DEPLOY || process.env.NEXT_PUBLIC_SOCKET_PORT)
 
     socket.on("connect", () => {
         console.log("connected to socket server");
