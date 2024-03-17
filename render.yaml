@@ -1,11 +1,6 @@
 buildCommand: npm run build
 startCommand: npm start
 
-# Specify server files to deploy
 sourceFiles:
   - server/**/*
-
-# Exclude client files
-ignore:
-  - client/*
   - client/**/*
