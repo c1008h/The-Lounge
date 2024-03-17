@@ -55,7 +55,7 @@ const addToAnonSession = async (displayName, sessionId) => {
 
         await anonSessionRef.child(sessionId).update({ participants });
 
-        console.log('Participant added to anon chat session:', userId);
+        console.log(`Participant ${userId} added to anon chat session`);
 
         return userId
     } catch (error) {

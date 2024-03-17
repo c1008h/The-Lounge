@@ -44,7 +44,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     }, [socket])
 
     const addUserToAnon = useCallback((displayName: string, sessionId: string): Promise<TempUserProps> => {
-        console.log("session id received context:", sessionId)
+        // console.log("session id received context:", sessionId)
         // if (socket) socket.emit('addAnonToSession', user, sessionId)
         // return user
 

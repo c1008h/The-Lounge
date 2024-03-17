@@ -32,6 +32,14 @@ export default function Anon({ params }: { params: { slug: string } }) {
   }, [])
 
   useEffect(() => {
+    if (tempUser && tempUser.uid) {
+      console.log("temp user:", tempUser)
+      setUserId(tempUser)
+      setShowModal(false) 
+    } 
+  }, [tempUser])
+
+  useEffect(() => {
     if (!participants || !participants.length || !tempUser || !tempUser.uid) return
 
     let participantCount = participants.length
@@ -59,11 +67,14 @@ export default function Anon({ params }: { params: { slug: string } }) {
 
   const copyLinkToClipboard = () => {
     if (typeof navigator !== 'undefined') {
-      navigator.clipboard.writeText(`${window.location.origin}/${currentAnonSessionId}`);
-      setIsLinkCopied(true);
-      setTimeout(() => {
-        setIsLinkCopied(false);
-      }, 2000);
+      navigator.clipboard.writeText(`${window.location.origin}/${currentAnonSessionId}`)
+      .then(() => {
+        setIsLinkCopied(true);
+        setTimeout(() => {
+          setIsLinkCopied(false);
+        }, 2000);
+      })
+      .catch(err => console.error('Could not copy text: ', err));
     }
   };
 
@@ -78,9 +89,9 @@ export default function Anon({ params }: { params: { slug: string } }) {
       setLoading(true)
 
       const user = await addUserToAnon(displayName, params.slug)
-      console.log('userrrrrrr:', user)
+
       console.log("Resolved user:", user);
-      console.log('temp user:', tempUser?.uid)
+      console.log('temp user in page file:', tempUser)
 
       setUserId(user)
 
@@ -96,6 +107,8 @@ export default function Anon({ params }: { params: { slug: string } }) {
       setLoading(false)
     }
   }
+
+
 
   const handleSendMessage =  () => {
     if (!message || !tempUser) return
