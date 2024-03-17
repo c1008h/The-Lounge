@@ -76,7 +76,7 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
 
         const handleAddParticipant = (sessionId: string, participant: Participant) => addParticipant(sessionId, participant);
         const handleRemoveParticipant = (uid: string) => removeSpecificParticipant(uid);
-        const handleRemoveAnon = (userId: string, sessionId: string) => removeAnon(userId, sessionId)
+        const handleRemoveAnon = (userId: string, sessionId: string, participant: number) => removeAnon(userId, sessionId, participant)
 
         socket.on('participantAdded', handleAddParticipant);
         socket.on('participantRemoved', handleRemoveParticipant);
