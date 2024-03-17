@@ -6,7 +6,7 @@ interface ModalTemplateProps {
     visible?: boolean;
     onClose?: () => void;
     children?: React.ReactNode; 
-    canClose: boolean;
+    canClose?: boolean;
 }
 
 export default function ModalTemplate({

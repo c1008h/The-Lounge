@@ -2,6 +2,6 @@ export interface Message {
     id?: string;
     message: string;
     sender: string;
-    timestamp?: Date | string;
+    timestamp: Date | string;
 }
   

@@ -2,13 +2,14 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { useDispatch } from 'react-redux';
 import { Friend } from '@/interfaces/Friend';
 import { useSocket } from '@/hooks/useSocket';
+
 interface FriendContextType {
     friends: Friend[];
     searchFriend: (friendId: string) => void;
     addAFriend: (userId: string, friend: Friend) => void;
     deleteAFriend: (userId: string, friendId: string) => void;
-    isFriendFound: Friend | null;
-    successfullyAdded: boolean | null;
+    isFriendFound: Friend | undefined;
+    successfullyAdded?: boolean | null;
     acceptFriendsRequest: (userId: string, friendId: string) => void;
     declineFriendRequest: (userId: string, friendId: string) => void;
     cancelFriendRequest: (userId: string, friendId: string) => void;
@@ -27,7 +28,7 @@ export const useFriend = (): FriendContextType => {
 export const FriendProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket(); 
     const [friends, setFriends] = useState<Friend[]>([]);
-    const [isFriendFound, setIsFriendFound] = useState<Friend | null>(null)
+    const [isFriendFound, setIsFriendFound] = useState<Friend | undefined>(undefined);
     const [successfullyAdded, setSuccessfullyAdded] = useState<boolean | null>(null)
 
     const dispatch = useDispatch(); 

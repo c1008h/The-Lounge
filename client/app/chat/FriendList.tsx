@@ -96,11 +96,23 @@ export default function FriendList({ userId }: FriendListProps) {
                 return <div className='flex flex-row justify-evenly'>
                     <FaCheck 
                         style={{ width: '25px', height: '25px' }}
-                        onClick={() => acceptFriendsRequest(userId, isFriendFound.uid)}
+                        onClick={() => {
+                            if (isFriendFound) {
+                                acceptFriendsRequest(userId, isFriendFound.uid)
+                            } else {
+                                console.error("Friend not found.");
+                            }
+                        }}
                     />
                     <FaRegCircleXmark 
                         style={{ width: '25px', height: '25px' }}
-                        onClick={() => declineFriendRequest(userId, isFriendFound.uid)}
+                        onClick={() => {
+                            if (isFriendFound) {
+                                declineFriendRequest(userId, isFriendFound.uid)
+                            } else {
+                                console.error("Friend not found.");
+                            }
+                        }}
                     />
                 </div>
             default:

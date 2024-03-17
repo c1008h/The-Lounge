@@ -60,11 +60,11 @@ export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [socket, participants]);
 
-    const validateParticipant = (participant) => {
-        // Implement validation logic, e.g., check if the participant exists in the database
-        // This function can be async if it needs to fetch data
-        return true; // Placeholder
-    };
+    // const validateParticipant = (participant) => {
+    //     // Implement validation logic, e.g., check if the participant exists in the database
+    //     // This function can be async if it needs to fetch data
+    //     return true; // Placeholder
+    // };
 
     const removeAnon = useCallback((userId: string, sessionId: string, participant: number) => {
         if (socket) socket.emit('disconnectAnon', userId, sessionId, participant);

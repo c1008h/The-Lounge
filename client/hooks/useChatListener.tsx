@@ -7,7 +7,7 @@ export const useChatListener = (sessionId: string) => {
     const [messages, setMessages] = useState<Message[] | null>([]);
     const [error, setError] = useState<string | null>(null);
 
-    console.log("SESSION ID INSIDE MESSAGE LISTENER:", sessionId)
+    // console.log("SESSION ID INSIDE MESSAGE LISTENER:", sessionId)
     useEffect(() => {
         const messageRef: DatabaseReference = child(sessionsRT, `${sessionId}/messages`)
 
@@ -38,7 +38,7 @@ export const useAnonChatListener = (sessionId: string) => {
     const [messages, setMessages] = useState<Message[] | null>([]);
     const [error, setError] = useState<string | null>(null);
 
-    console.log("SESSION ID INSIDE MESSAGE LISTENER:", sessionId)
+    // console.log("SESSION ID INSIDE MESSAGE LISTENER:", sessionId)
     useEffect(() => {
         const messageRef: DatabaseReference = child(anonRT, `${sessionId}/messages`)
 

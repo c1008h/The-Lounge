@@ -7,7 +7,7 @@ import { useParticipantsListener } from '@/hooks'
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
 
 interface SessionProps {
-    userId: string;
+    // userId: string;
     sessionId: string;
     lastmessage: string;
     participants: string[];

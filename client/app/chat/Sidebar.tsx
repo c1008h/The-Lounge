@@ -24,12 +24,14 @@ interface SidebarProps {
     userId?: string;
     sessions: SessionProps[];
     handleAddNewSession: () => void;
+    currentSessionId?: string;
 }
 
 export default function Sidebar({
     sessions,
     handleAddNewSession,
-    userId
+    userId,
+    currentSessionId
 }: SidebarProps) {
     const [displayFriend, setDisplayFriend] = useState(false)
     const [displaySession, setDisplaySession] = useState(true)
@@ -65,13 +67,15 @@ export default function Sidebar({
                     )}
                 </div>
             </div>
+
             {displayFriend ? (
-                <FriendList userId={userId} />
+                <FriendList userId={userId!} />
             ): (
+            
                 <SessionList 
                     handleAddNewSession={handleAddNewSession}
                     sessions={sessions}
-                    userId={userId}
+                    userId={userId!}
                 />
             )}    
         </div>

@@ -5,8 +5,7 @@ import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
 import { useSession, useChat, useParticipants } from '@/context';
 import { useAnonParticipantsListener, useAnonChatListener } from '@/hooks';
 import { TempUserProps } from '@/interfaces/TempUser';
-import { useSelector } from 'react-redux'
-import { selectSession } from '@/features/session/sessionSelectors'
+import { formatTimestamp } from '@/utils/formatTimestamp'
 
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)
@@ -45,8 +44,8 @@ export default function Anon({ params }: { params: { slug: string } }) {
     }
 
     window.addEventListener('beforeunload', handleLeave)
-    return () => window.removeEventListener('beforeunload', handleLeave);
 
+    return () => window.removeEventListener('beforeunload', handleLeave);
   }, [removeAnon, tempUser, params.slug, participants])
 
   // console.log("Current anon session id", currentAnonSessionId)
@@ -59,11 +58,13 @@ export default function Anon({ params }: { params: { slug: string } }) {
   };
 
   const copyLinkToClipboard = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/${currentAnonSessionId}`);
-    setIsLinkCopied(true);
-    setTimeout(() => {
-      setIsLinkCopied(false);
-    }, 2000);
+    if (typeof navigator !== 'undefined') {
+      navigator.clipboard.writeText(`${window.location.origin}/${currentAnonSessionId}`);
+      setIsLinkCopied(true);
+      setTimeout(() => {
+        setIsLinkCopied(false);
+      }, 2000);
+    }
   };
 
   if (isSessionDeleted) {
@@ -75,7 +76,12 @@ export default function Anon({ params }: { params: { slug: string } }) {
     try {
       setShowError(false)
       setLoading(true)
-      const user = addUserToAnon(displayName, params.slug)
+
+      const user = await addUserToAnon(displayName, params.slug)
+      console.log('userrrrrrr:', user)
+      console.log("Resolved user:", user);
+      console.log('temp user:', tempUser?.uid)
+
       setUserId(user)
 
       if (user) {
@@ -85,6 +91,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
       }
     } catch (error) {
       console.error("Error adding user:", error)
+      setShowError(true);
     } finally {
       setLoading(false)
     }
@@ -95,7 +102,8 @@ export default function Anon({ params }: { params: { slug: string } }) {
     try {
       const messageData = {
         message: message.trim(),
-        sender: tempUser
+        sender: tempUser.uid,
+        timestamp: ''
       }
 
       sendAnonMessage(params.slug, messageData)
@@ -148,8 +156,9 @@ export default function Anon({ params }: { params: { slug: string } }) {
             console.log("messageeeee:", message)
             console.log('temp user', tempUser)
               const senderIsTempUser = message.sender === tempUser?.uid;
-              const senderDisplayName = senderIsTempUser ? "" : participants.find(p => p.uid === message.sender)?.displayName || "Unknown";
-              const formattedTimestamp = new Date(message.timestamp).toLocaleString();
+              const senderDisplayName = senderIsTempUser ? "" : participants?.find(p => p.uid === message.sender)?.displayName || "Unknown";
+              // const formattedTimestamp = message.timestamp.toDate().toLocaleString();
+              const formattedTimestamp = formatTimestamp(message.timestamp)
 
             return (
               <div key={index} className={`flex ${message.sender === tempUser?.uid ? 'justify-end' : 'justify-start'}`}>
@@ -167,8 +176,12 @@ export default function Anon({ params }: { params: { slug: string } }) {
       </div>
       <div className="bg-gray-800 p-4 flex justify-between items-center">
           <input 
-            type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your message..." 
-            className="mr-2 px-4 py-2 border border-gray-300 rounded-md w-full" />
+            type="text" 
+            value={message} 
+            onChange={(e) => setMessage(e.target.value)} 
+            placeholder="Type your message..." 
+            className="mr-2 px-4 py-2 border border-gray-300 rounded-md w-full" 
+          />
           <button className="bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => handleSendMessage()}>Send</button>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
 import { Session } from '@/interfaces/Session';
 import { useSocket } from '@/hooks/useSocket';
-import { TempUserProps } from '@/interfaces/TempUser'
+import { TempUserProps, defaultTempUser, AddAnonSessionResponse } from '@/interfaces/TempUser'
 
 interface SessionContextType {
     sessions: Session[];
@@ -14,8 +14,11 @@ interface SessionContextType {
     currentSessionId: string;
     createAnonSession: () => void;
     currentAnonSessionId: string;
-    addUserToAnon: (user: string, sessionId: string) => TempUserProps;
-    tempUser: TempUserProps;
+
+    addUserToAnon: (user: string, sessionId: string) => Promise<TempUserProps>;
+    // addUserToAnon: (user: string, sessionId: string) => TempUserProps;
+    
+    tempUser?: TempUserProps;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -31,19 +34,34 @@ export const useSession = (): SessionContextType => {
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket()
     const [sessions, setSessions] = useState<Session[]>([]);
-    const [currentSessionId, setCurrentSessionId] = useState<string>()
-    const [currentAnonSessionId, setCurrentAnonSessionId] = useState<string>()
-    const [tempUser, setTempUser] = useState<TempUserProps>()
+    const [currentSessionId, setCurrentSessionId] = useState<string>('')
+    const [currentAnonSessionId, setCurrentAnonSessionId] = useState<string>('')
+    const [tempUser, setTempUser] = useState<TempUserProps>(defaultTempUser)
     const dispatch = useDispatch(); 
 
     const createAnonSession = useCallback(() => {
         if (socket) socket.emit('createAnonSession', 'create anon session for strangers')
     }, [socket])
 
-    const addUserToAnon = useCallback((user: string, sessionId: string) => {
+    const addUserToAnon = useCallback((displayName: string, sessionId: string): Promise<TempUserProps> => {
         console.log("session id received context:", sessionId)
-        if (socket) socket.emit('addAnonToSession', user, sessionId)
-        return user
+        // if (socket) socket.emit('addAnonToSession', user, sessionId)
+        // return user
+
+        return new Promise((resolve, reject) => {
+            // Assuming socket.emit can accept a callback function for the server's response
+            if (socket) {
+                socket.emit('addAnonToSession', displayName, sessionId, (response:AddAnonSessionResponse) => {
+                    if (response.error) {
+                        reject(new Error('Failed to add anonymous user to session.'));
+                    } else {
+                        resolve({ displayName, uid: response.uid });
+                    }
+                });
+            } else {
+                reject(new Error('Socket not available.'));
+            }
+        });
     }, [socket])
 
     const addASession = useCallback((uid: string) => {
