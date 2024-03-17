@@ -2,7 +2,7 @@
 FROM node:14
 
 # Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
@@ -14,10 +14,10 @@ RUN npm install
 COPY . .
 
 # Make port 8080 available to the world outside this container
-EXPOSE 8080
+EXPOSE 3008
 
 # Define environment variable
 ENV NODE_ENV production
 
 # Run the app when the container launches
-CMD ["node", "server.js"]
+CMD ["node", "index.js"]

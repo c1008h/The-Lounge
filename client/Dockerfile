@@ -1,20 +1,23 @@
-# Use an official Node runtime as a parent image
-FROM node:14
+# Use an official Node runtime for building the application
+FROM node:18 AS build
 
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /
 
-# Copy the current directory contents into the container at /app
-COPY . .
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# Install any needed packages specified in package.json
+# Install dependencies
 RUN npm install
 
-# Build your Next.js app for production
+# Copy the rest of the application code
+COPY . .
+
+# Build the Next.js app
 RUN npm run build
 
-# Make port 3000 available to the world outside this container
+# Expose the port your Next.js app runs on
 EXPOSE 3000
 
-# Run the app when the container launches
+# Run the Next.js app
 CMD ["npm", "start"]
