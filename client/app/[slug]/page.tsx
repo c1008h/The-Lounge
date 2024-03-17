@@ -34,18 +34,21 @@ export default function Anon({ params }: { params: { slug: string } }) {
 
   useEffect(() => {
     if (!participants || !participants.length || !tempUser || !tempUser.uid) return
-    console.log("type of participant:", participants.length)
+
+    let participantCount = participants.length
+    let userId = tempUser.uid
     const handleLeave = () => {
       // const confirmationMessage = 'Are you sure you want to leave?';
       // event.returnValue = confirmationMessage;
       // return confirmationMessage;
-      removeAnon(tempUser.uid, params.slug, participants?.length)
+      removeAnon(tempUser.uid, params.slug, participantCount)
     }
 
     window.addEventListener('beforeunload', handleLeave)
     return () => window.removeEventListener('beforeunload', handleLeave);
 
-  }, [removeAnon, tempUser, params.slug, participants?.length])
+  }, [removeAnon, tempUser, params.slug, participants])
+
   // console.log("Current anon session id", currentAnonSessionId)
 
   const deleteSession = () => {
@@ -67,8 +70,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
     router.push('/');
     return null; 
   }
-
-  console.log('temp user:', tempUser)
+  
   const handleAddUser = async () => {
     try {
       setShowError(false)
