@@ -1,5 +1,5 @@
 buildCommand: npm run build
-startCommand: npm start
+startCommand: npm run dev
 
 sourceFiles:
   - server/**/*
