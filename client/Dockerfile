@@ -13,10 +13,10 @@ RUN npm install
 
 # Copy the rest of the application code
 # COPY app ./
-# COPY next.config.mjs ./
-# COPY tsconfig.json ./
-# COPY postcss.config.js ./
-# COPY tailwind.config.ts ./
+COPY next.config.mjs ./
+COPY tsconfig.json ./
+COPY postcss.config.js ./
+COPY tailwind.config.ts ./
 
 COPY . .
 

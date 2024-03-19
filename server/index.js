@@ -7,7 +7,7 @@ const routes = require('./routes')
 
 const app = express()
 const server = http.createServer(app)
-const PORT = process.env.PORT || 3008;
+const PORT = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 app.use(cors())

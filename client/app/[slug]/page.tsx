@@ -108,15 +108,12 @@ export default function Anon({ params }: { params: { slug: string } }) {
     }
   }
 
-
-
   const handleSendMessage =  () => {
     if (!message || !tempUser) return
     try {
       const messageData = {
         message: message.trim(),
-        sender: tempUser.uid,
-        timestamp: ''
+        sender: tempUser.uid
       }
 
       sendAnonMessage(params.slug, messageData)
