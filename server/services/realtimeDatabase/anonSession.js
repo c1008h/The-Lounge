@@ -79,9 +79,11 @@ const saveAnonMessage = async (sessionId, msg) => {
 
         messages.push({
             message: msg.message,
-            sender: msg.sender.uid,
+            sender: msg.sender,
             timestamp: admin.database.ServerValue.TIMESTAMP
         });
+
+        console.log('messages after push:', messages)
 
         await anonRef.update({ messages });
 

@@ -6,11 +6,14 @@ import { useSession, useChat, useParticipants } from '@/context';
 import { useAnonParticipantsListener, useAnonChatListener } from '@/hooks';
 import { TempUserProps } from '@/interfaces/TempUser';
 import { formatTimestamp } from '@/utils/formatTimestamp'
+import { storeUserSessionData, clearUserSessionData } from '@/utils/anonLocalStorage'
 
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)
   const [showError, setShowError] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
+
+  const [anonUser, setAnonUser] = useState<TempUserProps>()
 
   const [displayName, setDisplayName] = useState<string>('')
   const [userId, setUserId] = useState<TempUserProps>()
@@ -34,36 +37,46 @@ export default function Anon({ params }: { params: { slug: string } }) {
   useEffect(() => {
     if (tempUser && tempUser.uid) {
       console.log("temp user:", tempUser)
-      setUserId(tempUser)
+      storeUserSessionData(params.slug, { displayName: tempUser.displayName, uid: tempUser.uid})
+      setAnonUser({ displayName: tempUser.displayName, uid: tempUser.uid })
       setShowModal(false) 
     } 
   }, [tempUser])
 
   useEffect(() => {
-    if (!participants || !participants.length || !tempUser || !tempUser.uid) return
+    // Try to retrieve existing session data immediately when the component mounts
+    const existingSessionData = localStorage.getItem(params.slug);
+    if (existingSessionData) {
+      const { uid, displayName } = JSON.parse(existingSessionData);
+      if (uid && displayName) {
+        // If valid session data exists, use it to set the anonUser state and potentially skip the modal
+        setAnonUser({ uid, displayName });
+        setShowModal(false);
+      }
+    } else {
+      // If no session data exists, show the modal to allow new or returning users to enter their details
+      setShowModal(true);
+    }
+  }, [params.slug]);
 
+  useEffect(() => {
+    if (!participants || !participants.length || !anonUser || !anonUser.uid) return
     let participantCount = participants.length
-    let userId = tempUser.uid
+
     const handleLeave = () => {
       // const confirmationMessage = 'Are you sure you want to leave?';
       // event.returnValue = confirmationMessage;
       // return confirmationMessage;
-      removeAnon(tempUser.uid, params.slug, participantCount)
+      clearUserSessionData(params.slug)
+      removeAnon(anonUser.uid, params.slug, participantCount)
     }
 
     window.addEventListener('beforeunload', handleLeave)
 
     return () => window.removeEventListener('beforeunload', handleLeave);
-  }, [removeAnon, tempUser, params.slug, participants])
+  }, [removeAnon, anonUser, params.slug, participants])
 
   // console.log("Current anon session id", currentAnonSessionId)
-
-  const deleteSession = () => {
-    // Perform the logic to delete the session here
-    // For example, make an API call to delete the session from the database
-    // After deleting the session, you can redirect the user to another page or display a message confirming the deletion
-    setIsSessionDeleted(true);
-  };
 
   const copyLinkToClipboard = () => {
     if (typeof navigator !== 'undefined') {
@@ -109,11 +122,11 @@ export default function Anon({ params }: { params: { slug: string } }) {
   }
 
   const handleSendMessage =  () => {
-    if (!message || !tempUser) return
+    if (!message || !anonUser) return
     try {
       const messageData = {
         message: message.trim(),
-        sender: tempUser.uid
+        sender: anonUser
       }
 
       sendAnonMessage(params.slug, messageData)
@@ -164,19 +177,21 @@ export default function Anon({ params }: { params: { slug: string } }) {
         <div className="flex flex-col space-y-2">
           {messages?.map((message, index) => {
             console.log("messageeeee:", message)
-            console.log('temp user', tempUser)
-              const senderIsTempUser = message.sender === tempUser?.uid;
-              const senderDisplayName = senderIsTempUser ? "" : participants?.find(p => p.uid === message.sender)?.displayName || "Unknown";
+            console.log('temp user', anonUser)
+              const senderIsTempUser = message.sender.uid === anonUser?.uid;
+              const senderDisplayName = senderIsTempUser ? "" : participants.find(p => p.uid === (message.sender.uid || message.sender))?.displayName || "Unknown";
+
+              // const senderDisplayName = senderIsTempUser ? "" : participants?.find(p => p.uid === message.sender)?.displayName || "Unknown";
               // const formattedTimestamp = message.timestamp.toDate().toLocaleString();
               const formattedTimestamp = formatTimestamp(message.timestamp)
 
             return (
-              <div key={index} className={`flex ${message.sender === tempUser?.uid ? 'justify-end' : 'justify-start'}`}>
+              <div key={index} className={`flex ${message.sender.uid === anonUser?.uid ? 'justify-end' : 'justify-start'}`}>
                 <div className="flex flex-col max-w-3/4">
                   <p className={`text-sm ${senderIsTempUser ? 'text-right' : 'text-left'}`}>{senderDisplayName}</p>
-                  <div className={`py-2 px-4 rounded-lg max-w-3/4 ${message.sender === tempUser?.uid ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
+                  <div className={`py-2 px-4 rounded-lg max-w-3/4 ${message.sender.uid === anonUser?.uid ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
                     <p>{message.message}</p>
-                    <p>{formattedTimestamp}</p>
+                    {/* <p>{formattedTimestamp}</p> */}
                   </div>
                 </div>
               </div>
