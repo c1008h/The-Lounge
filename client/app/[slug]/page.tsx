@@ -41,7 +41,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
   }, [])
 
   useEffect(() => {
-    if (tempUser && tempUser.uid) {
+    if (tempUser && tempUser) {
       console.log("temp user:", tempUser)
       storeUserSessionData(params.slug, { displayName: tempUser.displayName, uid: tempUser.uid})
       setAnonUser({ displayName: tempUser.displayName, uid: tempUser.uid })
@@ -78,8 +78,6 @@ export default function Anon({ params }: { params: { slug: string } }) {
 
     return () => window.removeEventListener('beforeunload', handleLeave);
   }, [removeAnon, anonUser, params.slug, participants])
-
-  // console.log("Current anon session id", currentAnonSessionId)
 
   const copyLinkToClipboard = () => {
     if (typeof navigator !== 'undefined') {
@@ -189,7 +187,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
               <div 
                 key={index} 
                 className={`flex ${message.sender.uid === anonUser?.uid ? 'justify-end' : 'justify-start'}`}
-                ref={isLastMessage ? messagesEndRef : null} // Attach the ref here
+                ref={isLastMessage ? messagesEndRef : null} 
               >
                 <div className="flex flex-col max-w-3/4">
                   <p className={`text-sm ${senderIsTempUser ? 'text-right' : 'text-left'}`}>{senderDisplayName}</p>
