@@ -217,23 +217,31 @@ export default function Page() {
           
           {/* TEXT BOX SHOULD BE BOTTOM OF SCREEN */}
           <div className="w-2/3 flex fixed bottom-0 p-4 bg-white">
-            <FormTemplate 
-              className={'bg-white shadow rounded-lg overflow-hidden'}
-              onValueChange={(value: string) => setMessage(value)}
-              value={message}
-            />
-            <ButtonTemplate 
-              className=""
-              label={"Send"}
-              onPress={() => {
-                if (message.trim()) {
-                  handleSendMessage()
-                  setMessage('')
-                } else {
-                  console.error("message is empty")
-                }
+            <form 
+              className="flex w-full" 
+              onSubmit={(e) => {
+                e.preventDefault(); 
+                handleSendMessage();
               }}
-            />
+            >
+              <FormTemplate 
+                className={'bg-white shadow rounded-lg overflow-hidden'}
+                onValueChange={(value: string) => setMessage(value)}
+                value={message}
+              />
+              <ButtonTemplate 
+                className=""
+                label={"Send"}
+                onPress={() => {
+                  if (message.trim()) {
+                    handleSendMessage()
+                    setMessage('')
+                  } else {
+                    console.error("message is empty")
+                  }
+                }}
+              />
+            </form>
           </div>
         </div>
       </div>

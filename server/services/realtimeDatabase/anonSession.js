@@ -98,15 +98,25 @@ const removeAnonFromSession = async (userId, sessionId) => {
     try {
         console.log("userId", userId)
         const sessionSnapshot = await anonSessionRef.child(sessionId).once('value');
-        if (!sessionSnapshot.exists()) {
-            throw new Error('Session does not exist');
-        }
-        const sessionData = sessionSnapshot.val();
-        let participants = sessionData.participants || [];
-        participants = participants.filter(participant => participant.uid !== userId.uid);
-        await anonSessionRef.child(sessionId).child('participants').set(participants);
+        if (sessionSnapshot.exists()) {
+            console.log('session does exist');
 
-        console.log('Chat session deleted from real-time database.');
+            const sessionData = sessionSnapshot.val();
+            console.log('session data:', sessionData)
+
+            let participants = sessionData.participants || [];
+            participants = participants.filter(participant => participant.uid !== userId.uid);
+
+            if (participants.length > 0) {
+                await anonSessionRef.child(sessionId).child('participants').set(participants);
+                console.log('remove participant')
+            } else {
+                await anonSessionRef.child(sessionId).remove();
+                console.log('delete session forever')
+            }
+        } else {
+            console.log('session not found')
+        }
     } catch (error) {
         console.error('Error deleting chat session from real-time database:', error);
         throw error
@@ -115,11 +125,20 @@ const removeAnonFromSession = async (userId, sessionId) => {
 
 const deleteSession = async (sessionId) => {
     try {
+        const sessionSnapshot = await anonSessionRef.child(sessionId).once('value');
+        if (!sessionSnapshot.exists()) {
+          console.log(`Session ${sessionId} does not exist, likely already deleted.`);
+          return; 
+        }
+        
         await anonSessionRef.child(sessionId).remove();
-        console.log('Chat session deleted from real-time database.');
+       
     } catch (error) {
-        console.error('Error deleting chat session from real-time database:', error);
-        throw error
+        if (error.message === "Session does not exist") {
+            console.log(`Attempted to remove user from a non-existent session: ${sessionId}`);
+        } else {
+            throw error;
+        }
     }
 }
 
