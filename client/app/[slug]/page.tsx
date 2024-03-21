@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { useRouter } from 'next/navigation';
 import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
 import { useSession, useChat, useParticipants } from '@/context';
@@ -14,9 +14,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const [loading, setLoading] = useState<boolean>(false)
 
   const [anonUser, setAnonUser] = useState<TempUserProps>()
-
   const [displayName, setDisplayName] = useState<string>('')
-  const [userId, setUserId] = useState<TempUserProps>()
 
   const { currentAnonSessionId, addUserToAnon, tempUser } = useSession()
   const { sendAnonMessage } = useChat()
@@ -29,6 +27,14 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const [isSessionDeleted, setIsSessionDeleted] = useState(false);
   const [message, setMessage] = useState('');
   const [isLinkCopied, setIsLinkCopied] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
+  }, [messages]);
 
   useEffect(() => {
     setShowModal(true)
@@ -44,17 +50,14 @@ export default function Anon({ params }: { params: { slug: string } }) {
   }, [tempUser])
 
   useEffect(() => {
-    // Try to retrieve existing session data immediately when the component mounts
     const existingSessionData = localStorage.getItem(params.slug);
     if (existingSessionData) {
       const { uid, displayName } = JSON.parse(existingSessionData);
       if (uid && displayName) {
-        // If valid session data exists, use it to set the anonUser state and potentially skip the modal
         setAnonUser({ uid, displayName });
         setShowModal(false);
       }
     } else {
-      // If no session data exists, show the modal to allow new or returning users to enter their details
       setShowModal(true);
     }
   }, [params.slug]);
@@ -105,8 +108,6 @@ export default function Anon({ params }: { params: { slug: string } }) {
 
       console.log("Resolved user:", user);
       console.log('temp user in page file:', tempUser)
-
-      setUserId(user)
 
       if (user) {
         setShowModal(false)
@@ -176,17 +177,20 @@ export default function Anon({ params }: { params: { slug: string } }) {
         {/* Chat messages will be displayed here */}
         <div className="flex flex-col space-y-2">
           {messages?.map((message, index) => {
-            console.log("messageeeee:", message)
-            console.log('temp user', anonUser)
-              const senderIsTempUser = message.sender.uid === anonUser?.uid;
-              const senderDisplayName = senderIsTempUser ? "" : participants.find(p => p.uid === (message.sender.uid || message.sender))?.displayName || "Unknown";
+            const senderIsTempUser = message.sender.uid === anonUser?.uid;
+            const senderDisplayName = senderIsTempUser ? "" : participants.find(p => p.uid === (message.sender.uid || message.sender))?.displayName || "Unknown";
 
-              // const senderDisplayName = senderIsTempUser ? "" : participants?.find(p => p.uid === message.sender)?.displayName || "Unknown";
-              // const formattedTimestamp = message.timestamp.toDate().toLocaleString();
-              const formattedTimestamp = formatTimestamp(message.timestamp)
+            // const senderDisplayName = senderIsTempUser ? "" : participants?.find(p => p.uid === message.sender)?.displayName || "Unknown";
+            // const formattedTimestamp = message.timestamp.toDate().toLocaleString();
+            const formattedTimestamp = formatTimestamp(message.timestamp)
+            const isLastMessage = index === messages.length - 1;
 
             return (
-              <div key={index} className={`flex ${message.sender.uid === anonUser?.uid ? 'justify-end' : 'justify-start'}`}>
+              <div 
+                key={index} 
+                className={`flex ${message.sender.uid === anonUser?.uid ? 'justify-end' : 'justify-start'}`}
+                ref={isLastMessage ? messagesEndRef : null} // Attach the ref here
+              >
                 <div className="flex flex-col max-w-3/4">
                   <p className={`text-sm ${senderIsTempUser ? 'text-right' : 'text-left'}`}>{senderDisplayName}</p>
                   <div className={`py-2 px-4 rounded-lg max-w-3/4 ${message.sender.uid === anonUser?.uid ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
@@ -200,6 +204,13 @@ export default function Anon({ params }: { params: { slug: string } }) {
         </div>
       </div>
       <div className="bg-gray-800 p-4 flex justify-between items-center">
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault(); 
+            handleSendMessage();
+          }}
+          className="flex w-full"
+        >
           <input 
             type="text" 
             value={message} 
@@ -207,7 +218,8 @@ export default function Anon({ params }: { params: { slug: string } }) {
             placeholder="Type your message..." 
             className="mr-2 px-4 py-2 border border-gray-300 rounded-md w-full" 
           />
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => handleSendMessage()}>Send</button>
+          <button type='submit' className="bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => handleSendMessage()}>Send</button>
+        </form>
       </div>
     </div>
   )
