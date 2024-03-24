@@ -27,11 +27,13 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const storedDisplayName = useSelector((state: RootState) => state.anon.displayName)
   const storedTempUid = useSelector((state: RootState) => state.anon.uid)
   const storedToken = useSelector((state: RootState) => state.anon.accessToken)
+  const participantCount = useSelector((state: RootState) => state.anon.participantsActive)
 
   const { sendAnonMessage, messages } = useAnonMessage()
   const { removeAnon } = useParticipants()
 
-  const { participants } = useAnonParticipantsListener(params.slug)
+  console.log('participant count:', participantCount)
+  // const { participants } = useAnonParticipantsListener(params.slug)
   // const { messages } = useAnonChatListener(params.slug)
   const router = useRouter()
 
@@ -75,8 +77,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
   // }, [params.slug]);
 
   useEffect(() => {
-    if (!participants || !participants.length || !anonUser || !anonUser.uid) return
-    let participantCount = participants.length
+    if (participantCount == 0 || !anonUser || !anonUser.uid) return
 
     const handleLeave = () => {
       // const confirmationMessage = 'Are you sure you want to leave?';
@@ -89,7 +90,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
     window.addEventListener('beforeunload', handleLeave)
 
     return () => window.removeEventListener('beforeunload', handleLeave);
-  }, [removeAnon, anonUser, params.slug, participants])
+  }, [removeAnon, anonUser, params.slug, participantCount])
 
   const copyLinkToClipboard = () => {
     if (typeof navigator !== 'undefined') {
@@ -178,7 +179,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
       <div className="bg-gray-800 text-white p-4 flex justify-between flex-col">
         <div className='flex flex-row justify-between'>
           <div>Chat Room</div>
-          <div>{participants?.length} {participants?.length === 1 ? 'person' : 'people'} in the chat</div>
+          <div>{participantCount} {participantCount === 1 ? 'person' : 'people'} in the chat</div>
         </div>
         <div>
           {/* Instructions for sharing the chatroom link */}

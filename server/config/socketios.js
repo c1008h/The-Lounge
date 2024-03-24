@@ -29,7 +29,13 @@ function setupSocket(server) {
             console.log('session created in server:', sessionId)
 
             socket.join(sessionId);
+
+            const count = io.of(sessionId).sockets.size;
+            console.log(`Client ${socket.id} joined room ${sessionId}. Total clients: ${sockets.size}`);
+
             socket.emit('anonSessionCreated', sessionId)
+            io.in(sessionId).emit('roomOccupancyUpdate', { sessionId, occupancy: count });
+
         })
 
         socket.on('addAnonToSession', async (user, sessionId) => {
