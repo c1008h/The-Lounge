@@ -1,34 +1,46 @@
 "use client"
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
-import { useSession, useChat, useParticipants } from '@/context';
-import { useAnonParticipantsListener, useAnonChatListener } from '@/hooks';
+import { useParticipants } from '@/context';
+import { useAnonParticipantsListener } from '@/hooks';
 import { TempUserProps } from '@/interfaces/TempUser';
 import { formatTimestamp } from '@/utils/formatTimestamp'
-import { storeUserSessionData, clearUserSessionData } from '@/utils/anonLocalStorage'
+import { setUserSession, getUserSession, clearUserSession } from '@/utils/anonSessions'
+import { useAnonSession, useAnonMessage } from '@/hooks'
+import { RootState } from '@/features/store';
 
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)
   const [showError, setShowError] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
-
   const [anonUser, setAnonUser] = useState<TempUserProps>()
   const [displayName, setDisplayName] = useState<string>('')
-
-  const { currentAnonSessionId, addUserToAnon, tempUser } = useSession()
-  const { sendAnonMessage } = useChat()
-  const { removeAnon } = useParticipants()
-
-  const { participants } = useAnonParticipantsListener(params.slug)
-  const { messages, error } = useAnonChatListener(params.slug)
-  const router = useRouter()
-
   const [isSessionDeleted, setIsSessionDeleted] = useState(false);
   const [message, setMessage] = useState('');
   const [isLinkCopied, setIsLinkCopied] = useState(false);
 
+  const { currentSession, tempUser, addUserToSession, sessionToken } = useAnonSession()
+
+  const storedSessionId = useSelector((state: RootState) => state.anon.anonSessionId)
+  const storedDisplayName = useSelector((state: RootState) => state.anon.displayName)
+  const storedTempUid = useSelector((state: RootState) => state.anon.uid)
+  const storedToken = useSelector((state: RootState) => state.anon.accessToken)
+
+  const { sendAnonMessage, messages } = useAnonMessage()
+  const { removeAnon } = useParticipants()
+
+  const { participants } = useAnonParticipantsListener(params.slug)
+  // const { messages } = useAnonChatListener(params.slug)
+  const router = useRouter()
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    console.log('messages:', messages)
+  }, [messages])
+  // console.log("participants:", participants)
 
   useLayoutEffect(() => {
     setTimeout(() => {
@@ -41,26 +53,26 @@ export default function Anon({ params }: { params: { slug: string } }) {
   }, [])
 
   useEffect(() => {
-    if (tempUser && tempUser) {
+    if (storedSessionId && storedDisplayName && storedTempUid) {
       console.log("temp user:", tempUser)
-      storeUserSessionData(params.slug, { displayName: tempUser.displayName, uid: tempUser.uid})
-      setAnonUser({ displayName: tempUser.displayName, uid: tempUser.uid })
+      setUserSession(storedSessionId, params.slug, storedTempUid, storedDisplayName, )
+      setAnonUser({ displayName: storedDisplayName, uid: storedTempUid })
       setShowModal(false) 
     } 
-  }, [tempUser])
+  }, [storedSessionId, storedDisplayName, storedTempUid])
 
-  useEffect(() => {
-    const existingSessionData = localStorage.getItem(params.slug);
-    if (existingSessionData) {
-      const { uid, displayName } = JSON.parse(existingSessionData);
-      if (uid && displayName) {
-        setAnonUser({ uid, displayName });
-        setShowModal(false);
-      }
-    } else {
-      setShowModal(true);
-    }
-  }, [params.slug]);
+  // useEffect(() => {
+  //   const existingSessionData = localStorage.getItem(params.slug);
+  //   if (existingSessionData) {
+  //     const { uid, displayName } = JSON.parse(existingSessionData);
+  //     if (uid && displayName) {
+  //       setAnonUser({ uid, displayName });
+  //       setShowModal(false);
+  //     }
+  //   } else {
+  //     setShowModal(true);
+  //   }
+  // }, [params.slug]);
 
   useEffect(() => {
     if (!participants || !participants.length || !anonUser || !anonUser.uid) return
@@ -70,7 +82,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
       // const confirmationMessage = 'Are you sure you want to leave?';
       // event.returnValue = confirmationMessage;
       // return confirmationMessage;
-      clearUserSessionData(params.slug)
+      clearUserSession(sessionToken)
       removeAnon(anonUser.uid, params.slug, participantCount)
     }
 
@@ -81,7 +93,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
 
   const copyLinkToClipboard = () => {
     if (typeof navigator !== 'undefined') {
-      navigator.clipboard.writeText(`${window.location.origin}/${currentAnonSessionId}`)
+      navigator.clipboard.writeText(`${window.location.origin}/${currentSession}`)
       .then(() => {
         setIsLinkCopied(true);
         setTimeout(() => {
@@ -102,12 +114,11 @@ export default function Anon({ params }: { params: { slug: string } }) {
       setShowError(false)
       setLoading(true)
 
-      const user = await addUserToAnon(displayName, params.slug)
+      addUserToSession(displayName, params.slug)
 
-      console.log("Resolved user:", user);
       console.log('temp user in page file:', tempUser)
 
-      if (user) {
+      if (storedTempUid && storedDisplayName) {
         setShowModal(false)
       } else {
         setShowError(true)
@@ -121,15 +132,19 @@ export default function Anon({ params }: { params: { slug: string } }) {
   }
 
   const handleSendMessage =  () => {
-    if (!message || !anonUser) return
+    if (!message || !storedDisplayName || !storedTempUid) return
     try {
       const messageData = {
         message: message.trim(),
-        sender: anonUser
+        sender: { uid: storedTempUid, displayName: storedDisplayName
+          // uid: session.userId,
+          // displayName: session.displayName
+        },
+        timestamp: new Date()
       }
 
       sendAnonMessage(params.slug, messageData)
-    
+
     } catch (error) {
       console.error("Error sending message:", error)
 
@@ -172,12 +187,11 @@ export default function Anon({ params }: { params: { slug: string } }) {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4">
-        {/* Chat messages will be displayed here */}
         <div className="flex flex-col space-y-2">
-          {messages?.map((message, index) => {
+          {participants && messages?.map((message, index) => {
             const senderIsTempUser = message.sender.uid === anonUser?.uid;
             const senderDisplayName = senderIsTempUser ? "" : participants.find(p => p.uid === (message.sender.uid || message.sender))?.displayName || "Unknown";
-
+            console.log('messages:',messages)
             // const senderDisplayName = senderIsTempUser ? "" : participants?.find(p => p.uid === message.sender)?.displayName || "Unknown";
             // const formattedTimestamp = message.timestamp.toDate().toLocaleString();
             const formattedTimestamp = formatTimestamp(message.timestamp)

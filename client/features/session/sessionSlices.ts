@@ -8,7 +8,7 @@ interface SessionState {
 
 const initialState: SessionState = {
     currentSession: "",
-    sessions: []
+    sessions: [],
 }
 
 export const sessionSlice = createSlice({
@@ -30,6 +30,11 @@ export const sessionSlice = createSlice({
     },
 })
 
-export const { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState } = sessionSlice.actions;
+export const { 
+    selectSessionToState, 
+    addSessionToState, 
+    deleteSessionFromState, 
+    leaveSessionFromState
+} = sessionSlice.actions;
 
 export default sessionSlice.reducer;

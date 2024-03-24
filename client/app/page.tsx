@@ -6,22 +6,22 @@ import { ButtonTemplate, FeatureCard } from '@/components';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment } from '@fortawesome/free-solid-svg-icons'; // Import the message icon
-import { useSession } from '@/context';
+import { useAnonSession } from '@/hooks';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const { createAnonSession, currentAnonSessionId } = useSession()
+  const { createSession, currentSession } = useAnonSession()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>()
   const router = useRouter()
 
   useEffect(() => {
-    if (currentAnonSessionId) {
-      router.push(`/${currentAnonSessionId}`);
+    if (currentSession) {
+      router.push(`/${currentSession}`);
     }
-  }, [currentAnonSessionId, router]);
+  }, [currentSession, router]);
 
-  const handleAnonSession = () => createAnonSession()
+  const handleAnonSession = () => createSession()
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen py-20 bg-gradient-to-b from-blue-300 to-blue-500">

@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
 import { Session } from '@/interfaces/Session';
 import { useSocket } from '@/hooks/useSocket';
-import { TempUserProps, defaultTempUser, AddAnonSessionResponse } from '@/interfaces/TempUser'
+import { TempUserProps, defaultTempUser } from '@/interfaces/TempUser'
 
 interface SessionContextType {
     sessions: Session[];
@@ -12,13 +12,9 @@ interface SessionContextType {
     leaveSession: (sessionId: string) => void;
     selectSession: (sessionId: string) => void;
     currentSessionId: string;
-    createAnonSession: () => void;
-    currentAnonSessionId: string;
 
-    addUserToAnon: (user: string, sessionId: string) => Promise<TempUserProps>;
+    // addUserToAnon: (user: string, sessionId: string) => Promise<TempUserProps>;
     // addUserToAnon: (user: string, sessionId: string) => TempUserProps;
-    
-    tempUser?: TempUserProps;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -35,34 +31,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const { socket } = useSocket()
     const [sessions, setSessions] = useState<Session[]>([]);
     const [currentSessionId, setCurrentSessionId] = useState<string>('')
-    const [currentAnonSessionId, setCurrentAnonSessionId] = useState<string>('')
-    const [tempUser, setTempUser] = useState<TempUserProps>(defaultTempUser)
     const dispatch = useDispatch(); 
 
-    const createAnonSession = useCallback(() => {
-        if (socket) socket.emit('createAnonSession', 'create anon session for strangers')
-    }, [socket])
-
-    const addUserToAnon = useCallback((displayName: string, sessionId: string): Promise<TempUserProps> => {
-        // console.log("session id received context:", sessionId)
-        // if (socket) socket.emit('addAnonToSession', user, sessionId)
-        // return user
-
-        return new Promise((resolve, reject) => {
-            // Assuming socket.emit can accept a callback function for the server's response
-            if (socket) {
-                socket.emit('addAnonToSession', displayName, sessionId, (response:AddAnonSessionResponse) => {
-                    if (response.error) {
-                        reject(new Error('Failed to add anonymous user to session.'));
-                    } else {
-                        resolve({ displayName, uid: response.uid });
-                    }
-                });
-            } else {
-                reject(new Error('Socket not available.'));
-            }
-        });
-    }, [socket])
 
     const addASession = useCallback((uid: string) => {
         if (socket) socket.emit('addSession', uid);
@@ -99,39 +69,20 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         }
         const handleRemoveSession = (sessionId: string, userId: string) => deleteSession(sessionId, userId);
 
-        const handleCreateAnonSession = (tempSession: string) => {
-            console.log('temp session', tempSession)
-            dispatch(selectSessionToState(tempSession))
-            setCurrentAnonSessionId(tempSession);
-        }
-
-        const handleAddToAnon = (uid: string, displayName: string) => {
-            console.log('returned temp user id:', uid)
-            console.log('returned temp user display name:', displayName)
-
-            setTempUser({ 
-                displayName: displayName,
-                uid: uid
-            })
-        }
-
         socket.on('sessionAdded', handleSessionAdded);
         socket.on('sessionRemoved', handleRemoveSession);
         socket.on('leaveSession', handleRemoveSession)
-        socket.on('anonSessionCreated', handleCreateAnonSession)
-        socket.on('anonAddedToSession', handleAddToAnon)
+
 
         return () => {
             socket.off('sessionAdded', handleSessionAdded);
             socket.off('sessionRemoved', handleRemoveSession);
             socket.off('sessionLeft', handleRemoveSession)
-            socket.off('anonSessionCreated', handleCreateAnonSession)
-            socket.off('anonAddedToSession', handleAddToAnon)
         }
     }, [socket, dispatch, deleteSession, leaveSession])
   
     return (
-        <SessionContext.Provider value={{ sessions,  addASession, deleteSession, leaveSession, currentSessionId, currentAnonSessionId, selectSession, createAnonSession, addUserToAnon, tempUser }}>
+        <SessionContext.Provider value={{ sessions,  addASession, deleteSession, leaveSession, currentSessionId, selectSession }}>
             {children}
         </SessionContext.Provider>
     );
