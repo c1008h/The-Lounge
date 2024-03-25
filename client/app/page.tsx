@@ -8,14 +8,19 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment } from '@fortawesome/free-solid-svg-icons'; // Import the message icon
 import { useRouter } from 'next/navigation';
 import { generateTempId } from '@/utils/generateTempId';
+import { useDispatch } from 'react-redux';
+import { storeSessionId } from '@/features/anon/anonSlices'
 
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>()
   const router = useRouter()
+  const dispatch = useDispatch()
 
   const handleGetStarted = () => {
     const sessionId = generateTempId()
+    console.log('sessoion id: ', sessionId)
+    dispatch(storeSessionId(sessionId))
     router.push(`/${sessionId}`)
   }
 

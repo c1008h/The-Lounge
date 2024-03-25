@@ -7,7 +7,6 @@ import { TempUserProps } from '@/interfaces/TempUser';
 import { setUserSession, getUserSession, clearUserSession } from '@/utils/anonSessions'
 import { useAnonSession, useAnonMessage } from '@/hooks'
 import { RootState } from '@/features/store';
-import { useSocket } from '@/hooks/useSocket';
 
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)
@@ -18,7 +17,14 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const [isSessionDeleted, setIsSessionDeleted] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
 
-  const { createSession, currentSession, tempUser, addUserToSession, sessionToken, removeAnon } = useAnonSession()
+  const { 
+    createSession, 
+    currentSession, 
+    tempUser, 
+    addUserToSession, 
+    sessionToken, 
+    removeAnon 
+  } = useAnonSession()
 
   const storedSessionId = useSelector((state: RootState) => state.anon.anonSessionId)
   const storedDisplayName = useSelector((state: RootState) => state.anon.displayName)
@@ -30,17 +36,15 @@ export default function Anon({ params }: { params: { slug: string } }) {
   // const { removeAnon } = useParticipants()
 
   console.log('participant count:', participantCount)
-  console.log('participant count type:', typeof participantCount)
+  // console.log('participant count type:', typeof participantCount)
 
-  const { socket, connect } = useSocket();
 
   const router = useRouter()
 
   useEffect(() => {
     const initiateChatSession = async () => {
-      await createSession(); // Ensure this is asynchronous as needed
-      // Assuming createSession updates currentSession upon success
-      if (currentSession) {
+      await createSession(params.slug); // Ensure this is asynchronous as needed
+      if (storedSessionId) {
         setLoading(false); // Hide loading indicator once session is ready
       } else {
         // Handle session creation failure as needed
@@ -51,13 +55,6 @@ export default function Anon({ params }: { params: { slug: string } }) {
     initiateChatSession();
   }, []);
 
-  // useEffect(() => {
-  //   connect(); 
-
-  //   return () => {
-  //     // disconnect()
-  //   };
-  // }, []);
 
 
   // console.log("participants:", participants)
@@ -149,7 +146,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
       </ModalTemplate>)
   }
 
-  if (loading || !socket) return <Loading message={'Loading chat...'} />
+  if (loading) return <Loading message={'Loading chat...'} />
   
   return (
     <div className="flex flex-col h-screen">

@@ -4,7 +4,6 @@ const { addChatSessionToUser, deleteSessionFromUser, userHasChatSession } = requ
 const { addParticipant } = require('../services/realtimeDatabase/participants')
 const { saveMessage } = require('../services/realtimeDatabase/message')
 const { searchFriend, addFriend, acceptRequest, declineRequest, deleteFriend, cancelRequest } = require('../services/firestore/friend')
-// const { createSessionAnon, addToAnonSession, saveAnonMessage, removeAnonFromSession, deleteSession } = require('../services/realtimeDatabase/anonSession')
 const { createUniqueId } = require('../utils/tempIdGenerator')
 
 function setupSocket(server) {
@@ -20,15 +19,9 @@ function setupSocket(server) {
     io.on('connection', (socket) => {
         console.log('a user connected');
 
-        socket.on('createAnonSession', async () => {
+        socket.on('createAnonSession', async (sessionId) => {
             console.log("SOCKET ROOM:", socket.rooms);
-            console.log("SOCKET ID ON CREATING:", socket.id);
-
-            const sessionId = createUniqueId()
-            // const sessionId = await createSessionAnon()
-            console.log('session created in server:', sessionId)
-            socket.join(sessionId);
-
+            console.log(`SOCKET ID IS ${socket.id} WHEN SESSION ID: ${sessionId} IS CREATED IN THE SERVER`);
             socket.emit('anonSessionCreated', sessionId)
         })
 
@@ -37,16 +30,14 @@ function setupSocket(server) {
             console.log("SOCKET ROOM in addAnonToSession:", socket.rooms);
             console.log("SOCKET ID ON ADDING TO SESSION:", socket.id);
 
-            // const userId = await addToAnonSession(user, sessionId)
             const userId = createUniqueId()
 
             socket.join(sessionId);
-            const roomCount = await io.in(sessionId).fetchSockets();
-            console.log(roomCount)
+            const roomCount = socket.rooms.length;
+            // console.log(roomCount)
 
             io.in(sessionId).emit('anonAddedToSession',  userId, user );
 
-            // socket.emit('anonAddedToSession', userId, user );
             io.in(sessionId).emit('roomOccupancyUpdate', { uid: userId, displayName: user, occupancy: roomCount });
 
             console.log(`User ${user} added to session ${sessionId} with user ID: ${userId}. Total room count: ${roomCount}`);
@@ -62,7 +53,7 @@ function setupSocket(server) {
 
             socket.leave(sessionId);
 
-            var room = io.sockets.adapter.rooms[sessionId];
+            // var room = io.sockets.adapter.rooms[sessionId];
             
 
             io.in(sessionId).emit('userLeft', userId);
@@ -73,7 +64,6 @@ function setupSocket(server) {
             console.log("SOCKET ROOM in sendAnonMessage:", socket.rooms);
             console.log("SOCKET ID ON SENDING MESSAGE:", socket.id);
 
-            // await saveAnonMessage(sessionId, message)
             // io.to(sessionId).emit('newAnonMessage', message);
             console.log('Message received:', message)
             console.log(`At sessionId : ${sessionId}`)
@@ -179,25 +169,6 @@ function setupSocket(server) {
                 socket.emit('errorJoiningChat', { message: error.message || 'Unable to join chat.' });
             }
         })
-    
-        // socket.on('sendMessage', async (data) => {
-
-        //     const { sender, message, timestamp, sessionId } = data
-
-        //     const messages = {
-        //         sender: sender,
-        //         message: message,
-        //         timestamp: timestamp
-        //     }
-            
-        //     try {
-        //         console.log("RECEIVED MESSAGE:", data)
-        //         await saveMessage(sessionId, { messages });
-        //         io.to(sessionId).emit('newMessage', messages)
-        //     } catch(error) {
-        //         console.error("Error handling chat message:", error)
-        //     }
-        // });
 
         socket.on('leaveRoom', ({ userId, roomId }) => {
             socket.leave(roomId)

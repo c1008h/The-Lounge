@@ -4,27 +4,34 @@ import { TempUserProps, AddAnonSessionResponse } from '@/interfaces/TempUser';
 import { useDispatch } from 'react-redux';
 import { setDisplayName, setUid, storeSessionId, storeToken, clearSessionId, setParticipantCount } from '@/features/anon/anonSlices'
 import { setUserSession } from '@/utils/anonSessions'
-import { generateTempId } from '@/utils/generateTempId';
 
 interface UseAnonSessionProps {
     currentSession: string;
     tempUser: TempUserProps | null;
-    createSession: () => void;
+    createSession: (tempSessionId: string) => void;
     addUserToSession: (displayName: string, sessionId: string) => void;
     sessionToken: string;
     removeAnon: (userId: string, sessionId: string, participant: number) => void;
 }
 
 export const useAnonSession = (): UseAnonSessionProps => {
-    const { socket } = useSocket();
+    const { socket, connect } = useSocket();
     const [currentSession, setCurrentSession] = useState('');
     const [sessionToken, setSessionToken] = useState<string>('') 
     const [tempUser, setTempUser] = useState<TempUserProps | null>(null);
 
     const dispatch = useDispatch(); 
 
-    const createSession = useCallback(() => {
-        if (socket) socket.emit('createAnonSession', 'create anon session for strangers')
+    useEffect(() => {
+        connect(); 
+
+        return () => {
+        // disconnect()
+        };
+    }, []);
+
+    const createSession = useCallback((sessionId: string) => {
+        if (socket) socket.emit('createAnonSession', sessionId)
         
     }, [socket]);
 
@@ -59,12 +66,12 @@ export const useAnonSession = (): UseAnonSessionProps => {
     useEffect(() => {
         if (!socket) return
 
-        const handleCreateAnonSession = (tempSession: string) => {
-            const tempSessionId = generateTempId()
+        const handleCreateAnonSession = (tempSessionId: string) => {
+            // const tempSessionId = generateTempId()
             dispatch(storeSessionId(tempSessionId));
-            console.log('temp session', tempSession)
+            console.log('temp session', tempSessionId)
             
-            setCurrentSession(tempSession);
+            setCurrentSession(tempSessionId);
             console.log("TEMPSESSION:", tempSessionId)
             setSessionToken(tempSessionId);
         }
