@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useFriendListener } from '@/hooks'
+import { useFriendListener, useFriend } from '@/hooks'
 import { addFriend } from '@/features/friends/friendSlices'
-import { useFriend } from '@/context'
 import { ButtonTemplate, ModalTemplate, InputForm, BoxTemplate, DropDownMenu } from '@/components';
 import { IoPersonAddSharp } from "react-icons/io5";
 import { MdOutlinePending } from "react-icons/md";

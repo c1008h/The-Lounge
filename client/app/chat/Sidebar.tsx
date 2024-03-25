@@ -1,10 +1,9 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { useSession } from '@/context';
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
 import { initializeParticipants } from '@/features/participants/participantSlices';
-import { useParticipantsListener } from '@/hooks'
+import { useParticipantsListener, useSession } from '@/hooks'
 import FriendList from './FriendList';
 import { FaUserFriends } from "react-icons/fa";
 import { FaRegMessage } from "react-icons/fa6";

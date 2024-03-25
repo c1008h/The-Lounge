@@ -148,119 +148,119 @@ export default function Page() {
   }
   
   return (
-    <UserProviderWrapper>
-    <div className="flex flex-col min-h-screen bg-neutral-400	">
-      <div className="flex flex-row flex-1 ">
-        {/* LEFT SESSION NAVIGATION */}
-        {uid && (
-          <Sidebar 
-            sessions={sessionDetails}
-            handleAddNewSession={handleNewChat}
-            userId={uid}
-            currentSessionId={currentSessionId ?? ''}
-          />
-        )}
+    // <UserProviderWrapper>
+      <div className="flex flex-col min-h-screen bg-neutral-400	">
+        <div className="flex flex-row flex-1 ">
+          {/* LEFT SESSION NAVIGATION */}
+          {uid && (
+            <Sidebar 
+              sessions={sessionDetails}
+              handleAddNewSession={handleNewChat}
+              userId={uid}
+              currentSessionId={currentSessionId ?? ''}
+            />
+          )}
 
-        {/* RIGHT SIDE OF SCREEN */}
-        <div className="w-2/3 h-screen bg-gray-100 flex flex-col gap-4 relative">
-          <div className='relative flex top-0 bg-slate-400 w-full h-24 justify-center items-center'>
-            {addToChat ? (
-              <div className='flex items-center flex-row bg-slate-400 text-white' >
-                <label className='mr-2' htmlFor="participantInput">To: </label>
-                {participantList && participantList.map((participant: Participant, index: number) => (
-                  <div key={index} className='participant-block mr-2 mb-2 bg-gray-300 text-gray-700 p-2 rounded-lg flex items-center'>
-                    <p>{participant.displayName ? participant.displayName : participant.email ? participant.email : participant.phoneNumber}</p>
-                  </div>
-                ))}
-                <input 
-                  id="participantInput"
-                  value={inputValue}
-                  className='bg-slate-400 no-border outline-none'
-                  onChange={(e) => setInputValue(e.target.value)} 
-                  onKeyDown={(event) => { 
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      // handleAddParticipant(friend); 
-                    } else if (event.key === 'Backspace' && !inputValue.trim()) {
-                      // removeParticipant();
-                      handleBackSpace()
+          {/* RIGHT SIDE OF SCREEN */}
+          <div className="w-2/3 h-screen bg-gray-100 flex flex-col gap-4 relative">
+            <div className='relative flex top-0 bg-slate-400 w-full h-24 justify-center items-center'>
+              {addToChat ? (
+                <div className='flex items-center flex-row bg-slate-400 text-white' >
+                  <label className='mr-2' htmlFor="participantInput">To: </label>
+                  {participantList && participantList.map((participant: Participant, index: number) => (
+                    <div key={index} className='participant-block mr-2 mb-2 bg-gray-300 text-gray-700 p-2 rounded-lg flex items-center'>
+                      <p>{participant.displayName ? participant.displayName : participant.email ? participant.email : participant.phoneNumber}</p>
+                    </div>
+                  ))}
+                  <input 
+                    id="participantInput"
+                    value={inputValue}
+                    className='bg-slate-400 no-border outline-none'
+                    onChange={(e) => setInputValue(e.target.value)} 
+                    onKeyDown={(event) => { 
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        // handleAddParticipant(friend); 
+                      } else if (event.key === 'Backspace' && !inputValue.trim()) {
+                        // removeParticipant();
+                        handleBackSpace()
+                      }
+                    }}
+                  />
+                  {filteredFriends.length > 0 && (
+                    <div className="absolute bg-white border mt-1 max-h-60 overflow-auto z-10">
+                      {filteredFriends.map(friend => (
+                        <div className='' key={friend.uid} onClick={() => handleSelectFriend(friend)}>
+                          <p>{friend.displayName ? friend.displayName : friend.email ? friend.email : friend.phoneNumber}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <ButtonTemplate
+                    // onPress={() =>       
+                    //   // addParticipant(activeSessionID, newParticipant);
+                    // }
+                    label={'+'}
+                    // disabled={participants.length < 1 || participants == null}
+                  />
+                </div>
+              ) : (
+                <h3 className='text-white'>To: {participants && participants.map(participant => participant.displayName).join(', ')}</h3>
+              )}
+            </div>
+              {/* {messages && messages.map((message, index) => (
+                <React.Fragment key={`message-${index}`}>
+                  <CardTemplate 
+                    id={message.id}
+                    message={message.message}
+                    sender={message.sender.displayName}
+                    timestamp={message.timestamp}
+                    alignment={message.sender === uid ? 'right' : 'left'}
+                  />
+                </React.Fragment>
+              ))} */}
+
+            <MessageContainer 
+              messages={messages} 
+              uid={currentUser.ui}
+              displayName={displayName}
+            />
+            {/* TEXT BOX SHOULD BE BOTTOM OF SCREEN */}
+            <div className="w-2/3 flex fixed bottom-0 p-4 bg-white">
+              <MessageInput 
+                sendMessage={sendMessage}
+                sessionId={activeSessionID}
+                uid={currentUser.uid}
+                displayName={displayName}
+              />
+              {/* <form 
+                className="flex w-full" 
+                onSubmit={(e) => {
+                  e.preventDefault(); 
+                  handleSendMessage();
+                }}
+              >
+                <FormTemplate 
+                  className={'bg-white shadow rounded-lg overflow-hidden'}
+                  onValueChange={(value: string) => setMessage(value)}
+                  value={message}
+                />
+                <ButtonTemplate 
+                  className=""
+                  label={"Send"}
+                  onPress={() => {
+                    if (message.trim()) {
+                      handleSendMessage()
+                      setMessage('')
+                    } else {
+                      console.error("message is empty")
                     }
                   }}
                 />
-                {filteredFriends.length > 0 && (
-                  <div className="absolute bg-white border mt-1 max-h-60 overflow-auto z-10">
-                    {filteredFriends.map(friend => (
-                      <div className='' key={friend.uid} onClick={() => handleSelectFriend(friend)}>
-                        <p>{friend.displayName ? friend.displayName : friend.email ? friend.email : friend.phoneNumber}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <ButtonTemplate
-                  // onPress={() =>       
-                  //   // addParticipant(activeSessionID, newParticipant);
-                  // }
-                  label={'+'}
-                  // disabled={participants.length < 1 || participants == null}
-                />
-              </div>
-            ) : (
-              <h3 className='text-white'>To: {participants && participants.map(participant => participant.displayName).join(', ')}</h3>
-            )}
-          </div>
-            {/* {messages && messages.map((message, index) => (
-              <React.Fragment key={`message-${index}`}>
-                <CardTemplate 
-                  id={message.id}
-                  message={message.message}
-                  sender={message.sender.displayName}
-                  timestamp={message.timestamp}
-                  alignment={message.sender === uid ? 'right' : 'left'}
-                />
-              </React.Fragment>
-            ))} */}
-
-          <MessageContainer 
-            messages={messages} 
-            uid={currentUser.ui}
-            displayName={displayName}
-          />
-          {/* TEXT BOX SHOULD BE BOTTOM OF SCREEN */}
-          <div className="w-2/3 flex fixed bottom-0 p-4 bg-white">
-            <MessageInput 
-              sendMessage={sendMessage}
-              sessionId={activeSessionID}
-              uid={currentUser.uid}
-              displayName={displayName}
-            />
-            {/* <form 
-              className="flex w-full" 
-              onSubmit={(e) => {
-                e.preventDefault(); 
-                handleSendMessage();
-              }}
-            >
-              <FormTemplate 
-                className={'bg-white shadow rounded-lg overflow-hidden'}
-                onValueChange={(value: string) => setMessage(value)}
-                value={message}
-              />
-              <ButtonTemplate 
-                className=""
-                label={"Send"}
-                onPress={() => {
-                  if (message.trim()) {
-                    handleSendMessage()
-                    setMessage('')
-                  } else {
-                    console.error("message is empty")
-                  }
-                }}
-              />
-            </form> */}
+              </form> */}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    </UserProviderWrapper>
+    {/* </UserProviderWrapper> */}
   );
 }

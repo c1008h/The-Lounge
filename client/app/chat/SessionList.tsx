@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { ButtonTemplate, BoxTemplate, Divider } from '@/components'
-import { useSession } from '@/context'
 import { Session } from '@/interfaces/Session'
-import { useParticipantsListener } from '@/hooks'
+import { useParticipantsListener, useSession } from '@/hooks'
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
 
 interface SessionProps {
