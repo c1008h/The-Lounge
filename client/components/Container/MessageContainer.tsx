@@ -23,7 +23,7 @@ export default function MessageContainer({ messages, uid, displayName }: Message
                 // const formattedTimestamp = formatTimestamp(message.timestamp)
                 const isLastMessage = index === messages.length - 1;
 
-                if (message.type === 'notification') {
+                if (message.sender === 'system' || message.type === 'notification') {
                     // Render system notifications in the center
                     return (
                         <div 
@@ -38,8 +38,9 @@ export default function MessageContainer({ messages, uid, displayName }: Message
                     );
                 } else {
                     // Render user messages to the left or right
-                    const senderIsTempUser = message.sender.uid === uid;
-                    const senderDisplayName = senderIsTempUser ? "" : message.sender.displayName || "Unknown";
+                    const senderIsTempUser = typeof message.sender !== 'string' && message.sender.uid === uid;
+                    const senderDisplayName = senderIsTempUser ? "" : typeof message.sender !== 'string' ? message.sender.displayName || "Unknown" : "Unknown";
+
                     return (
                         <div 
                             key={index} 
@@ -47,7 +48,7 @@ export default function MessageContainer({ messages, uid, displayName }: Message
                             ref={isLastMessage ? messagesEndRef : null} 
                         >
                             <div className="flex flex-col max-w-3/4">
-                                <p className={`text-sm ${senderIsTempUser ? 'text-right' : 'text-left'}`}>{senderIsTempUser ? "" : message.sender.displayName}</p>
+                                <p className={`text-sm ${senderIsTempUser ? 'text-right' : 'text-left'}`}>{senderIsTempUser ? "" : senderDisplayName}</p>
                                 <div className={`py-2 px-4 rounded-lg max-w-3/4 ${senderIsTempUser ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
                                     <p>{message.message}</p>
                                 </div>

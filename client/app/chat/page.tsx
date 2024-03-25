@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from "next/image";
 import { useDispatch, useSelector } from 'react-redux';
-import { CardTemplate, ButtonTemplate, FormTemplate, BoxTemplate, Error, InputForm, Loading } from '@/components'
+import { MessageContainer, CardTemplate, ButtonTemplate, MessageInput, FormTemplate, BoxTemplate, Error, InputForm, Loading } from '@/components'
 import { useParticipants, useSession, useChat } from '@/context';
 import { useSessionsListener, useParticipantsListener, useChatListener, useFriendListener } from '@/hooks';
 import { useAuth } from '@/provider/AuthProvider';
@@ -18,6 +18,7 @@ import { UserProviderWrapper } from '@/components/provider/UserProviderWrapper';
 export default function Page() {
   const [message, setMessage] = useState<string>('') 
   const [uid, setUid] = useState<string>('')
+  const [displayName, setDisplayName] = useState<string>('')
   const [addToChat, setAddToChat] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState('');
   const [filteredFriends, setFilteredFriends] = useState<Friend[]>([])
@@ -111,19 +112,20 @@ export default function Page() {
     removeParticipant()
   }
 
-  const handleSendMessage = () => {
-    if (uid && activeSessionID ) {
+  // const handleSendMessage = () => {
+  //   if (uid && activeSessionID ) {
 
-      console.log("Active session ID:", activeSessionID)
-      const messageData = {
-        message: message,
-        sender: uid,
-        timestamp: new Date().toISOString()
-      }
+  //     console.log("Active session ID:", activeSessionID)
+  //     const messageData = {
+  //       message: message,
+  //       type:'message'
+  //       sender: { uid: uid, displayName: displayName },
+  //       timestamp: new Date().toISOString()
+  //     }
   
-      sendMessage(activeSessionID, messageData)
-    }
-  }
+  //     sendMessage(activeSessionID, messageData)
+  //   }
+  // }
   const handleSelectFriend = (friend: Friend) => {
     if (activeSessionID) {
       const newParticipant = { 
@@ -205,21 +207,32 @@ export default function Page() {
               <h3 className='text-white'>To: {participants && participants.map(participant => participant.displayName).join(', ')}</h3>
             )}
           </div>
-            {messages && messages.map((message, index) => (
+            {/* {messages && messages.map((message, index) => (
               <React.Fragment key={`message-${index}`}>
                 <CardTemplate 
                   id={message.id}
                   message={message.message}
-                  sender={message.sender}
+                  sender={message.sender.displayName}
                   timestamp={message.timestamp}
                   alignment={message.sender === uid ? 'right' : 'left'}
                 />
               </React.Fragment>
-            ))}
-          
+            ))} */}
+
+          <MessageContainer 
+            messages={messages} 
+            uid={currentUser.ui}
+            displayName={displayName}
+          />
           {/* TEXT BOX SHOULD BE BOTTOM OF SCREEN */}
           <div className="w-2/3 flex fixed bottom-0 p-4 bg-white">
-            <form 
+            <MessageInput 
+              sendMessage={sendMessage}
+              sessionId={activeSessionID}
+              uid={currentUser.uid}
+              displayName={displayName}
+            />
+            {/* <form 
               className="flex w-full" 
               onSubmit={(e) => {
                 e.preventDefault(); 
@@ -243,7 +256,7 @@ export default function Page() {
                   }
                 }}
               />
-            </form>
+            </form> */}
           </div>
         </div>
       </div>

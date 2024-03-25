@@ -4,7 +4,7 @@ import { onValue, child, DatabaseReference, Unsubscribe } from "firebase/databas
 import { Message } from '@/interfaces/Chat';
 
 export const useChatListener = (sessionId: string) => {
-    const [messages, setMessages] = useState<Message[] | null>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     // console.log("SESSION ID INSIDE MESSAGE LISTENER:", sessionId)
@@ -18,7 +18,7 @@ export const useChatListener = (sessionId: string) => {
                 setMessages(messageArray)
                 setError(null);
             } else {
-                setMessages(null);
+                setMessages([]);
                 setError('No messages found.');
             }
         }

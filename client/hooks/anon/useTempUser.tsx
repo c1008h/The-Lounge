@@ -12,7 +12,7 @@ interface UseAnonSessionProps {
     createSession: (tempSessionId: string) => void;
     addUserToSession: (displayName: string, sessionId: string) => void;
     sessionToken: string;
-    removeAnon: (userId: string, sessionId: string, participant: number) => void;
+    removeAnon: (userId: string, displayName: string, sessionId: string) => void;
 }
 
 export const useAnonSession = (): UseAnonSessionProps => {
@@ -98,27 +98,13 @@ export const useAnonSession = (): UseAnonSessionProps => {
 
         const handleRemoveAnon = (userId: string, displayName: string, sessionId: string) => {
             // removeAnon(userId, sessionId, participant)
-            try {
-                const messageData = {
-                  message: `${displayName} has left the chat`,
-                  type: 'notification',
-                  sender: 'system',
-                  timestamp: new Date()
-                }
-          
-                sendAnonMessage(sessionId, messageData)
-            } catch (error) {
-                console.error('error broadcasting notification:',  error)
-            }
         }
-
 
         socket.on('anonSessionCreated', handleCreateAnonSession)
         socket.on('anonAddedToSession', handleAddToAnon)
         socket.on('roomOccupancyUpdate', updateRoomCount)
         socket.on('anonRemoved', handleRemoveAnon);
         socket.on('roomOccupancyUpdate', updateRoomCount)
-
 
         return () => {
             socket.off('anonSessionCreated', handleCreateAnonSession)
