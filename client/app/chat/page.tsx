@@ -216,7 +216,7 @@ export default function Page() {
 
           <MessageContainer 
             messages={messages} 
-            uid={currentUser.uid}
+            uid={currentUser?.uid}
             displayName={displayName}
           />
           {/* TEXT BOX SHOULD BE BOTTOM OF SCREEN */}
@@ -224,7 +224,7 @@ export default function Page() {
             <MessageInput 
               sendMessage={sendMessage}
               sessionId={activeSessionID}
-              uid={currentUser.uid}
+              uid={currentUser?.uid}
               displayName={displayName}
             />
             {/* <form 
