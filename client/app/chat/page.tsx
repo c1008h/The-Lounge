@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import Image from "next/image";
 import { useDispatch, useSelector } from 'react-redux';
 import { MessageContainer, CardTemplate, ButtonTemplate, MessageInput, FormTemplate, BoxTemplate, Error, InputForm, Loading } from '@/components'
-import { useParticipants, useSession, useChat } from '@/context';
+import { useParticipants, useSession, useMessage } from '@/hooks';
 import { useSessionsListener, useParticipantsListener, useChatListener, useFriendListener } from '@/hooks';
 import { useAuth } from '@/provider/AuthProvider';
 import Sidebar from './Sidebar';
@@ -39,7 +39,7 @@ export default function Page() {
   const { addParticipant, removeParticipant, removeSpecificParticipant } = useParticipants();
   const { participants, error: participantError } = useParticipantsListener(activeSessionID);
 
-  const { sendMessage } = useChat()
+  const { sendMessage } = useMessage()
   const { messages, error: chatError } = useChatListener(activeSessionID)
   // console.log("CURRENT SESSION ID IN PAGE:", activeSessionID)
 
