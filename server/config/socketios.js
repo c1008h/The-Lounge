@@ -14,7 +14,12 @@ function setupSocket(server) {
         }
     })
 
-    let sockets = []
+    async function findNumberOfClients(sessionId) {
+        const clients = await io.in(sessionId).fetchSockets();
+        const numClients = clients.length;
+    
+        return numClients
+    }
 
     io.on('connection', (socket) => {
         console.log('a user connected');
@@ -25,25 +30,19 @@ function setupSocket(server) {
             socket.emit('anonSessionCreated', sessionId)
         })
 
-        socket.on('addAnonToSession', async (user, sessionId) => {
+        socket.on('addAnonToSession', async (user, sessionId, userId) => {
             console.log("SOCKET ROOM in addAnonToSession:", socket.rooms);
             console.log("SOCKET ID ON ADDING TO SESSION:", socket.id);
 
-            const userId = createUniqueId()
-
             socket.join(sessionId);
-            // const roomCount = socket.rooms.length;
-            const clients = await io.in(sessionId).fetchSockets();
-            // const clients = await io.in(roomId).allSockets();
-            const numClients = clients.length;
+            const numClients = await findNumberOfClients(sessionId)
             console.log('amount of roomcount:', numClients)
 
+            
             io.in(sessionId).emit('anonAddedToSession',  userId, user );
             io.in(sessionId).emit('roomOccupancyUpdate', numClients);
 
             console.log(`User ${user} added to session ${sessionId} with user ID: ${userId}. Total room count: ${numClients}`);
-            // console.log(`Client ${socket.id} joined room ${sessionId}. Total clients: ${sockets.size}`);
-
         })
 
         socket.on('disconnectAnon', async (userId, sessionId, participant) => {
@@ -51,14 +50,12 @@ function setupSocket(server) {
             console.log('session id:', sessionId)
             console.log('participant count:', participant)
             console.log(`Removed user ${userId} from session ${sessionId}`);
+            const numClients = await findNumberOfClients(sessionId)
 
             socket.leave(sessionId);
 
-            // var room = io.sockets.adapter.rooms[sessionId];
-            
-
             io.in(sessionId).emit('userLeft', userId);
-            io.in(sessionId).emit('roomOccupancyUpdate', { userId, occupancy: room.length });
+            io.in(sessionId).emit('roomOccupancyUpdate', numClients);
         })
 
         socket.on('sendAnonMessage', async (sessionId, message) => {

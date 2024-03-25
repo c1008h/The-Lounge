@@ -4,6 +4,7 @@ import { TempUserProps, AddAnonSessionResponse } from '@/interfaces/TempUser';
 import { useDispatch } from 'react-redux';
 import { setDisplayName, setUid, storeSessionId, storeToken, clearSessionId, setParticipantCount } from '@/features/anon/anonSlices'
 import { setUserSession } from '@/utils/anonSessions'
+import { generateTempId } from '@/utils/generateTempId'
 
 interface UseAnonSessionProps {
     currentSession: string;
@@ -36,9 +37,19 @@ export const useAnonSession = (): UseAnonSessionProps => {
     }, [socket]);
 
     const addUserToSession = useCallback((displayName: string, sessionId: string) => {
+        const userId = generateTempId()
+
+        dispatch(setDisplayName(displayName))
+        dispatch(setUid(userId))
+        
+        setTempUser({ 
+            displayName: displayName,
+            uid: userId
+        })
+
         return new Promise((resolve, reject) => {
             if (socket) {
-                socket.emit('addAnonToSession', displayName, sessionId, (response:AddAnonSessionResponse) => {
+                socket.emit('addAnonToSession', displayName, sessionId, userId, (response:AddAnonSessionResponse) => {
                     if (response.error) {
                         reject(new Error('Failed to add anonymous user to session.'));
                     } else {
@@ -80,13 +91,13 @@ export const useAnonSession = (): UseAnonSessionProps => {
             console.log('returned temp user id:', uid)
             console.log('returned temp user display name:', displayName)
 
-            dispatch(setDisplayName(displayName))
-            dispatch(setUid(uid))
+            // dispatch(setDisplayName(displayName))
+            // dispatch(setUid(uid))
             
-            setTempUser({ 
-                displayName: displayName,
-                uid: uid
-            })
+            // setTempUser({ 
+            //     displayName: displayName,
+            //     uid: uid
+            // })
 
         }
 

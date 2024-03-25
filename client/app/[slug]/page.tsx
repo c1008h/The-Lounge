@@ -1,12 +1,13 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { ButtonTemplate, ModalTemplate, InputForm, Loading, MessageInput, MessageContainer } from '@/components';
 import { TempUserProps } from '@/interfaces/TempUser';
 import { setUserSession, getUserSession, clearUserSession } from '@/utils/anonSessions'
 import { useAnonSession, useAnonMessage } from '@/hooks'
 import { RootState } from '@/features/store';
+import { storeSessionId } from '@/features/anon/anonSlices';
 
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)
@@ -16,7 +17,6 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const [displayName, setDisplayName] = useState<string>('')
   const [isSessionDeleted, setIsSessionDeleted] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
-
   const { 
     createSession, 
     currentSession, 
@@ -40,24 +40,28 @@ export default function Anon({ params }: { params: { slug: string } }) {
 
 
   const router = useRouter()
-
+  const dispatch = useDispatch()
   useEffect(() => {
+    const currentParam = params.slug
+    console.log('current param:', currentParam)
+    
     const initiateChatSession = async () => {
-      await createSession(params.slug); // Ensure this is asynchronous as needed
+      await createSession(params.slug); 
+      
       if (storedSessionId) {
-        setLoading(false); // Hide loading indicator once session is ready
+        setLoading(false); 
       } else {
-        // Handle session creation failure as needed
-        router.push('/error'); // Example: navigate to an error page
+        router.push('/error'); 
       }
     };
 
-    initiateChatSession();
+    if (!storedSessionId) {
+      dispatch(storeSessionId(currentParam))
+    } else {
+      initiateChatSession();
+    }
+
   }, []);
-
-
-
-  // console.log("participants:", participants)
 
   useEffect(() => {
     setShowModal(true)
