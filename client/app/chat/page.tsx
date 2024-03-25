@@ -13,7 +13,6 @@ import { Friend } from '@/interfaces/Friend';
 import { addAParticipant, backspaceParticipant, clearParticipants } from '@/features/participants/participantSlices';
 import { RootState } from '@/features/store';
 import { current } from '@reduxjs/toolkit';
-import { UserProviderWrapper } from '@/components/provider/UserProviderWrapper';
 
 export default function Page() {
   const [message, setMessage] = useState<string>('') 
@@ -70,9 +69,6 @@ export default function Page() {
       setFilteredFriends([])
     }
   }, [inputValue, friends])
-
-  // console.log(`Participants in this chat session ${activeSessionID}: ${participants}`)
-  // console.log("USER UID", uid)
   
   const handleNewChat = () => {
     if(!uid) return
@@ -220,7 +216,7 @@ export default function Page() {
 
           <MessageContainer 
             messages={messages} 
-            uid={currentUser.ui}
+            uid={currentUser.uid}
             displayName={displayName}
           />
           {/* TEXT BOX SHOULD BE BOTTOM OF SCREEN */}
