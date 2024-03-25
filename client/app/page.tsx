@@ -1,27 +1,23 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Image from "next/image";
 import Head from 'next/head';
 import { ButtonTemplate, FeatureCard } from '@/components';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment } from '@fortawesome/free-solid-svg-icons'; // Import the message icon
-import { useAnonSession } from '@/hooks';
 import { useRouter } from 'next/navigation';
+import { generateTempId } from '@/utils/generateTempId';
 
 export default function Home() {
-  const { createSession, currentSession } = useAnonSession()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>()
   const router = useRouter()
 
-  useEffect(() => {
-    if (currentSession) {
-      router.push(`/${currentSession}`);
-    }
-  }, [currentSession, router]);
-
-  const handleAnonSession = () => createSession()
+  const handleGetStarted = () => {
+    const sessionId = generateTempId()
+    router.push(`/${sessionId}`)
+  }
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen py-20 bg-gradient-to-b from-blue-300 to-blue-500">
@@ -35,7 +31,7 @@ export default function Home() {
         <p className="text-lg text-white mb-8">Connect with your friends anytime, anywhere. Share moments, have fun, and stay connected.</p>
         <ButtonTemplate 
           label="Click here to get started!"
-          onPress={handleAnonSession}
+          onPress={handleGetStarted}
           className="px-8 py-3 bg-white text-blue-500 font-semibold rounded-md shadow-md hover:bg-blue-600 hover:text-white transition duration-300"
         />
         <div className="mt-12 flex justify-center items-center">

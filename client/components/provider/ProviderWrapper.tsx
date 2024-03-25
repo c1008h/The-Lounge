@@ -15,17 +15,17 @@ export function ProviderWrapper({ children }: ProviderProps) {
         <NextUIProvider>
             <Provider store={store}>
                 <AuthProvider>
-                    <FriendProvider>
+                    {/* <FriendProvider>
                         <SessionProvider>
                             <ParticipantsProvider>
-                                <ChatProvider>
+                                <ChatProvider> */}
                                     {/* NAV WILL GO HERE */}
                                     {children}
                                     {/* FOOTER WILL GO HERE */}
-                                </ChatProvider>
+                                {/* </ChatProvider>
                             </ParticipantsProvider>
                         </SessionProvider>
-                    </FriendProvider>
+                    </FriendProvider> */}
                 </AuthProvider>
             </Provider>
         </NextUIProvider>

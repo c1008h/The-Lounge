@@ -15,3 +15,9 @@ export {default as Error} from './Error';
 export {default as ModalTemplate} from './modals/ModalTemplate'
 
 export {default as DropDownMenu} from './DropDownMenu'
+
+
+
+export {default as MessageInput} from './TextInput/MessageInput'
+
+export {default as MessageContainer} from './Container/MessageContainer';

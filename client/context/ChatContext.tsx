@@ -37,7 +37,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     if (!socket) return;
 
     const handleSendMessage = (sessionId: string, msg: Message) => sendMessage(sessionId, msg)
-    const handleSendAnonMessage = (sessionId: string, msg: Message) => sendAnonMessage(sessionId, msg)
 
     socket.on('sentMessage', handleSendMessage)
     // socket.on('sentAnonMessage', handleSendAnonMessage)

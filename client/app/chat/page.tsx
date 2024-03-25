@@ -13,6 +13,7 @@ import { Friend } from '@/interfaces/Friend';
 import { addAParticipant, backspaceParticipant, clearParticipants } from '@/features/participants/participantSlices';
 import { RootState } from '@/features/store';
 import { current } from '@reduxjs/toolkit';
+import { UserProviderWrapper } from '@/components/provider/UserProviderWrapper';
 
 export default function Page() {
   const [message, setMessage] = useState<string>('') 
@@ -145,6 +146,7 @@ export default function Page() {
   }
   
   return (
+    <UserProviderWrapper>
     <div className="flex flex-col min-h-screen bg-neutral-400	">
       <div className="flex flex-row flex-1 ">
         {/* LEFT SESSION NAVIGATION */}
@@ -246,5 +248,6 @@ export default function Page() {
         </div>
       </div>
     </div>
+    </UserProviderWrapper>
   );
 }

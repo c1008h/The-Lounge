@@ -27,15 +27,9 @@ function setupSocket(server) {
             const sessionId = createUniqueId()
             // const sessionId = await createSessionAnon()
             console.log('session created in server:', sessionId)
-
             socket.join(sessionId);
 
-            const count = io.of(sessionId).sockets.size;
-            console.log(`Client ${socket.id} joined room ${sessionId}. Total clients: ${sockets.size}`);
-
             socket.emit('anonSessionCreated', sessionId)
-            io.in(sessionId).emit('roomOccupancyUpdate', { sessionId, occupancy: count });
-
         })
 
         socket.on('addAnonToSession', async (user, sessionId) => {
@@ -46,13 +40,18 @@ function setupSocket(server) {
             // const userId = await addToAnonSession(user, sessionId)
             const userId = createUniqueId()
 
-            console.log(`User ${user} added to session ${sessionId} with user ID: ${userId}`);
-
             socket.join(sessionId);
+            const roomCount = await io.in(sessionId).fetchSockets();
+            console.log(roomCount)
 
             io.in(sessionId).emit('anonAddedToSession',  userId, user );
 
-            socket.emit('anonAddedToSession', userId, user );
+            // socket.emit('anonAddedToSession', userId, user );
+            io.in(sessionId).emit('roomOccupancyUpdate', { uid: userId, displayName: user, occupancy: roomCount });
+
+            console.log(`User ${user} added to session ${sessionId} with user ID: ${userId}. Total room count: ${roomCount}`);
+            console.log(`Client ${socket.id} joined room ${sessionId}. Total clients: ${sockets.size}`);
+
         })
 
         socket.on('disconnectAnon', async (userId, sessionId, participant) => {
@@ -61,15 +60,13 @@ function setupSocket(server) {
             console.log('participant count:', participant)
             console.log(`Removed user ${userId} from session ${sessionId}`);
 
-            // if (participant === 1) {
-            //     await deleteSession(sessionId)
-            //     console.log(`Session ${sessionId} deleted due to no participants.`);
-            // }
-
-            // await removeAnonFromSession(userId, sessionId);
-
             socket.leave(sessionId);
+
+            var room = io.sockets.adapter.rooms[sessionId];
+            
+
             io.in(sessionId).emit('userLeft', userId);
+            io.in(sessionId).emit('roomOccupancyUpdate', { userId, occupancy: room.length });
         })
 
         socket.on('sendAnonMessage', async (sessionId, message) => {

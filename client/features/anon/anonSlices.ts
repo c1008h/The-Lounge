@@ -22,7 +22,6 @@ export const anonSlice = createSlice({
     reducers: {
         setDisplayName: (state, action: PayloadAction<string>) => {
             state.displayName = action.payload;
-
         },
         setUid: (state, action: PayloadAction<string>) => {
             state.uid = action.payload;
@@ -33,15 +32,8 @@ export const anonSlice = createSlice({
         storeToken: (state, action: PayloadAction<string>) => {
             state.accessToken = action.payload;
         },
-        addParticipant: (state) => {
-            state.participantsActive += 1;
-        },
-        removeParticipant: (state) => {
-            if (state.participantsActive > 0) {
-                state.participantsActive -= 1;
-            } else {
-                console.warn("Trying to remove participant when none exist.");
-            }
+        setParticipantCount: (state, action: PayloadAction<number>) => {
+            state.participantsActive = Math.max(0, action.payload);
         },
         clearSessionId: (state) => {
             state.anonSessionId = null;
@@ -59,8 +51,7 @@ export const {
     storeSessionId, 
     storeToken,
     clearSessionId,
-    addParticipant,
-    removeParticipant
+    setParticipantCount
 } = anonSlice.actions;
 
 export default anonSlice.reducer;

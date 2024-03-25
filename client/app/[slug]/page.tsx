@@ -1,15 +1,13 @@
 "use client"
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import { ButtonTemplate, ModalTemplate, InputForm } from '@/components';
-import { useParticipants } from '@/context';
-import { useAnonParticipantsListener } from '@/hooks';
+import { ButtonTemplate, ModalTemplate, InputForm, Loading, MessageInput, MessageContainer } from '@/components';
 import { TempUserProps } from '@/interfaces/TempUser';
-import { formatTimestamp } from '@/utils/formatTimestamp'
 import { setUserSession, getUserSession, clearUserSession } from '@/utils/anonSessions'
 import { useAnonSession, useAnonMessage } from '@/hooks'
 import { RootState } from '@/features/store';
+import { useSocket } from '@/hooks/useSocket';
 
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)
@@ -18,10 +16,9 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const [anonUser, setAnonUser] = useState<TempUserProps>()
   const [displayName, setDisplayName] = useState<string>('')
   const [isSessionDeleted, setIsSessionDeleted] = useState(false);
-  const [message, setMessage] = useState('');
   const [isLinkCopied, setIsLinkCopied] = useState(false);
 
-  const { currentSession, tempUser, addUserToSession, sessionToken } = useAnonSession()
+  const { createSession, currentSession, tempUser, addUserToSession, sessionToken, removeAnon } = useAnonSession()
 
   const storedSessionId = useSelector((state: RootState) => state.anon.anonSessionId)
   const storedDisplayName = useSelector((state: RootState) => state.anon.displayName)
@@ -30,25 +27,40 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const participantCount = useSelector((state: RootState) => state.anon.participantsActive)
 
   const { sendAnonMessage, messages } = useAnonMessage()
-  const { removeAnon } = useParticipants()
+  // const { removeAnon } = useParticipants()
 
   console.log('participant count:', participantCount)
-  // const { participants } = useAnonParticipantsListener(params.slug)
-  // const { messages } = useAnonChatListener(params.slug)
+  console.log('participant count type:', typeof participantCount)
+
+  const { socket, connect } = useSocket();
+
   const router = useRouter()
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    console.log('messages:', messages)
-  }, [messages])
-  // console.log("participants:", participants)
+    const initiateChatSession = async () => {
+      await createSession(); // Ensure this is asynchronous as needed
+      // Assuming createSession updates currentSession upon success
+      if (currentSession) {
+        setLoading(false); // Hide loading indicator once session is ready
+      } else {
+        // Handle session creation failure as needed
+        router.push('/error'); // Example: navigate to an error page
+      }
+    };
 
-  useLayoutEffect(() => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 0);
-  }, [messages]);
+    initiateChatSession();
+  }, []);
+
+  // useEffect(() => {
+  //   connect(); 
+
+  //   return () => {
+  //     // disconnect()
+  //   };
+  // }, []);
+
+
+  // console.log("participants:", participants)
 
   useEffect(() => {
     setShowModal(true)
@@ -63,28 +75,13 @@ export default function Anon({ params }: { params: { slug: string } }) {
     } 
   }, [storedSessionId, storedDisplayName, storedTempUid])
 
-  // useEffect(() => {
-  //   const existingSessionData = localStorage.getItem(params.slug);
-  //   if (existingSessionData) {
-  //     const { uid, displayName } = JSON.parse(existingSessionData);
-  //     if (uid && displayName) {
-  //       setAnonUser({ uid, displayName });
-  //       setShowModal(false);
-  //     }
-  //   } else {
-  //     setShowModal(true);
-  //   }
-  // }, [params.slug]);
 
   useEffect(() => {
     if (participantCount == 0 || !anonUser || !anonUser.uid) return
 
     const handleLeave = () => {
-      // const confirmationMessage = 'Are you sure you want to leave?';
-      // event.returnValue = confirmationMessage;
-      // return confirmationMessage;
       clearUserSession(sessionToken)
-      removeAnon(anonUser.uid, params.slug, participantCount)
+      // removeAnon(anonUser.uid, params.slug, participantCount)
     }
 
     window.addEventListener('beforeunload', handleLeave)
@@ -132,28 +129,6 @@ export default function Anon({ params }: { params: { slug: string } }) {
     }
   }
 
-  const handleSendMessage =  () => {
-    if (!message || !storedDisplayName || !storedTempUid) return
-    try {
-      const messageData = {
-        message: message.trim(),
-        sender: { uid: storedTempUid, displayName: storedDisplayName
-          // uid: session.userId,
-          // displayName: session.displayName
-        },
-        timestamp: new Date()
-      }
-
-      sendAnonMessage(params.slug, messageData)
-
-    } catch (error) {
-      console.error("Error sending message:", error)
-
-    } finally {
-      setMessage('')
-    }
-  }
-
   if (showModal) {
     return (
       <ModalTemplate
@@ -174,6 +149,8 @@ export default function Anon({ params }: { params: { slug: string } }) {
       </ModalTemplate>)
   }
 
+  if (loading || !socket) return <Loading message={'Loading chat...'} />
+  
   return (
     <div className="flex flex-col h-screen">
       <div className="bg-gray-800 text-white p-4 flex justify-between flex-col">
@@ -189,50 +166,20 @@ export default function Anon({ params }: { params: { slug: string } }) {
       </div>
       <div className="flex-1 overflow-y-auto p-4">
         <div className="flex flex-col space-y-2">
-          {messages?.map((message, index) => {
-            const senderIsTempUser = message.sender.uid === anonUser?.uid;
-            // const senderDisplayName = senderIsTempUser ? "" : participants.find(p => p.uid === (message.sender.uid || message.sender))?.displayName || "Unknown";
-            console.log('messages:',messages)
-            // const senderDisplayName = senderIsTempUser ? "" : participants?.find(p => p.uid === message.sender)?.displayName || "Unknown";
-            // const formattedTimestamp = message.timestamp.toDate().toLocaleString();
-            // const formattedTimestamp = formatTimestamp(message.timestamp)
-            const isLastMessage = index === messages.length - 1;
-
-            return (
-              <div 
-                key={index} 
-                className={`flex ${message.sender.uid === anonUser?.uid ? 'justify-end' : 'justify-start'}`}
-                ref={isLastMessage ? messagesEndRef : null} 
-              >
-                <div className="flex flex-col max-w-3/4">
-                  <p className={`text-sm ${senderIsTempUser ? 'text-right' : 'text-left'}`}>{message.sender.displayName}</p>
-                  <div className={`py-2 px-4 rounded-lg max-w-3/4 ${message.sender.uid === anonUser?.uid ? 'bg-blue-600 text-white' : 'bg-gray-300'}`}>
-                    <p>{message.message}</p>
-                    {/* <p>{formattedTimestamp}</p> */}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+          <MessageContainer 
+            messages={messages} 
+            uid={storedTempUid}
+            displayName={storedDisplayName}
+          />
         </div>
       </div>
       <div className="bg-gray-800 p-4 flex justify-between items-center">
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault(); 
-            handleSendMessage();
-          }}
-          className="flex w-full"
-        >
-          <input 
-            type="text" 
-            value={message} 
-            onChange={(e) => setMessage(e.target.value)} 
-            placeholder="Type your message..." 
-            className="mr-2 px-4 py-2 border border-gray-300 rounded-md w-full" 
-          />
-          <button type='submit' className="bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => handleSendMessage()}>Send</button>
-        </form>
+        <MessageInput 
+          sendMessage={sendAnonMessage}
+          sessionId={params.slug}
+          uid={storedTempUid}
+          displayName={storedDisplayName}
+        />
       </div>
     </div>
   )

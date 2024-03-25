@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { useSocket } from '../useSocket'; 
 import { TempUserProps, AddAnonSessionResponse } from '@/interfaces/TempUser';
 import { useDispatch } from 'react-redux';
-import { setDisplayName, setUid, storeSessionId, storeToken, clearSessionId } from '@/features/anon/anonSlices'
+import { setDisplayName, setUid, storeSessionId, storeToken, clearSessionId, setParticipantCount } from '@/features/anon/anonSlices'
 import { setUserSession } from '@/utils/anonSessions'
 import { generateTempId } from '@/utils/generateTempId';
 
@@ -12,6 +12,7 @@ interface UseAnonSessionProps {
     createSession: () => void;
     addUserToSession: (displayName: string, sessionId: string) => void;
     sessionToken: string;
+    removeAnon: (userId: string, sessionId: string, participant: number) => void;
 }
 
 export const useAnonSession = (): UseAnonSessionProps => {
@@ -42,6 +43,11 @@ export const useAnonSession = (): UseAnonSessionProps => {
             }
         });
     }, [socket]);
+
+    const removeAnon = useCallback((userId: string, sessionId: string, participant: number) => {
+        if (socket) socket.emit('disconnectAnon', userId, sessionId, participant);
+        
+    }, [socket])
 
     useEffect(() => {
         if (sessionToken && currentSession && tempUser) {
@@ -77,15 +83,27 @@ export const useAnonSession = (): UseAnonSessionProps => {
 
         }
 
+        const updateRoomCount = (uid: string, displayName: string, occupancy: number) => {
+            dispatch(setParticipantCount(occupancy))
+        }
+
+        const handleRemoveAnon = (userId: string, sessionId: string, participant: number) => removeAnon(userId, sessionId, participant)
+
         socket.on('anonSessionCreated', handleCreateAnonSession)
         socket.on('anonAddedToSession', handleAddToAnon)
+        socket.on('roomOccupancyUpdate', updateRoomCount)
+        socket.on('anonRemoved', handleRemoveAnon);
+
 
         return () => {
             socket.off('anonSessionCreated', handleCreateAnonSession)
             socket.off('anonAddedToSession', handleAddToAnon)
+            socket.off('roomOccupancyUpdate', updateRoomCount)
+            socket.off('anonRemoved', handleRemoveAnon);
+
         }
 
     }, [socket])
 
-    return { currentSession, createSession, addUserToSession, tempUser, sessionToken };
+    return { currentSession, createSession, addUserToSession, tempUser, sessionToken, removeAnon };
 };
