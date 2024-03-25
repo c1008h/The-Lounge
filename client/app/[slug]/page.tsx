@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { ButtonTemplate, ModalTemplate, InputForm, Loading, MessageInput, MessageContainer } from '@/components';
 import { TempUserProps } from '@/interfaces/TempUser';
-import { setUserSession, getUserSession, clearUserSession } from '@/utils/anonSessions'
+import { setUserSession, clearUserSession } from '@/utils/anonSessions'
 import { useAnonSession, useAnonMessage } from '@/hooks'
 import { RootState } from '@/features/store';
 import { storeSessionId } from '@/features/anon/anonSlices';
@@ -22,7 +22,6 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const storedSessionId = useSelector((state: RootState) => state.anon.anonSessionId)
   const storedDisplayName = useSelector((state: RootState) => state.anon.displayName)
   const storedTempUid = useSelector((state: RootState) => state.anon.uid)
-  const storedToken = useSelector((state: RootState) => state.anon.accessToken)
   const participantCount = useSelector((state: RootState) => state.anon.participantsActive)
 
   const { sendAnonMessage, messages } = useAnonMessage()
@@ -65,7 +64,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
 
 
   useEffect(() => {
-    if (!storedDisplayName || !storedTempUid) return
+    if (!storedDisplayName || !storedTempUid || typeof window === 'undefined') return
 
     const handleLeave = () => {
       clearUserSession(sessionToken)
