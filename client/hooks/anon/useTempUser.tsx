@@ -90,7 +90,8 @@ export const useAnonSession = (): UseAnonSessionProps => {
 
         }
 
-        const updateRoomCount = (uid: string, displayName: string, occupancy: number) => {
+        const updateRoomCount = (occupancy: number) => {
+            console.log('occupancy:', occupancy)
             dispatch(setParticipantCount(occupancy))
         }
 
@@ -100,6 +101,7 @@ export const useAnonSession = (): UseAnonSessionProps => {
         socket.on('anonAddedToSession', handleAddToAnon)
         socket.on('roomOccupancyUpdate', updateRoomCount)
         socket.on('anonRemoved', handleRemoveAnon);
+        socket.on('roomOccupancyUpdate', updateRoomCount)
 
 
         return () => {
@@ -107,6 +109,8 @@ export const useAnonSession = (): UseAnonSessionProps => {
             socket.off('anonAddedToSession', handleAddToAnon)
             socket.off('roomOccupancyUpdate', updateRoomCount)
             socket.off('anonRemoved', handleRemoveAnon);
+            socket.off('roomOccupancyUpdate', updateRoomCount)
+
 
         }
 

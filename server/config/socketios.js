@@ -26,22 +26,23 @@ function setupSocket(server) {
         })
 
         socket.on('addAnonToSession', async (user, sessionId) => {
-            
             console.log("SOCKET ROOM in addAnonToSession:", socket.rooms);
             console.log("SOCKET ID ON ADDING TO SESSION:", socket.id);
 
             const userId = createUniqueId()
 
             socket.join(sessionId);
-            const roomCount = socket.rooms.length;
-            // console.log(roomCount)
+            // const roomCount = socket.rooms.length;
+            const clients = await io.in(sessionId).fetchSockets();
+            // const clients = await io.in(roomId).allSockets();
+            const numClients = clients.length;
+            console.log('amount of roomcount:', numClients)
 
             io.in(sessionId).emit('anonAddedToSession',  userId, user );
+            io.in(sessionId).emit('roomOccupancyUpdate', numClients);
 
-            io.in(sessionId).emit('roomOccupancyUpdate', { uid: userId, displayName: user, occupancy: roomCount });
-
-            console.log(`User ${user} added to session ${sessionId} with user ID: ${userId}. Total room count: ${roomCount}`);
-            console.log(`Client ${socket.id} joined room ${sessionId}. Total clients: ${sockets.size}`);
+            console.log(`User ${user} added to session ${sessionId} with user ID: ${userId}. Total room count: ${numClients}`);
+            // console.log(`Client ${socket.id} joined room ${sessionId}. Total clients: ${sockets.size}`);
 
         })
 
@@ -175,8 +176,9 @@ function setupSocket(server) {
             console.log(`User ${userId} left room ${roomId}`);
         })
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', ({ sessionId }) => {
             console.log('user disconnected')
+            socket.leave(sessionId)
         })
     });
     
