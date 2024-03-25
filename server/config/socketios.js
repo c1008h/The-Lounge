@@ -38,23 +38,31 @@ function setupSocket(server) {
             const numClients = await findNumberOfClients(sessionId)
             console.log('amount of roomcount:', numClients)
 
+            const msg = {
+                message: `${user} has joined the chat`,
+                type: 'notification',
+                sender: 'system',
+                timestamp: new Date()
+            }
             
-            io.in(sessionId).emit('anonAddedToSession',  userId, user );
+            io.in(sessionId).emit('anonAddedToSession',  user, sessionId, userId );
+            io.in(sessionId).emit('receivedNotification', msg);
             io.in(sessionId).emit('roomOccupancyUpdate', numClients);
+            
+            // io.in(sessionId).emit('newUserNotification', userId, displayName)
 
             console.log(`User ${user} added to session ${sessionId} with user ID: ${userId}. Total room count: ${numClients}`);
         })
 
-        socket.on('disconnectAnon', async (userId, sessionId, participant) => {
+        socket.on('disconnectAnon', async (userId, displayName, sessionId) => {
             console.log('user id:', userId)
             console.log('session id:', sessionId)
-            console.log('participant count:', participant)
             console.log(`Removed user ${userId} from session ${sessionId}`);
             const numClients = await findNumberOfClients(sessionId)
 
             socket.leave(sessionId);
 
-            io.in(sessionId).emit('userLeft', userId);
+            io.in(sessionId).emit('anonRemoved', userId, displayName);
             io.in(sessionId).emit('roomOccupancyUpdate', numClients);
         })
 

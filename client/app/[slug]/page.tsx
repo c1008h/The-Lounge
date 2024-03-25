@@ -17,14 +17,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const [displayName, setDisplayName] = useState<string>('')
   const [isSessionDeleted, setIsSessionDeleted] = useState(false);
   const [isLinkCopied, setIsLinkCopied] = useState(false);
-  const { 
-    createSession, 
-    currentSession, 
-    tempUser, 
-    addUserToSession, 
-    sessionToken, 
-    removeAnon 
-  } = useAnonSession()
+  const { createSession, currentSession, tempUser, addUserToSession, sessionToken, removeAnon } = useAnonSession()
 
   const storedSessionId = useSelector((state: RootState) => state.anon.anonSessionId)
   const storedDisplayName = useSelector((state: RootState) => state.anon.displayName)
@@ -33,18 +26,12 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const participantCount = useSelector((state: RootState) => state.anon.participantsActive)
 
   const { sendAnonMessage, messages } = useAnonMessage()
-  // const { removeAnon } = useParticipants()
-
-  console.log('participant count:', participantCount)
-  // console.log('participant count type:', typeof participantCount)
-
 
   const router = useRouter()
   const dispatch = useDispatch()
+
   useEffect(() => {
-    const currentParam = params.slug
-    console.log('current param:', currentParam)
-    
+    const currentParam = params.slug    
     const initiateChatSession = async () => {
       await createSession(params.slug); 
       
@@ -78,17 +65,17 @@ export default function Anon({ params }: { params: { slug: string } }) {
 
 
   useEffect(() => {
-    if (participantCount == 0 || !anonUser || !anonUser.uid) return
+    if (!storedDisplayName || !storedTempUid) return
 
     const handleLeave = () => {
       clearUserSession(sessionToken)
-      // removeAnon(anonUser.uid, params.slug, participantCount)
+      removeAnon(storedTempUid, storedDisplayName, params.slug)
     }
 
     window.addEventListener('beforeunload', handleLeave)
 
     return () => window.removeEventListener('beforeunload', handleLeave);
-  }, [removeAnon, anonUser, params.slug, participantCount])
+  }, [removeAnon, storedTempUid, params.slug, storedDisplayName])
 
   const copyLinkToClipboard = () => {
     if (typeof navigator !== 'undefined') {
@@ -137,16 +124,22 @@ export default function Anon({ params }: { params: { slug: string } }) {
         onClose={() => setShowModal(false)}
         visible={showModal}
       >
-        <div className='flex flex-row items-center'>
+        <form 
+          className='flex flex-col items-center justify-center w-full mx-auto my-0'       
+          onSubmit={(e) => {
+            e.preventDefault(); 
+            handleAddUser();
+          }}
+        >
           <InputForm onValueChange={(value: string) => setDisplayName(value)} value={displayName} placeholder={'Enter your name'}/>
-        </div>
-        {showError && <p>Error saving. Try again!</p>}
-        <ButtonTemplate 
-          label='Save' 
-          className='justify-center' 
-          onPress={handleAddUser}
-          disabled={displayName.trim().length <= 3}
-        />
+          {showError && <p>Error saving. Try again!</p>}
+          <ButtonTemplate 
+            label='Save' 
+            className='justify-center w-full' 
+            onPress={handleAddUser}
+            disabled={displayName.trim().length <= 3}
+          />
+        </form>
       </ModalTemplate>)
   }
 

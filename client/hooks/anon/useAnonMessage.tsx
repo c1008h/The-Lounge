@@ -26,12 +26,20 @@ export const useAnonMessage = (): AnonMessageProps => {
             console.log('new message received:', newMessage)
             setMessages(prev => [...prev, newMessage]);
         };
+
+        const handleNotification = (newMessage: Message) => {
+            setMessages(prev => [...prev, newMessage]);
+        }
+
         // socket.on('sentAnonMessage', handleSendAnonMessage)
         socket.on('receiveAnonMessage', handleReceiveAnonMessage);
+        socket.on('receivedNotification', handleNotification)
 
         return () => {
             // socket.off('sentAnonMessage', handleSendAnonMessage)
             socket.off('receiveAnonMessage', handleReceiveAnonMessage);
+            socket.off('receivedNotification', handleNotification)
+
         }
 
     }, [socket])

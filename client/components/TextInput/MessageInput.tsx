@@ -9,6 +9,7 @@ export default function MessageInput({ sendMessage, sessionId, uid, displayName 
     try {
       const messageData = {
         message: message.trim(),
+        type: 'message',
         sender: { uid: uid, displayName: displayName },
         timestamp: new Date()
       }

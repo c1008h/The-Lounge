@@ -20,7 +20,6 @@ export const useAnonSession = (): UseAnonSessionProps => {
     const [currentSession, setCurrentSession] = useState('');
     const [sessionToken, setSessionToken] = useState<string>('') 
     const [tempUser, setTempUser] = useState<TempUserProps | null>(null);
-
     const dispatch = useDispatch(); 
 
     useEffect(() => {
@@ -62,8 +61,8 @@ export const useAnonSession = (): UseAnonSessionProps => {
         });
     }, [socket]);
 
-    const removeAnon = useCallback((userId: string, sessionId: string, participant: number) => {
-        if (socket) socket.emit('disconnectAnon', userId, sessionId, participant);
+    const removeAnon = useCallback((userId: string, displayName: string, sessionId: string) => {
+        if (socket) socket.emit('disconnectAnon', userId, displayName, sessionId);
         
     }, [socket])
 
@@ -87,18 +86,9 @@ export const useAnonSession = (): UseAnonSessionProps => {
             setSessionToken(tempSessionId);
         }
 
-        const handleAddToAnon = (uid: string, displayName: string) => {
-            console.log('returned temp user id:', uid)
-            console.log('returned temp user display name:', displayName)
-
-            // dispatch(setDisplayName(displayName))
-            // dispatch(setUid(uid))
-            
-            // setTempUser({ 
-            //     displayName: displayName,
-            //     uid: uid
-            // })
-
+        const handleAddToAnon = (user: string, sessionId: string, userId: string) => {
+            console.log('returned temp user id:', userId)
+            console.log('returned temp user display name:', user)
         }
 
         const updateRoomCount = (occupancy: number) => {
@@ -106,7 +96,22 @@ export const useAnonSession = (): UseAnonSessionProps => {
             dispatch(setParticipantCount(occupancy))
         }
 
-        const handleRemoveAnon = (userId: string, sessionId: string, participant: number) => removeAnon(userId, sessionId, participant)
+        const handleRemoveAnon = (userId: string, displayName: string, sessionId: string) => {
+            // removeAnon(userId, sessionId, participant)
+            try {
+                const messageData = {
+                  message: `${displayName} has left the chat`,
+                  type: 'notification',
+                  sender: 'system',
+                  timestamp: new Date()
+                }
+          
+                sendAnonMessage(sessionId, messageData)
+            } catch (error) {
+                console.error('error broadcasting notification:',  error)
+            }
+        }
+
 
         socket.on('anonSessionCreated', handleCreateAnonSession)
         socket.on('anonAddedToSession', handleAddToAnon)
