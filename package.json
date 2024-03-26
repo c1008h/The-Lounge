@@ -7,7 +7,7 @@
     "npm":"10.x"
   },
   "scripts": {
-    "build": "cd client && npm install && npm run build",
+    "build": "cd client && npm install --production=false && npm run build && npm ci",
     "start": "cd client && npm run start",
     "dev:next": "cd client && npm run dev",
     "dev": "npm-run-all --parallel dev:next dev:server",
