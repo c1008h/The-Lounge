@@ -25,7 +25,15 @@
     "paths": {
       "@/*": [
         "./*"
-      ]
+      ],
+      "@/components/*": ["components/*"],
+      "@/context/*": ["context/*"],
+      "@/features/*": ["features/*"],
+      "@/hooks/*": ["hooks/*"],
+      "@/interface/*": ["interface/*"],
+      "@/provider/*": ["provider/*"],
+      "@/services/*": ["services/*"],
+      "@/utils/*": ["utils/*"]
     }
   },
   "include": [
