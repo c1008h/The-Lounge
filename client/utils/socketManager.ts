@@ -6,7 +6,7 @@ class SocketManager {
     connect() {
         if (!this.socket) {
             console.log('Creating new socket connection');
-            this.socket = io(process.env.NEXT_PUBLIC_SOCKET_PORT || process.env.NEXT_PUBLIC_DEPLOY as string);
+            this.socket = io(process.env.NEXT_PUBLIC_DEPLOY as string);
             this.socket.on('connect', () => {
                 console.log(`Socket connected: ${this.socket?.id}`);
             });
