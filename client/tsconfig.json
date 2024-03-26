@@ -28,7 +28,7 @@
       "@/context/*": ["context/*"],
       "@/features/*": ["features/*"],
       "@/hooks/*": ["hooks/*"],
-      "@/interface/*": ["interface/*"],
+      "@/interfaces/*": ["interfaces/*"],
       "@/provider/*": ["provider/*"],
       "@/services/*": ["services/*"],
       "@/utils/*": ["utils/*"]
