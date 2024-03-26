@@ -23,9 +23,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
+      "@/*": ["*"],
       "@/components/*": ["components/*"],
       "@/context/*": ["context/*"],
       "@/features/*": ["features/*"],
