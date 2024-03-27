@@ -77,12 +77,10 @@ export const useAnonSession = (): UseAnonSessionProps => {
         if (!socket) return
 
         const handleCreateAnonSession = (tempSessionId: string) => {
-            // const tempSessionId = generateTempId()
             dispatch(storeSessionId(tempSessionId));
             console.log('temp session', tempSessionId)
             
             setCurrentSession(tempSessionId);
-            console.log("TEMPSESSION:", tempSessionId)
             setSessionToken(tempSessionId);
         }
 
@@ -104,16 +102,12 @@ export const useAnonSession = (): UseAnonSessionProps => {
         socket.on('anonAddedToSession', handleAddToAnon)
         socket.on('roomOccupancyUpdate', updateRoomCount)
         socket.on('anonRemoved', handleRemoveAnon);
-        socket.on('roomOccupancyUpdate', updateRoomCount)
 
         return () => {
             socket.off('anonSessionCreated', handleCreateAnonSession)
             socket.off('anonAddedToSession', handleAddToAnon)
             socket.off('roomOccupancyUpdate', updateRoomCount)
             socket.off('anonRemoved', handleRemoveAnon);
-            socket.off('roomOccupancyUpdate', updateRoomCount)
-
-
         }
 
     }, [socket])
