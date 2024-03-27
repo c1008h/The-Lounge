@@ -21,8 +21,27 @@ function setupSocket(server) {
         return numClients
     }
 
+    io.use((socket, next) => {
+        const token = socket.handshake.auth.token;
+        if (token) {
+          try {
+            const decodedToken = verifyToken(token); 
+            socket.userId = decodedToken.userId; 
+            console.log(`Authenticated user with ID: ${socket.userId}`);
+            return next();
+          } catch (error) {
+            console.error('Authentication failed:', error.message);
+            return next(new Error('Authentication error'));
+          }
+        } else {
+          console.error('Authentication token not provided');
+          return next(new Error('Authentication token not provided'));
+        }
+    })
+
     io.on('connection', (socket) => {
         console.log('a user connected');
+
 
         socket.on('createAnonSession', async (sessionId) => {
             console.log("SOCKET ROOM:", socket.rooms);
