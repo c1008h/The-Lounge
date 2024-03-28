@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { socketManager } from '@/utils/socketManager';
 
-export const useSocket = (): { socket: Socket | null, connect: () => void } => {
+export const useSocket = (token: string): { socket: Socket | null, connect: () => void } => {
   const [socket, setSocket] = useState<Socket | null>(socketManager.getSocket());
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export const useSocket = (): { socket: Socket | null, connect: () => void } => {
   }, []);
 
   const connect = () => {
-    socketManager.connect();
+    socketManager.connect(token);
   };
 
   return { socket, connect };

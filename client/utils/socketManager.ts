@@ -9,7 +9,7 @@ class SocketManager {
         transports: ['websocket', 'polling'], // Fallback to polling if WebSocket is not available
     };
 
-    connect() {
+    connect(token: string) {
         if (!this.socket) {
             console.log('Creating new socket connection');
             this.socket = io(process.env.NEXT_PUBLIC_DEPLOY as string, this.defaultOptions);

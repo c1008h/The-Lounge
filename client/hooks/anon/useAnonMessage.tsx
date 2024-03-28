@@ -8,7 +8,7 @@ interface AnonMessageProps {
 }
 
 export const useAnonMessage = (): AnonMessageProps => {
-    const { socket } = useSocket();
+    const { socket } = useSocket(process.env.PUBLIC_NEXT_ANON_TOKEN || '');
     const [messages, setMessages] = useState<Message[]>([]);
 
     const sendAnonMessage = useCallback((sessionId: string, newMessage: Message) => {
@@ -39,9 +39,7 @@ export const useAnonMessage = (): AnonMessageProps => {
             // socket.off('sentAnonMessage', handleSendAnonMessage)
             socket.off('receiveAnonMessage', handleReceiveAnonMessage);
             socket.off('receivedNotification', handleNotification)
-
         }
-
     }, [socket])
 
     return { messages, sendAnonMessage };

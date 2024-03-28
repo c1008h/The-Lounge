@@ -16,7 +16,7 @@ interface UseAnonSessionProps {
 }
 
 export const useAnonSession = (): UseAnonSessionProps => {
-    const { socket, connect } = useSocket();
+    const { socket, connect } = useSocket(process.env.NEXT_PUBLIC_ANON_TOKEN || '');
     const [currentSession, setCurrentSession] = useState('');
     const [sessionToken, setSessionToken] = useState<string>('') 
     const [tempUser, setTempUser] = useState<TempUserProps | null>(null);
@@ -24,6 +24,7 @@ export const useAnonSession = (): UseAnonSessionProps => {
 
     useEffect(() => {
         connect(); 
+
         return () => {
         // disconnect()
         };
