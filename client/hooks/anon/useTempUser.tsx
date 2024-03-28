@@ -24,7 +24,6 @@ export const useAnonSession = (): UseAnonSessionProps => {
 
     useEffect(() => {
         connect(); 
-
         return () => {
         // disconnect()
         };
