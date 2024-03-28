@@ -28,7 +28,7 @@ export const useSession = (): SessionContextType => {
 }
 
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
-    const { socket } = useSocket()
+    const { socket } = useSocket('user token')
     const [sessions, setSessions] = useState<Session[]>([]);
     const [currentSessionId, setCurrentSessionId] = useState<string>('')
     const dispatch = useDispatch(); 

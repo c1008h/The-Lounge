@@ -26,7 +26,7 @@ export const useFriend = (): FriendContextType => {
 }
 
 export const FriendProvider = ({ children }: { children: ReactNode }) => {
-    const { socket } = useSocket(); 
+    const { socket } = useSocket('user token'); 
     const [friends, setFriends] = useState<Friend[]>([]);
     const [isFriendFound, setIsFriendFound] = useState<Friend | undefined>(undefined);
     const [successfullyAdded, setSuccessfullyAdded] = useState<boolean | null>(null)

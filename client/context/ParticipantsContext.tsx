@@ -21,7 +21,7 @@ export const useParticipants = (): ParticipantsContextType => {
 };
 
 export const ParticipantsProvider = ({ children }: { children: ReactNode }) => {
-    const { socket } = useSocket();
+    const { socket } = useSocket('user token');
     const [participants, setParticipants] = useState<Participant[]>([]);
 
     const addParticipant = useCallback((sessionId: string, participant: Participant) => {

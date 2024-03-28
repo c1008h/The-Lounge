@@ -17,7 +17,7 @@ export const useChat = (): ChatContextType => {
 };
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
-  const { socket } = useSocket();
+  const { socket } = useSocket('user token');
   const [messages, setMessages] = useState<Message[]>([]);
 
   const sendMessage = useCallback((sessionId: string, newMessage: Message) => {
