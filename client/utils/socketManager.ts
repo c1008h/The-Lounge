@@ -12,7 +12,10 @@ class SocketManager {
     connect(token: string) {
         if (!this.socket) {
             console.log('Creating new socket connection');
-            this.socket = io(process.env.NEXT_PUBLIC_DEPLOY as string, this.defaultOptions);
+            this.socket = io(process.env.NEXT_PUBLIC_DEPLOY as string, {
+                ...this.defaultOptions,
+                auth: { token }
+            });
             this.socket.on('connect', () => {
                 console.log(`Socket connected: ${this.socket?.id}`);
             });
