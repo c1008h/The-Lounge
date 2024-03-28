@@ -6,7 +6,7 @@ import {ProviderWrapper} from '@/components/provider/ProviderWrapper'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Super Cool Chat",
+  title: "The Lounge",
   description: "Created by Chris Hong",
 };
 

@@ -14,7 +14,7 @@ interface SessionProps {
 }
 
 export const useSession = (): SessionProps => {
-    const { socket } = useSocket();
+    const { socket } = useSocket('user string');
     const [sessions, setSessions] = useState<Session[]>([]);
     const [currentSessionId, setCurrentSessionId] = useState<string>('')
     const dispatch = useDispatch(); 
