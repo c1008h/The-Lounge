@@ -8,7 +8,7 @@ interface MessageProps {
 }
 
 export const useMessage = (): MessageProps => {
-    const { socket } = useSocket();
+    const { socket } = useSocket('user string');
     const [messages, setMessages] = useState<Message[]>([]);
 
     const sendMessage = useCallback((sessionId: string, newMessage: Message) => {

@@ -11,7 +11,7 @@ interface ParticipantProps {
 }
 
 export const useParticipants = (): ParticipantProps => {
-    const { socket } = useSocket();
+    const { socket } = useSocket('user string');
     const [participants, setParticipants] = useState<Participant[]>([]);
 
     const dispatch = useDispatch(); 

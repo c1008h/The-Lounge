@@ -16,7 +16,7 @@ interface FriendProps {
 }
 
 export const useFriend = (): FriendProps => {
-    const { socket } = useSocket();
+    const { socket } = useSocket('user string');
     const [friends, setFriends] = useState<Friend[]>([]);
     const [isFriendFound, setIsFriendFound] = useState<Friend | undefined>(undefined);
     const [successfullyAdded, setSuccessfullyAdded] = useState<boolean | null>(null)
