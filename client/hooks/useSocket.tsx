@@ -6,21 +6,24 @@ export const useSocket = (token: string): { socket: Socket | null, connect: () =
   const [socket, setSocket] = useState<Socket | null>(socketManager.getSocket());
 
   useEffect(() => {
+    socketManager.connect(token);
+    let currentSocket = socketManager.getSocket();
+    setSocket(currentSocket)
+
     const handleConnect = () => setSocket(socketManager.getSocket());
     const handleDisconnect = () => setSocket(null);
 
-    // Assuming the socket instance could be null, check before attaching event listeners
-    socketManager.getSocket()?.on('connect', handleConnect);
-    socketManager.getSocket()?.on('disconnect', handleDisconnect);
+
+    currentSocket?.on('connect', handleConnect);
+    currentSocket?.on('disconnect', handleDisconnect);
 
     return () => {
-      const currentSocket = socketManager.getSocket();
       if (currentSocket) {
         currentSocket.off('connect', handleConnect);
         currentSocket.off('disconnect', handleDisconnect);
       }
     };
-  }, []);
+  }, [token]);
 
   const connect = () => {
     socketManager.connect(token);
