@@ -104,10 +104,7 @@ export default function Anon({ params }: { params: { slug: string } }) {
       addUserToSession(displayName, params.slug)
 
       console.log('temp user in page file:', tempUser)
-      if (displayName.length < 3) {
-        setShowError(true)
-        setErrorMessage("Display name must be longer than 3 characters.")
-      } else if (storedTempUid && storedDisplayName) {
+      if (storedTempUid && storedDisplayName) {
         setShowModal(false)
       } else {
         setShowError(true)
@@ -133,7 +130,13 @@ export default function Anon({ params }: { params: { slug: string } }) {
           className='flex flex-col items-center justify-center w-full mx-auto my-0'       
           onSubmit={(e) => {
             e.preventDefault(); 
-            handleAddUser();
+            if (displayName.length > 3) {
+              setShowError(false)
+              handleAddUser();
+            } else {
+              setShowError(true)
+              setErrorMessage("Display name must be longer than 3 characters.")
+            }
           }}
         >
           <InputForm onValueChange={(value: string) => setDisplayName(value)} value={displayName} placeholder={'Enter your name'}/>
@@ -154,12 +157,12 @@ export default function Anon({ params }: { params: { slug: string } }) {
     <div className="flex flex-col h-screen">
       <div className="bg-gray-800 text-white p-4 flex justify-between flex-col">
         <div className='flex flex-row justify-between'>
-          <div>Chat Room</div>
-          <div>{participantCount} {participantCount === 1 ? 'person' : 'people'} in the chat</div>
+          <div>The Lounge</div>
+          <div>{participantCount} {participantCount === 1 ? 'person' : 'people'} in the lounge</div>
         </div>
         <div>
           {/* Instructions for sharing the chatroom link */}
-          Share this link with friends to chat: {`${window.location.origin}/${params.slug}`}
+          Share this link with friends to join: {`${window.location.origin}/${params.slug}`}
           <button onClick={copyLinkToClipboard} className="ml-2 px-2 py-1 bg-gray-600 text-white rounded-md">{isLinkCopied ? 'Copied!' : 'Copy Link'}</button>
         </div>
       </div>
