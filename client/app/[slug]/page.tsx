@@ -7,7 +7,7 @@ import { TempUserProps } from '@/interfaces/TempUser';
 import { setUserSession, clearUserSession } from '@/utils/anonSessions'
 import { useAnonSession, useAnonMessage } from '@/hooks'
 import { RootState } from '@/features/store';
-import { storeSessionId } from '@/features/anon/anonSlices';
+import { storeSessionId, clearSessionId } from '@/features/anon/anonSlices';
 
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)
@@ -119,6 +119,11 @@ export default function Anon({ params }: { params: { slug: string } }) {
     }
   }
 
+  const handleLeave = async () => {
+    dispatch(clearSessionId())
+    router.replace('/')
+  }
+
   if (showModal) {
     return (
       <ModalTemplate
@@ -157,13 +162,17 @@ export default function Anon({ params }: { params: { slug: string } }) {
     <div className="flex flex-col h-screen">
       <div className="bg-gray-800 text-white p-4 flex justify-between flex-col">
         <div className='flex flex-row justify-between'>
-          <div>The Lounge</div>
-          <div>{participantCount} {participantCount === 1 ? 'person' : 'people'} in the lounge</div>
+          <div className='text-2xl font-bold text-white md:text-3xl lg:text-4xl'>The Lounge</div>
+          <div>
+            {participantCount} {participantCount === 1 ? 'person' : 'people'} in the lounge
+          </div>
         </div>
-        <div>
-          {/* Instructions for sharing the chatroom link */}
-          Share this link with friends to join: {`${window.location.origin}/${params.slug}`}
-          <button onClick={copyLinkToClipboard} className="ml-2 px-2 py-1 bg-gray-600 text-white rounded-md">{isLinkCopied ? 'Copied!' : 'Copy Link'}</button>
+        <div className='flex flex-row justify-between'>
+          <div>
+            Share this link with friends to join: {`${window.location.origin}/${params.slug}`}
+            <ButtonTemplate onPress={copyLinkToClipboard} className="ml-2 px-2 py-1 bg-gray-600 text-white rounded-md" label={isLinkCopied ? 'Copied!' : 'Copy Link'} />
+          </div>
+          <ButtonTemplate onPress={handleLeave} className='ml-4 px-2 py-1 bg-red-600 text-white rounded-md' label='Leave'/>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4">
