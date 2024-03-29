@@ -72,7 +72,7 @@ NEXT_PUBLIC_DEPLOY_URL=http://localhost:8080
 
 ### Installation for Local Development
 
-1. Clone the repository:```bash git clone git@github.com:c1008h/The-Lounge.git```
+1. Fork and Clone the repository:```bash git clone git@github.com:c1008h/The-Lounge.git```
 2. Navigate into the directory: ```cd The-Loung```
 3. Install the dependencies: ```npm install``` or if you are using Yarn: ```yarn install```
 
