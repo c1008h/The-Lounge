@@ -126,8 +126,10 @@ export default function Anon({ params }: { params: { slug: string } }) {
         <form 
           className='flex flex-col items-center justify-center w-full mx-auto my-0'       
           onSubmit={(e) => {
-            e.preventDefault(); 
-            handleAddUser();
+            if (displayName.length > 3) {
+              e.preventDefault(); 
+              handleAddUser();
+            }
           }}
         >
           <InputForm onValueChange={(value: string) => setDisplayName(value)} value={displayName} placeholder={'Enter your name'}/>
