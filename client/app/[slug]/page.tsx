@@ -12,6 +12,7 @@ import { storeSessionId } from '@/features/anon/anonSlices';
 export default function Anon({ params }: { params: { slug: string } }) {
   const [showModal, setShowModal] = useState<boolean>(false)
   const [showError, setShowError] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [anonUser, setAnonUser] = useState<TempUserProps>()
   const [displayName, setDisplayName] = useState<string>('')
@@ -97,20 +98,25 @@ export default function Anon({ params }: { params: { slug: string } }) {
   const handleAddUser = async () => {
     try {
       setShowError(false)
+      setErrorMessage('')
       setLoading(true)
 
       addUserToSession(displayName, params.slug)
 
       console.log('temp user in page file:', tempUser)
-
-      if (storedTempUid && storedDisplayName) {
+      if (displayName.length < 3) {
+        setShowError(true)
+        setErrorMessage("Display name must be longer than 3 characters.")
+      } else if (storedTempUid && storedDisplayName) {
         setShowModal(false)
       } else {
         setShowError(true)
+        setErrorMessage("Error saving. Try again!")
       }
     } catch (error) {
       console.error("Error adding user:", error)
       setShowError(true);
+      setErrorMessage(`Error: ${error}`)
     } finally {
       setLoading(false)
     }
@@ -126,14 +132,12 @@ export default function Anon({ params }: { params: { slug: string } }) {
         <form 
           className='flex flex-col items-center justify-center w-full mx-auto my-0'       
           onSubmit={(e) => {
-            if (displayName.length > 3) {
-              e.preventDefault(); 
-              handleAddUser();
-            }
+            e.preventDefault(); 
+            handleAddUser();
           }}
         >
           <InputForm onValueChange={(value: string) => setDisplayName(value)} value={displayName} placeholder={'Enter your name'}/>
-          {showError && <p>Error saving. Try again!</p>}
+          {showError && <p>{errorMessage}</p>}
           <ButtonTemplate 
             label='Save' 
             className='justify-center w-full' 
