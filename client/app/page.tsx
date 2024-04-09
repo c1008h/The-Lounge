@@ -32,19 +32,19 @@ export default function Home() {
         {/* <link rel="icon" href="/favicon.ico" /> */}
       </Head>
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-white mb-6">Welcome to the Chatroom</h1>
+        <h1 className="text-4xl font-bold text-white mb-6">Welcome to The Lounge</h1>
         <p className="text-lg text-white mb-8">Connect with your friends anytime, anywhere. Share moments, have fun, and stay connected.</p>
         <ButtonTemplate 
           label="Click here to get started!"
           onPress={handleGetStarted}
           className="px-8 py-3 bg-white text-blue-500 font-semibold rounded-md shadow-md hover:bg-blue-600 hover:text-white transition duration-300"
         />
-        <div className="mt-12 flex justify-center items-center">
-          <FontAwesomeIcon icon={faComment} className="text-white text-4xl" /> {/* Use the icon */}
-        </div>
+        {/* <div className="mt-12 flex justify-center items-center">
+          <FontAwesomeIcon icon={faComment} className="text-white text-4xl" /> 
+        </div> */}
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-white mb-4">Features</h2>
-          <div className="flex justify-center items-center space-x-8">
+          <div className="flex justify-center items-center space-x-7 m-4">
             <FeatureCard 
               icon="💬"
               title="Real-time Chat"

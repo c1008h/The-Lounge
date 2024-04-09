@@ -22,6 +22,7 @@ export const useFriendListener = (userId: string) => {
         
         try {
             const q = query(userCollection, where("uid", "==", userId))
+            
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const friendsData: Friend[] = []
                 const friendRequestsData: Friend[] = [];

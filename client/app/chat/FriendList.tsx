@@ -12,10 +12,11 @@ import { FaRegMessage } from "react-icons/fa6";
 
 interface FriendListProps {
     userId: string;
+    visible: boolean;
+    setVisible: (value: boolean) => void;
 }
 
-export default function FriendList({ userId }: FriendListProps) {
-    const [visible, setVisible] = useState(false)
+export default function FriendList({ userId, visible, setVisible  }: FriendListProps) {
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const buttonRef = useRef<HTMLDivElement>(null);
     const [searchMade, setSearchMade] = useState(false)
@@ -31,7 +32,7 @@ export default function FriendList({ userId }: FriendListProps) {
         declineFriendRequest,
         cancelFriendRequest
     } = useFriend()
-    // const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
+    const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
     const [friendStatus, setFriendStatus] = useState<'pending' | 'alreadyFriends' | 'requestedInbox' | 'notFound'>('notFound');
 
     useEffect(() => {
@@ -45,33 +46,31 @@ export default function FriendList({ userId }: FriendListProps) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
     
-    // console.log("friend list:", friends)
-
     const handleSearchInputChange = (value: string) => setSearchInput(value)
 
     console.log('friends:', friends)
     console.log('pending friends:', pendingFriends)
     console.log('friends request sent:', friendRequests)
 
-    // const handleSearchFriend = () => {
-    //     const trimmedInput = searchInput.trim();
-    //     if (!trimmedInput) return
-    //     setSearchMade(true)
-    //     // console.log("trimmedInput:", trimmedInput)
+    const handleSearchFriend = () => {
+        const trimmedInput = searchInput.trim();
+        if (!trimmedInput) return
+        setSearchMade(true)
+        // console.log("trimmedInput:", trimmedInput)
 
-    //     if (friends.some(friend => friend.email === trimmedInput) || friends.some(friend => friend.uid === trimmedInput) || friends.some(friend => friend.phoneNumber === trimmedInput)) {
-    //         setFriendStatus('alreadyFriends');
-    //     } else if (friendRequests.some(request => request.email === trimmedInput) || friendRequests.some(request => request.uid === trimmedInput) || friendRequests.some(request => request.phoneNumber === trimmedInput)) {
-    //         setFriendStatus('requestedInbox');
-    //     } else if (pendingFriends.some(pendingFriend => pendingFriend.email === trimmedInput) || pendingFriends.some(pendingFriend => pendingFriend.uid === trimmedInput) || pendingFriends.some(pendingFriend => pendingFriend.phoneNumber === trimmedInput)) {
-    //         setFriendStatus('pending');
-    //     } else {
-    //         setFriendStatus('notFound');
-    //     }
+        if (friends.some(friend => friend.email === trimmedInput) || friends.some(friend => friend.uid === trimmedInput) || friends.some(friend => friend.phoneNumber === trimmedInput)) {
+            setFriendStatus('alreadyFriends');
+        } else if (friendRequests.some(request => request.email === trimmedInput) || friendRequests.some(request => request.uid === trimmedInput) || friendRequests.some(request => request.phoneNumber === trimmedInput)) {
+            setFriendStatus('requestedInbox');
+        } else if (pendingFriends.some(pendingFriend => pendingFriend.email === trimmedInput) || pendingFriends.some(pendingFriend => pendingFriend.uid === trimmedInput) || pendingFriends.some(pendingFriend => pendingFriend.phoneNumber === trimmedInput)) {
+            setFriendStatus('pending');
+        } else {
+            setFriendStatus('notFound');
+        }
 
-    //     searchFriend(trimmedInput)
-    //     setSearchInput('')
-    // }
+        searchFriend(trimmedInput)
+        setSearchInput('')
+    }
 
     const handleAddFriend = () => {
         if (!userId || !isFriendFound) return
@@ -82,6 +81,7 @@ export default function FriendList({ userId }: FriendListProps) {
     // console.log("is friend found:", isFriendFound)
 
     const handler = () => setVisible(true);
+
     const handleModalClose = () => setVisible(false)
 
     const renderIcon = () => {
@@ -124,8 +124,6 @@ export default function FriendList({ userId }: FriendListProps) {
 
     return (
         <>
-        {/* // //</><div className='w-screen flex flex-col items-center justify-center space-y-4'> */}
-        <ButtonTemplate label='Add Friend' className='justify-center' onPress={handler}/>
             <div className="section bg-gray-200 rounded p-4">
                 <h3 className="text-lg font-semibold">ALL FRIENDS - {friends.length}</h3>
                 {friends && friends.map(friend => (
@@ -203,8 +201,8 @@ export default function FriendList({ userId }: FriendListProps) {
                                 <p>Email: {isFriendFound.email}</p>
                                 {/* {isPending ? ( */}
                                     <div className='flex flex-col justify-center items-center'>
-                                    {renderIcon()}
-                                    <p>{friendStatus === 'pending' ? 'Pending' : 'Add Friend'}</p>
+                                        {renderIcon()}
+                                        <p>{friendStatus === 'pending' ? 'Pending' : 'Add Friend'}</p>
                                     </div>
                                 {/* ): (
                                     <IoPersonAddSharp style={{width:'25', height:'25'}} onClick={() => handleAddFriend()}/>

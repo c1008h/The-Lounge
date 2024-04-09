@@ -21,3 +21,5 @@ export {default as DropDownMenu} from './DropDownMenu'
 export {default as MessageInput} from './TextInput/MessageInput'
 
 export {default as MessageContainer} from './Container/MessageContainer';
+
+export { default as Navbar } from './Navbar'

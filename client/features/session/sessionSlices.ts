@@ -4,17 +4,22 @@ import { Session } from "@/interfaces/Session";
 interface SessionState {
     currentSession: string;
     sessions: Session[];
+    addToChat: boolean;
 }
 
 const initialState: SessionState = {
     currentSession: "",
     sessions: [],
+    addToChat: false,
 }
 
 export const sessionSlice = createSlice({
     name: "session",
     initialState,
     reducers: {
+        addToChat: (state, action: PayloadAction<boolean>) => {
+            state.addToChat = action.payload;
+        },
         selectSessionToState: (state, action: PayloadAction<string>) => {
             state.currentSession = action.payload;
         },
@@ -30,7 +35,8 @@ export const sessionSlice = createSlice({
     },
 })
 
-export const { 
+export const {
+    addToChat, 
     selectSessionToState, 
     addSessionToState, 
     deleteSessionFromState, 

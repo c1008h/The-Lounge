@@ -45,9 +45,10 @@ export default function SessionList({ userId, sessions, handleAddNewSession }: S
 
     return (
         <>
-            <ButtonTemplate label='NEW CHAT' className='m-4' onPress={() => handleAddNewSession()}/>
+            {/* <ButtonTemplate label='NEW CHAT' className='m-4' onPress={() => handleAddNewSession()}/> */}
             {!sessions ? (
                 <>
+                    <h2>No sessions available. Create session to get started!</h2>
                 </>
             ) : (
                 <>

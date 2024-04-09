@@ -4,12 +4,12 @@ import { child, onValue, Unsubscribe, DatabaseReference} from 'firebase/database
 import { Participant } from '@/interfaces/Participant';
 
 interface ParticipantsListenerResult {
-  participants: Participant[] | null;
+  participants: Participant[];
   error: string | null;
 }
 
 export const useParticipantsListener = (sessionId: string): ParticipantsListenerResult => {
-  const [participants, setParticipants] = useState<Participant[] | null>(null);
+  const [participants, setParticipants] = useState<Participant[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -22,36 +22,7 @@ export const useParticipantsListener = (sessionId: string): ParticipantsListener
         setParticipants(participantsArray);
         setError(null);
       } else {
-        setParticipants(null);
-        setError('No participants found.');
-      }
-    }
-
-    const unsubscribe: Unsubscribe = onValue(participantsRef, handleData);
-
-    return () => {
-      unsubscribe()
-    }
-  }, [sessionId])
-
-  return { participants, error }
-};
-  
-export const useAnonParticipantsListener = (sessionId: string): ParticipantsListenerResult => {
-  const [participants, setParticipants] = useState<Participant[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const participantsRef: DatabaseReference = child(anonRT, `${sessionId}/participants`)
-
-    const handleData = (snapshot: any) => {
-      if (snapshot.exists()) {
-        const participantsData: Record<string, Participant> = snapshot.val()
-        const participantsArray = Object.values(participantsData)
-        setParticipants(participantsArray);
-        setError(null);
-      } else {
-        setParticipants(null);
+        setParticipants([]);
         setError('No participants found.');
       }
     }

@@ -46,12 +46,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
+        console.log('userrrr:', user)
+        setCurrentUser(user)
+        dispatch(loginUser(user))
+
         user.getIdToken().then((idToken) => {
           setToken(idToken);
         });
-
-        setCurrentUser(user)
-        dispatch(loginUser(user))
       } else {
         setCurrentUser(null)
         dispatch(logoutUser())

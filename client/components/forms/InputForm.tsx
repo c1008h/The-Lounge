@@ -1,9 +1,9 @@
 import React from 'react'
-import {Input} from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 
 interface InputFormProps {
     onValueChange?: (value: string) => void;
-    onChange?: (value: string) => void;
+    onChange?: (value: string) => void | ((event: React.ChangeEvent<HTMLInputElement>) => void);
     onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
     className?: string;
     value: string;

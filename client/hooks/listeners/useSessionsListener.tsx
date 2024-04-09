@@ -24,6 +24,7 @@ export const useSessionsListener = (userId: string) => {
     
             if (!querySnapshot.empty) {
                 const userDoc = querySnapshot.docs[0];
+                console.log("user doc session data:", userDoc.data().sessions)
                 setSessions(userDoc.data().sessions)
             } else {
                 console.log("No user found with the given UID.");
