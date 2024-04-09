@@ -31,7 +31,7 @@ export default function FriendList({ userId }: FriendListProps) {
         declineFriendRequest,
         cancelFriendRequest
     } = useFriend()
-    const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
+    // const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
     const [friendStatus, setFriendStatus] = useState<'pending' | 'alreadyFriends' | 'requestedInbox' | 'notFound'>('notFound');
 
     useEffect(() => {
@@ -53,25 +53,25 @@ export default function FriendList({ userId }: FriendListProps) {
     console.log('pending friends:', pendingFriends)
     console.log('friends request sent:', friendRequests)
 
-    const handleSearchFriend = () => {
-        const trimmedInput = searchInput.trim();
-        if (!trimmedInput) return
-        setSearchMade(true)
-        // console.log("trimmedInput:", trimmedInput)
+    // const handleSearchFriend = () => {
+    //     const trimmedInput = searchInput.trim();
+    //     if (!trimmedInput) return
+    //     setSearchMade(true)
+    //     // console.log("trimmedInput:", trimmedInput)
 
-        if (friends.some(friend => friend.email === trimmedInput) || friends.some(friend => friend.uid === trimmedInput) || friends.some(friend => friend.phoneNumber === trimmedInput)) {
-            setFriendStatus('alreadyFriends');
-        } else if (friendRequests.some(request => request.email === trimmedInput) || friendRequests.some(request => request.uid === trimmedInput) || friendRequests.some(request => request.phoneNumber === trimmedInput)) {
-            setFriendStatus('requestedInbox');
-        } else if (pendingFriends.some(pendingFriend => pendingFriend.email === trimmedInput) || pendingFriends.some(pendingFriend => pendingFriend.uid === trimmedInput) || pendingFriends.some(pendingFriend => pendingFriend.phoneNumber === trimmedInput)) {
-            setFriendStatus('pending');
-        } else {
-            setFriendStatus('notFound');
-        }
+    //     if (friends.some(friend => friend.email === trimmedInput) || friends.some(friend => friend.uid === trimmedInput) || friends.some(friend => friend.phoneNumber === trimmedInput)) {
+    //         setFriendStatus('alreadyFriends');
+    //     } else if (friendRequests.some(request => request.email === trimmedInput) || friendRequests.some(request => request.uid === trimmedInput) || friendRequests.some(request => request.phoneNumber === trimmedInput)) {
+    //         setFriendStatus('requestedInbox');
+    //     } else if (pendingFriends.some(pendingFriend => pendingFriend.email === trimmedInput) || pendingFriends.some(pendingFriend => pendingFriend.uid === trimmedInput) || pendingFriends.some(pendingFriend => pendingFriend.phoneNumber === trimmedInput)) {
+    //         setFriendStatus('pending');
+    //     } else {
+    //         setFriendStatus('notFound');
+    //     }
 
-        searchFriend(trimmedInput)
-        setSearchInput('')
-    }
+    //     searchFriend(trimmedInput)
+    //     setSearchInput('')
+    // }
 
     const handleAddFriend = () => {
         if (!userId || !isFriendFound) return
@@ -188,6 +188,7 @@ export default function FriendList({ userId }: FriendListProps) {
                     label="Add Friend"
                     onClose={handleModalClose}
                     visible={visible}
+                    canClose={true}
                 >
                     <p>Search user by email, phone number or user ID.</p>
                     <InputForm 

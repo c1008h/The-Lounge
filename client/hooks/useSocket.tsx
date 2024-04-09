@@ -29,5 +29,10 @@ export const useSocket = (token: string): { socket: Socket | null, connect: () =
     socketManager.connect(token);
   };
 
+  const disconnect = () => {
+    socketManager.disconnect(); // This method should exist in your socketManager
+    setSocket(null);
+  };
+
   return { socket, connect };
 };

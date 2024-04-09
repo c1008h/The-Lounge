@@ -44,12 +44,13 @@ export default function Sidebar({
 
     return (
         <div className="flex flex-col h-screen w-1/3"> 
-            <div className='bg-neutral-500 w-full h-20 items-center relative flex justify-between'>
+            <div className='bg-gray-800 w-full h-20 items-center relative flex justify-between'>
                 <h4 className=''>Profile Icon</h4>
                 <div className='flex flex-row'>
                     {displayFriend && !displaySession ? (
                         <FaRegMessage 
-                            style={{width:'40px', height:'40px'}} 
+                            className="w-10 h-10 cursor-pointer"
+                            // style={{width:'40px', height:'40px'}} 
                             onClick={() => {
                                 setDisplayFriend(false)
                                 setDisplaySession(true)
@@ -57,7 +58,8 @@ export default function Sidebar({
                         />
                     ) : (
                         <FaUserFriends 
-                            style={{width:'40px', height:'40px'}} 
+                            className="w-10 h-10 cursor-pointer"
+                            // style={{width:'40px', height:'40px'}} 
                             onClick={() => {
                                 setDisplayFriend(true)
                                 setDisplaySession(false)
@@ -67,16 +69,19 @@ export default function Sidebar({
                 </div>
             </div>
 
-            {displayFriend ? (
-                <FriendList userId={userId!} />
-            ): (
-            
-                <SessionList 
-                    handleAddNewSession={handleAddNewSession}
-                    sessions={sessions}
-                    userId={userId!}
-                />
-            )}    
+            <div className="flex-grow bg-gray-200">
+                {/* {displayFriend ? (
+                    <FriendList userId={userId!} />
+                ): (
+                
+                    <SessionList 
+                        handleAddNewSession={handleAddNewSession}
+                        sessions={sessions}
+                        userId={userId!}
+                    />
+                )}     */}
+            </div>
+
         </div>
     )
 }

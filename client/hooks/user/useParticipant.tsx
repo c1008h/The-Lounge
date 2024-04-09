@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { useSocket } from '../useSocket'; 
 import { useDispatch } from 'react-redux';
 import { Participant } from '@/interfaces/Participant';
-
+import { useSocketContext } from '@/provider/SocketProvider';
 interface ParticipantProps {
     participants: Participant[];
     addParticipant: (sessionId: string, participant: Participant) => void;
@@ -11,7 +11,9 @@ interface ParticipantProps {
 }
 
 export const useParticipants = (): ParticipantProps => {
-    const { socket } = useSocket('user string');
+    // const { socket } = useSocket('user string');
+    const socket = useSocketContext();
+
     const [participants, setParticipants] = useState<Participant[]>([]);
 
     const dispatch = useDispatch(); 
@@ -31,14 +33,14 @@ export const useParticipants = (): ParticipantProps => {
             return prevParticipants;
         })
         
-        if (socket) socket.emit('addParticipant', sessionId, participant);
+        if (socket?.socket) socket.socket.emit('addParticipant', sessionId, participant);
 
     }, [socket, participants]);
 
     const removeSpecificParticipant = useCallback((uid: string) => {
         setParticipants(participants.filter((p) => p.uid !== uid));
 
-        if (socket) socket.emit('removeParticipant', uid);
+        if (socket?.socket) socket.socket.emit('removeParticipant', uid);
 
     }, [participants, socket])
 
@@ -47,7 +49,7 @@ export const useParticipants = (): ParticipantProps => {
             const removedParticipantId = participants[participants.length - 1].uid;
             setParticipants(prevParticipants => prevParticipants.slice(0, -1));
 
-            if (socket) socket.emit('removeParticipant', removedParticipantId);
+            if (socket?.socket) socket.socket.emit('removeParticipant', removedParticipantId);
         }
     }, [socket, participants]);
 
@@ -58,17 +60,19 @@ export const useParticipants = (): ParticipantProps => {
     // };
 
     useEffect(() => {
-        if (!socket) return
+        if (!socket || !socket.socket) return;
 
         const handleAddParticipant = (sessionId: string, participant: Participant) => addParticipant(sessionId, participant);
         const handleRemoveParticipant = (uid: string) => removeSpecificParticipant(uid);
 
-        socket.on('participantAdded', handleAddParticipant);
-        socket.on('participantRemoved', handleRemoveParticipant);
+        socket.socket.on('participantAdded', handleAddParticipant);
+        socket.socket.on('participantRemoved', handleRemoveParticipant);
 
         return () => {
-            socket.off('participantAdded', handleAddParticipant);
-            socket.off('participantRemoved', handleRemoveParticipant);
+            if (!socket || !socket.socket) return;
+            
+            socket.socket.off('participantAdded', handleAddParticipant);
+            socket.socket.off('participantRemoved', handleRemoveParticipant);
         }
 
     }, [socket])

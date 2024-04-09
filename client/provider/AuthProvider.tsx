@@ -21,6 +21,7 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
   logout: () => Promise<void>;
   currentUser: User | any;
+  token: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,11 +39,17 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string>('')
+
   const dispatch = useDispatch();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
+        user.getIdToken().then((idToken) => {
+          setToken(idToken);
+        });
+
         setCurrentUser(user)
         dispatch(loginUser(user))
       } else {
@@ -169,6 +176,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signUpWithEmail,
     signInWithEmail,
     logout,
+    token,
     currentUser
   };
 

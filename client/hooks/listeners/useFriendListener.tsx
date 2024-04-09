@@ -39,6 +39,11 @@ export const useFriendListener = (userId: string) => {
                         pendingFriendsData.push(...userData.sentFriendRequests);
                     }
                 });
+
+                console.log("FRIENDS:", friends)
+                console.log("FRIEND REQUEST DATA:", friendRequestsData)
+                console.log("PENDING FRIEND DATA:", pendingFriendsData)
+
                 setFriends(friendsData);
                 setFriendRequests(friendRequestsData);
                 setPendingFriends(pendingFriendsData);
@@ -48,9 +53,8 @@ export const useFriendListener = (userId: string) => {
             return () => unsubscribe();
         } catch (error) {
             setError(error instanceof Error ? error : new Error('Error fetching friends'));
-        } finally {
             setLoading(false);
-        }
+        } 
     }, [userId, setFriends, setFriendRequests, setPendingFriends, setLoading, setError]);
 
     useEffect(() => {

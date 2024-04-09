@@ -22,7 +22,7 @@ const database = getDatabase(app);
 
 // const analytics = getAnalytics(app);
 
-const userCollection: CollectionReference = collection(db,'users')
+const userCollection: CollectionReference = collection(db, 'users')
 
 const sessionsRT: DatabaseReference = ref(database, '/sessions');
 const anonRT: DatabaseReference = ref(database, '/anon');

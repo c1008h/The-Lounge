@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { useSocket } from '../useSocket'; 
 import { useDispatch } from 'react-redux';
 import { Friend } from '@/interfaces/Friend';
+import { useSocketContext } from '@/provider/SocketProvider';
 
 interface FriendProps {
     friends: Friend[];
@@ -16,7 +17,8 @@ interface FriendProps {
 }
 
 export const useFriend = (): FriendProps => {
-    const { socket } = useSocket('user string');
+    // const { socket } = useSocket('user string');
+    const socket = useSocketContext();
     const [friends, setFriends] = useState<Friend[]>([]);
     const [isFriendFound, setIsFriendFound] = useState<Friend | undefined>(undefined);
     const [successfullyAdded, setSuccessfullyAdded] = useState<boolean | null>(null)
@@ -24,34 +26,34 @@ export const useFriend = (): FriendProps => {
 
     const searchFriend = useCallback((friendId: string) => {
         console.log("user input friend search:", friendId)
-        if (socket) socket.emit('searchFriend', friendId)
+        if (socket?.socket) socket.socket.emit('searchFriend', friendId)
     }, [socket])
 
     const addAFriend = useCallback((userId: string, friend: Friend) => {
-        if (socket) socket.emit('addFriend', userId, friend);
+        if (socket?.socket) socket.socket.emit('addFriend', userId, friend);
     }, [socket])
 
     const deleteAFriend = useCallback((userId: string, friendId: string) => {
         setFriends(friends.filter((f) => f.uid !== friendId));
 
-        if (socket) socket.emit('deleteFriend', userId, friendId);
+        if (socket?.socket) socket.socket.emit('deleteFriend', userId, friendId);
     }, [socket])
 
     const acceptFriendsRequest = useCallback((userId: string, friendId: string) => {
         console.log('accept friend request triggered in context')
-        if (socket) socket.emit('acceptFriendRequest', userId, friendId)
+        if (socket?.socket) socket.socket.emit('acceptFriendRequest', userId, friendId)
     }, [socket])
 
     const declineFriendRequest = useCallback((userId: string, friendId: string) => {
-        if (socket) socket.emit('declineFriendRequest', userId, friendId)
+        if (socket?.socket) socket.socket.emit('declineFriendRequest', userId, friendId)
     }, [socket])
 
     const cancelFriendRequest = useCallback((userId: string, friendId: string) => {
-        if (socket) socket.emit('cancelFriendRequest', userId, friendId)
+        if (socket?.socket) socket.socket.emit('cancelFriendRequest', userId, friendId)
     }, [socket])
 
     useEffect(() => {
-        if (!socket) return
+        if (!socket || !socket.socket) return;
 
         const handleFriendFound = (friendId: Friend) => {
             setIsFriendFound(friendId)
@@ -89,19 +91,21 @@ export const useFriend = (): FriendProps => {
             if (result) console.log('cancelled friend request')
         }
 
-        socket.on('friendFound', handleFriendFound)
-        socket.on('friendAdded', handleFriendAdded);
-        socket.on('friendRemoved', handleRemoveFriend);
-        socket.on('acceptedFriendRequest', handleAcceptFriendRequest)
-        socket.on('declinedFriendRequest', handleDeclineFriendRequest)
-        socket.on('canceledFriendRequest', handleCancelFriendRequest)
+        socket.socket.on('friendFound', handleFriendFound)
+        socket.socket.on('friendAdded', handleFriendAdded);
+        socket.socket.on('friendRemoved', handleRemoveFriend);
+        socket.socket.on('acceptedFriendRequest', handleAcceptFriendRequest)
+        socket.socket.on('declinedFriendRequest', handleDeclineFriendRequest)
+        socket.socket.on('canceledFriendRequest', handleCancelFriendRequest)
 
         return () => {
-            socket.off('friendFound', handleFriendFound)
-            socket.off('friendAdded', handleFriendAdded);
-            socket.off('friendRemoved', handleRemoveFriend);
-            socket.off('acceptedFriendRequest', handleAcceptFriendRequest)
-            socket.off('canceledFriendRequest', handleCancelFriendRequest)
+            if (!socket || !socket.socket) return;
+
+            socket.socket.off('friendFound', handleFriendFound)
+            socket.socket.off('friendAdded', handleFriendAdded);
+            socket.socket.off('friendRemoved', handleRemoveFriend);
+            socket.socket.off('acceptedFriendRequest', handleAcceptFriendRequest)
+            socket.socket.off('canceledFriendRequest', handleCancelFriendRequest)
         }
 
     }, [socket])
