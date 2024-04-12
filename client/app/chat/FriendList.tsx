@@ -122,7 +122,9 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
 
     return (
         <>
-            <div className="section bg-gray-200 rounded p-4">
+             <div >
+
+            {/* <div className="section bg-gray-200 rounded p-4"> */}
                 <h3 className="text-lg font-semibold">ALL FRIENDS - {friends.length}</h3>
                 {friends && friends.map(friend => (
                     <div key={friend.uid} className='flex flex-row justify-between items-center'>
@@ -148,7 +150,7 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
                     </div>
                 ))}
             </div>
-            <div className="section bg-gray-200 p-4">
+            <div>
                 <h3 className="text-lg font-semibold">REQUEST - {friendRequests.length}</h3>
                 {friendRequests && friendRequests.map((requested => (
                     <div key={requested.uid} className='flex flex-row justify-between'>
@@ -166,7 +168,7 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
                     </div>
                 )))}
             </div>
-            <div className="section bg-gray-200 rounded p-4">
+            <div className="section">
                 <h3 className="text-lg font-semibold">PENDING - {pendingFriends.length}</h3>
                 {pendingFriends && pendingFriends.map((pending => (
                     <div key={pending.uid} className='flex flex-row justify-between'>

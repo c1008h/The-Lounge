@@ -49,6 +49,7 @@ export default function Sidebar({
     const dispatch = useDispatch()
     // const userId = useSelector((state: RootState) => state.auth.user)
 
+    console.log("SESSION DETAILS IN SIDEBAR:", sessionDetails)
     // if (!Array.isArray(sessions) || sessions.length === 0) {
     //     return null; 
     // }
@@ -139,19 +140,18 @@ export default function Sidebar({
                         />
                     )}
                 </div> */}
+                <div className='justify-end items-center m-3 gap-10' >
+                    {displayFriend ? (
+                        <FriendList userId={currentUser?.uid!} visible={visible} setVisible={setVisible} />
+                    ): (
+                        <SessionList 
+                            handleAddNewSession={handleNewChat}
+                            sessions={sessionDetails}
+                            userId={currentUser?.uid!}
+                        />
+                    )}   
+                </div>
             </div>
-
-            {/* <div className="flex-grow bg-gray-200"> */}
-                {displayFriend ? (
-                    <FriendList userId={currentUser?.uid!} visible={visible} setVisible={setVisible} />
-                ): (
-                    <SessionList 
-                        handleAddNewSession={handleNewChat}
-                        sessions={sessionDetails}
-                        userId={currentUser?.uid!}
-                    />
-                )}   
-            {/* </div> */}
         </div>
     )
 }

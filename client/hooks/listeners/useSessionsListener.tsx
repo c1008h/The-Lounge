@@ -17,7 +17,7 @@ export const useSessionsListener = (userId: string) => {
             setLoading(false)
             return;
         }
-        console.log("USER ID IN LISTENER:", userId)
+        
         try {
             const q = query(userCollection, where("uid", "==", userId))
             const querySnapshot = await getDocs(q)
