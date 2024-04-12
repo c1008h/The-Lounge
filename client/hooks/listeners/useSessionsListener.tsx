@@ -17,20 +17,30 @@ export const useSessionsListener = (userId: string) => {
             setLoading(false)
             return;
         }
-        
+        console.log("USER ID IN LISTENER:", userId)
         try {
             const q = query(userCollection, where("uid", "==", userId))
             const querySnapshot = await getDocs(q)
     
             if (!querySnapshot.empty) {
                 const userDoc = querySnapshot.docs[0];
-                console.log("user doc session data:", userDoc.data().sessions)
-                setSessions(userDoc.data().sessions)
+                const userData = userDoc.data();
+
+                if (userData.sessions) {
+                    console.log("user doc session data:", userData.sessions)
+                    setSessions(userData.sessions)
+                } else {
+                    console.log("No active sessions.");
+                }
+
             } else {
                 console.log("No user found with the given UID.");
+                setError(error instanceof Error ? error : new Error("No user found with the given UID."))
                 setSessions([]);
+
             }
         } catch (error) {
+            console.log("Error fetching sessions:", error)
             setError(error instanceof Error ? error : new Error('Error fetching sessions'));
         } finally {
             setLoading(false);

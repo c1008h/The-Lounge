@@ -40,6 +40,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [token, setToken] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(true);
 
   const dispatch = useDispatch();
 
@@ -48,7 +49,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (user) {
         console.log('userrrr:', user)
         setCurrentUser(user)
-        dispatch(loginUser(user))
+        dispatch(loginUser(auth.currentUser))
 
         user.getIdToken().then((idToken) => {
           setToken(idToken);
@@ -60,7 +61,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
 
     return unsubscribe;
-  }, [dispatch]);
+  }, [dispatch, ]);
 
   const provider = new GoogleAuthProvider();
 
@@ -172,6 +173,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }
 
+  useEffect(() => {
+    if (!loading && !currentUser) {
+      window.location.href = '/login';
+    }
+  }, [currentUser, loading]);
+  
   const value: AuthContextType = {
     signInWithGoogle,
     signUpWithEmail,

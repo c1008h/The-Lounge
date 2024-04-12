@@ -80,8 +80,6 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
 
     // console.log("is friend found:", isFriendFound)
 
-    const handler = () => setVisible(true);
-
     const handleModalClose = () => setVisible(false)
 
     const renderIcon = () => {

@@ -53,12 +53,11 @@ export default function Sidebar({
     //     return null; 
     // }
     
-    // console.log('uid', userId)
     const handleNewChat = () => {
-        if(!currentUser.uid) return
+        if(!currentUser?.uid) return
         dispatch(clearParticipants())
         dispatch(addToChat(true))
-        addASession(currentUser.uid)
+        addASession(currentUser?.uid)
     }
 
     if (sessionLoading) return <Loading message={'Loading sessions...'} />
@@ -144,12 +143,12 @@ export default function Sidebar({
 
             {/* <div className="flex-grow bg-gray-200"> */}
                 {displayFriend ? (
-                    <FriendList userId={userId!} visible={visible} setVisible={setVisible} />
+                    <FriendList userId={currentUser?.uid!} visible={visible} setVisible={setVisible} />
                 ): (
                     <SessionList 
                         handleAddNewSession={handleNewChat}
                         sessions={sessionDetails}
-                        userId={currentUser.uid!}
+                        userId={currentUser?.uid!}
                     />
                 )}   
             {/* </div> */}

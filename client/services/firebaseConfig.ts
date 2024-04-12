@@ -17,6 +17,16 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// Set the persistence option
+setPersistence(auth, browserSessionPersistence)
+.then(() => {
+  console.log("Authentication persistence set successfully.");
+})
+.catch((error) => {
+  console.error("Error setting authentication persistence:", error);
+});
+
 const db: Firestore = getFirestore(app)
 const database = getDatabase(app);
 
