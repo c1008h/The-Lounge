@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from 'react';
-import { useSocket } from '../useSocket'; 
 import { useDispatch } from 'react-redux';
 import { Session } from '@/interfaces/Session';
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
@@ -14,13 +13,10 @@ interface SessionProps {
 }
 
 export const useSession = (): SessionProps => {
-    // const { socket } = useSocket('user string');
     const socket = useSocketContext();
-
     const [sessions, setSessions] = useState<Session[]>([]);
     const [currentSessionId, setCurrentSessionId] = useState<string>('')
     const dispatch = useDispatch(); 
-
 
     const addASession = useCallback((uid: string) => {
         if (socket?.socket) socket.socket.emit('addSession', uid);

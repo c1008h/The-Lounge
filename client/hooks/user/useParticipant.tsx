@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from 'react';
-import { useSocket } from '../useSocket'; 
 import { useDispatch } from 'react-redux';
 import { Participant } from '@/interfaces/Participant';
 import { useSocketContext } from '@/provider/SocketProvider';
@@ -11,9 +10,7 @@ interface ParticipantProps {
 }
 
 export const useParticipants = (): ParticipantProps => {
-    // const { socket } = useSocket('user string');
     const socket = useSocketContext();
-
     const [participants, setParticipants] = useState<Participant[]>([]);
 
     const dispatch = useDispatch(); 

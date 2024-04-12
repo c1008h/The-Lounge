@@ -9,7 +9,10 @@ import { FaUserFriends } from "react-icons/fa";
 import { FaRegCircleXmark } from "react-icons/fa6";
 import { LiaUserEditSolid } from "react-icons/lia";
 import { FaRegMessage } from "react-icons/fa6";
-
+import { useSessionsListener } from '@/hooks';
+import { Friend } from '@/interfaces/Friend'
+import { useSession } from '@/hooks';
+import { useAuth } from '@/provider/AuthProvider'
 interface FriendListProps {
     userId: string;
     visible: boolean;
@@ -22,6 +25,7 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
     const [searchMade, setSearchMade] = useState(false)
     const [isPending, setIsPending] = useState(false)
     const [searchInput, setSearchInput] = useState<string>('')
+    const { currentUser } = useAuth()
     const { 
         searchFriend,
         addAFriend, 
@@ -34,6 +38,9 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
     } = useFriend()
     const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
     const [friendStatus, setFriendStatus] = useState<'pending' | 'alreadyFriends' | 'requestedInbox' | 'notFound'>('notFound');
+
+    const { sessionDetails, checkForExistingSession } = useSessionsListener(userId)
+    const { addASession, selectSession } = useSession()
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -120,18 +127,29 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
         }
     }
 
+    const handleChatWithFriend = async (friend: Friend) => {
+        const result = await checkForExistingSession(friend)
+
+        if (result) {
+            selectSession(result)
+        } else {
+            addASession(currentUser.uid)
+        }
+    }
+
     return (
         <>
-             <div >
+             <div>
 
             {/* <div className="section bg-gray-200 rounded p-4"> */}
-                <h3 className="text-lg font-semibold">ALL FRIENDS - {friends.length}</h3>
+                <h3 className="text-lg font-semibold">ALL FRIENDS - {friends.length > 0 ? friends.length : 'No friends!'}</h3>
                 {friends && friends.map(friend => (
                     <div key={friend.uid} className='flex flex-row justify-between items-center'>
                         <p>{friend.displayName ? friend.displayName : friend.email ? friend.email : friend.phoneNumber}</p>
                         <div className='flex flex-row items-center'>
                             <FaRegMessage 
                                 style={{ width: '25px', height: '25px', marginLeft:'5px' }}
+                                onClick={() => handleChatWithFriend(friend)}
                             />
                             <LiaUserEditSolid 
                                 style={{ width: '25px', height: '25px', marginLeft:'5px'}}

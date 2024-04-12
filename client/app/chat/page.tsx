@@ -8,6 +8,7 @@ import { useSessionsListener, useChatListener, useFriendListener } from '@/hooks
 import { useAuth } from '@/provider/AuthProvider';
 import { RootState } from '@/features/store';
 import Name from './Name';
+
 export default function Page() {
   // const [message, setMessage] = useState<string>('') 
   // const [uid, setUid] = useState<string>('')

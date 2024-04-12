@@ -2,12 +2,26 @@ import { useState, useEffect, useCallback } from 'react';
 import { userCollection, sessionsRT } from '@/services/firebaseConfig';
 import { query, where, updateDoc, arrayRemove, getDocs } from 'firebase/firestore';
 import { ref, get, onValue, child, DatabaseReference } from 'firebase/database';
+import { Participant } from '@/interfaces/Participant';
 
 export const useSessionsListener = (userId: string) => {
     const [sessions, setSessions] = useState<string[]>([]);
     const [sessionDetails, setSessionDetails] = useState<any[]>([]); 
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<Error | null>(null);
+
+    const checkForExistingSession = useCallback((friend: Participant) => {
+        const matchingSession = sessionDetails.find(session =>
+            session.participants.some((p: { uid: string; email: string | null | undefined; phoneNumber: string | null | undefined; displayName: string | null | undefined; }) =>
+                p.uid === friend.uid ||
+                p.email === friend.email ||
+                p.phoneNumber === friend.phoneNumber ||
+                p.displayName === friend.displayName
+            )
+        );
+    
+        return matchingSession ? matchingSession.sessionId : false;
+    }, [sessionDetails])
 
     const fetchSessions = useCallback(async () => {
         setLoading(true);
@@ -93,5 +107,5 @@ export const useSessionsListener = (userId: string) => {
         });
     }, [sessions]);
 
-    return { sessions, loading, error, sessionDetails };
+    return { sessions, loading, error, sessionDetails, checkForExistingSession };
 }

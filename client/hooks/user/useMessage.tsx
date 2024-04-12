@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from 'react';
-import { useSocket } from '../useSocket'; 
 import { Message } from '@/interfaces/Chat';
 import { useSocketContext } from '@/provider/SocketProvider';
 interface MessageProps {
@@ -8,7 +7,6 @@ interface MessageProps {
 }
 
 export const useMessage = (): MessageProps => {
-    // const { socket } = useSocket('user string');
     const socket = useSocketContext();
 
     const [messages, setMessages] = useState<Message[]>([]);

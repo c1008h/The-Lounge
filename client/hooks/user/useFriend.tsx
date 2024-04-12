@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from 'react';
-import { useSocket } from '../useSocket'; 
 import { useDispatch } from 'react-redux';
 import { Friend } from '@/interfaces/Friend';
 import { useSocketContext } from '@/provider/SocketProvider';
@@ -17,7 +16,6 @@ interface FriendProps {
 }
 
 export const useFriend = (): FriendProps => {
-    // const { socket } = useSocket('user string');
     const socket = useSocketContext();
     const [friends, setFriends] = useState<Friend[]>([]);
     const [isFriendFound, setIsFriendFound] = useState<Friend | undefined>(undefined);
