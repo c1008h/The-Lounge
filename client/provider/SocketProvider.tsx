@@ -1,17 +1,16 @@
 "use client"
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState, ReactNode } from 'react';
 import { Socket } from 'socket.io-client';
 import { socketManager } from '@/utils/socketManager';
-import { useAuth } from './AuthProvider';
+import { useAuth } from '@/context/AuthContext';
+import SocketContext from '@/context/SocketContext';
 
-interface SocketContextType {
-    socket: Socket | null;
+interface SocketProviderProps {
+  children: ReactNode;
 }
 
-const SocketContext = createContext<SocketContextType | null>(null);
-
-export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-    const [socket, setSocket] = useState<Socket | null>(socketManager.getSocket());
+export const SocketProvider = ({ children }: SocketProviderProps) => {
+  const [socket, setSocket] = useState<Socket | null>(socketManager.getSocket());
     const { token } = useAuth();
 
     // useEffect(() => {
@@ -56,11 +55,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   
     // return { socket, connect };
 
-    return (
-        <SocketContext.Provider value={{ socket }}>
-            {children}
-        </SocketContext.Provider>
-    );
+  return (
+    <SocketContext.Provider value={{ socket }}>
+        {children}
+    </SocketContext.Provider>
+  );
 };
-
-export const useSocketContext = () => useContext(SocketContext);

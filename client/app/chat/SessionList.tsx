@@ -19,7 +19,7 @@ interface SessionListProps {
 }
 export default function SessionList({ userId, sessions, handleAddNewSession }: SessionListProps) {
     const { selectSession, deleteSession, leaveSession, currentSessionId } = useSession()
-    const { participants } = useParticipantsListener(currentSessionId);
+    const { participants } = useParticipantsListener();
     const dispatch = useDispatch(); 
 
     useEffect(() => {

@@ -5,36 +5,20 @@ import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveS
 import { initializeParticipants } from '@/features/participants/participantSlices';
 import { useSessionsListener, useSession } from '@/hooks'
 import FriendList from './FriendList';
-import { FaUserFriends } from "react-icons/fa";
-import { FaRegMessage } from "react-icons/fa6";
-import { BiSolidMessageAltEdit } from "react-icons/bi";
-import { SlOptions } from "react-icons/sl";
-import { BsList } from "react-icons/bs";
-import { IoPersonAddSharp } from "react-icons/io5";
-
+import { FaUserFriends, FaRegMessage, BiSolidMessageAltEdit, SlOptions, BsList, IoPersonAddSharp } from './icons'
 import { RootState } from '@/features/store';
 import SessionList from './SessionList';
 import { ButtonTemplate, Divider, BoxTemplate, InputForm, Loading, ModalTemplate } from '@/components'
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/context/AuthContext';
 import { addToChat } from '@/features/session/sessionSlices';
 import { clearParticipants } from '@/features/participants/participantSlices';
-interface SessionProps {
-    sessionId: string;
-    lastmessage: string;
-    participants: string[];
-    timestamp: Date | number | string;
-}
 
 interface SidebarProps {
-    userId?: string;
-    currentSessionId?: string;
     setFullSize: React.Dispatch<React.SetStateAction<boolean>>;
-    fullSize:boolean;
+    fullSize: boolean;
 }
 
 export default function Sidebar({
-    userId,
-    currentSessionId,
     fullSize,
     setFullSize
 }: SidebarProps) {
@@ -49,13 +33,13 @@ export default function Sidebar({
     const dispatch = useDispatch()
     // const userId = useSelector((state: RootState) => state.auth.user)
 
-    console.log("SESSION DETAILS IN SIDEBAR:", sessionDetails)
+    // console.log("SESSION DETAILS IN SIDEBAR:", sessionDetails)
     // if (!Array.isArray(sessions) || sessions.length === 0) {
     //     return null; 
     // }
     
     const handleNewChat = () => {
-        if(!currentUser?.uid) return
+        if (!currentUser?.uid) return
         dispatch(clearParticipants())
         dispatch(addToChat(true))
         addASession(currentUser?.uid)
@@ -118,28 +102,6 @@ export default function Sidebar({
                     className={'w-7/8 mt-2'} 
                     placeholder={`Search ${displaySession ? 'messages' : 'contact'}`}
                 />
-                {/* <h4 className=''>Profile Icon</h4> */}
-                {/* <div className='flex flex-row'>
-                    {displayFriend && !displaySession ? (
-                        <FaRegMessage 
-                            className="w-10 h-10 cursor-pointer"
-                            // style={{width:'40px', height:'40px'}} 
-                            onClick={() => {
-                                setDisplayFriend(false)
-                                setDisplaySession(true)
-                            }}
-                        />
-                    ) : (
-                        <FaUserFriends 
-                            className="w-10 h-10 cursor-pointer"
-                            // style={{width:'40px', height:'40px'}} 
-                            onClick={() => {
-                                setDisplayFriend(true)
-                                setDisplaySession(false)
-                            }}
-                        />
-                    )}
-                </div> */}
                 <div className='justify-end items-center m-3 gap-10' >
                     {displayFriend ? (
                         <FriendList userId={currentUser?.uid!} visible={visible} setVisible={setVisible} />

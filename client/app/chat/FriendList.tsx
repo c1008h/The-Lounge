@@ -2,17 +2,16 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useFriendListener, useFriend } from '@/hooks'
 import { addFriend } from '@/features/friends/friendSlices'
 import { ButtonTemplate, ModalTemplate, InputForm, BoxTemplate, DropDownMenu } from '@/components';
-import { IoPersonAddSharp } from "react-icons/io5";
-import { MdOutlinePending } from "react-icons/md";
-import { FaCheck } from "react-icons/fa";
-import { FaUserFriends } from "react-icons/fa";
-import { FaRegCircleXmark } from "react-icons/fa6";
-import { LiaUserEditSolid } from "react-icons/lia";
-import { FaRegMessage } from "react-icons/fa6";
+import { IoPersonAddSharp, MdOutlinePending, FaCheck, FaUserFriends, FaRegCircleXmark, LiaUserEditSolid, FaRegMessage } from './icons'
 import { useSessionsListener } from '@/hooks';
 import { Friend } from '@/interfaces/Friend'
-import { useSession } from '@/hooks';
-import { useAuth } from '@/provider/AuthProvider'
+import { useParticipants } from '@/hooks';
+import { useAuth } from '@/context/AuthContext'
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/features/store';
+import { addAParticipant } from '@/features/participants/participantSlices'
+import { useSession } from '@/context';
+
 interface FriendListProps {
     userId: string;
     visible: boolean;
@@ -25,6 +24,7 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
     const [searchMade, setSearchMade] = useState(false)
     const [isPending, setIsPending] = useState(false)
     const [searchInput, setSearchInput] = useState<string>('')
+    const dispatch = useDispatch()
     const { currentUser } = useAuth()
     const { 
         searchFriend,
@@ -36,11 +36,15 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
         declineFriendRequest,
         cancelFriendRequest
     } = useFriend()
-    const { friends, friendRequests, pendingFriends } = useFriendListener(userId);
+    const { friends, friendRequests, pendingFriends } = useFriendListener();
     const [friendStatus, setFriendStatus] = useState<'pending' | 'alreadyFriends' | 'requestedInbox' | 'notFound'>('notFound');
 
-    const { sessionDetails, checkForExistingSession } = useSessionsListener(userId)
-    const { addASession, selectSession } = useSession()
+    const { sessionDetails, checkForExistingSession } = useSessionsListener()
+    const { setCurrentSession, setParticipants } = useSession()
+
+    const { addParticipant } = useParticipants()
+
+    const activeSessionID = useSelector((state: RootState) => state.session.currentSession)
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -55,9 +59,9 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
     
     const handleSearchInputChange = (value: string) => setSearchInput(value)
 
-    console.log('friends:', friends)
-    console.log('pending friends:', pendingFriends)
-    console.log('friends request sent:', friendRequests)
+    // console.log('friends:', friends)
+    // console.log('pending friends:', pendingFriends)
+    // console.log('friends request sent:', friendRequests)
 
     const handleSearchFriend = () => {
         const trimmedInput = searchInput.trim();
@@ -128,12 +132,18 @@ export default function FriendList({ userId, visible, setVisible  }: FriendListP
     }
 
     const handleChatWithFriend = async (friend: Friend) => {
+        console.log('handle chat with friend:', friend)
         const result = await checkForExistingSession(friend)
 
         if (result) {
-            selectSession(result)
+            console.log('continue previous conversation with friend')
+            setCurrentSession(result)
         } else {
-            addASession(currentUser.uid)
+            console.log('create new session with friend')
+            // addASession(currentUser.uid)
+            dispatch(addAParticipant(friend));
+            addParticipant(activeSessionID, friend)
+            setParticipants(friend)
         }
     }
 

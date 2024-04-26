@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Participant } from '@/interfaces/Participant';
-import { useSocketContext } from '@/provider/SocketProvider';
+import { useSocketContext } from '@/context/SocketContext';
 interface ParticipantProps {
     participants: Participant[];
     addParticipant: (sessionId: string, participant: Participant) => void;
@@ -17,8 +17,9 @@ export const useParticipants = (): ParticipantProps => {
 
     const addParticipant = useCallback((sessionId: string, participant: Participant) => {
         // console.log("PARTICIPANT IN CONTEXT:", participant)
+        console.log(`Participant inside of participant context:`, participant)
 
-        console.log(`Participant ${participant} and current session ${sessionId} inside of participant context`)
+        console.log(`current session ${sessionId} inside of participant context`)
         // console.log("CURRENT SESSION ID IN CONTEXT:", sessionId)
         if (!sessionId || !participant) return
 

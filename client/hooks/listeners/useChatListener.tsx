@@ -2,14 +2,16 @@ import {useState, useEffect} from 'react';
 import { sessionsRT } from '@/services/firebaseConfig';
 import { onValue, child, DatabaseReference, Unsubscribe } from "firebase/database";
 import { Message } from '@/interfaces/Chat';
+import { useSession } from '@/context/SessionContext';
 
-export const useChatListener = (sessionId: string) => {
+export const useChatListener = () => {
+    const { currentSession } = useSession();
     const [messages, setMessages] = useState<Message[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     // console.log("SESSION ID INSIDE MESSAGE LISTENER:", sessionId)
     useEffect(() => {
-        const messageRef: DatabaseReference = child(sessionsRT, `${sessionId}/messages`)
+        const messageRef: DatabaseReference = child(sessionsRT, `${currentSession}/messages`)
 
         const handleData = (snapshot: any) => {
             if (snapshot.exists()) {
@@ -29,7 +31,7 @@ export const useChatListener = (sessionId: string) => {
             unsubscribe()
         }
         
-    }, [sessionId])
+    }, [currentSession])
 
     return { messages, error };
 }

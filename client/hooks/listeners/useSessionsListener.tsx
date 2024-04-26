@@ -3,8 +3,10 @@ import { userCollection, sessionsRT } from '@/services/firebaseConfig';
 import { query, where, updateDoc, arrayRemove, getDocs } from 'firebase/firestore';
 import { ref, get, onValue, child, DatabaseReference } from 'firebase/database';
 import { Participant } from '@/interfaces/Participant';
+import { useAuth } from '@/context/AuthContext';
 
-export const useSessionsListener = (userId: string) => {
+export const useSessionsListener = () => {
+    const { currentUser } = useAuth()
     const [sessions, setSessions] = useState<string[]>([]);
     const [sessionDetails, setSessionDetails] = useState<any[]>([]); 
     const [loading, setLoading] = useState<boolean>(false);
@@ -27,13 +29,13 @@ export const useSessionsListener = (userId: string) => {
         setLoading(true);
         setError(null);
 
-        if (!userId) {
+        if (!currentUser?.uid) {
             setLoading(false)
             return;
         }
         
         try {
-            const q = query(userCollection, where("uid", "==", userId))
+            const q = query(userCollection, where("uid", "==", currentUser.uid))
             const querySnapshot = await getDocs(q)
     
             if (!querySnapshot.empty) {
@@ -59,7 +61,7 @@ export const useSessionsListener = (userId: string) => {
         } finally {
             setLoading(false);
         }
-    }, [userId])
+    }, [currentUser?.uid])
 
     useEffect(() => {
         fetchSessions();
@@ -67,7 +69,7 @@ export const useSessionsListener = (userId: string) => {
 
 
     useEffect(() => {
-        if (!userId) return;
+        if (!currentUser?.uid) return;
 
         const unsubscribe = onValue(sessionsRT, (snapshot) => {
             const sessionData = snapshot.val();
@@ -96,7 +98,7 @@ export const useSessionsListener = (userId: string) => {
         return () => {
             unsubscribe();
         };
-    }, [userId]);
+    }, [currentUser?.uid]);
 
     useEffect(() => {
         if (!sessions || sessions.length === 0) return;

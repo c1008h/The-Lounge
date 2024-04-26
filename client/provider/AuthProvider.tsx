@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { auth, db, userCollection } from '@/services/firebaseConfig'; 
 import { loginUser, logoutUser } from '@/features/auth/authSlices';
@@ -14,24 +14,25 @@ import {
   User
 } from "firebase/auth";
 import { addDoc } from "firebase/firestore";
+import AuthContext from '@/context/AuthContext';
 
-interface AuthContextType {
-  signInWithGoogle: () => Promise<UserCredential | undefined>;
-  signUpWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
-  signInWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
-  logout: () => Promise<void>;
-  currentUser: User | any;
-  token: string;
-}
+// interface AuthContextType {
+//   signInWithGoogle: () => Promise<UserCredential | undefined>;
+//   signUpWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
+//   signInWithEmail: (email: string, password: string) => Promise<UserCredential | undefined>;
+//   logout: () => Promise<void>;
+//   currentUser: User | any;
+//   token: string;
+// }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
+// export const useAuth = (): AuthContextType => {
+//   const context = useContext(AuthContext);
+//   if (!context) throw new Error('useAuth must be used within an AuthProvider');
   
-  return context;
-};
+//   return context;
+// };
 
 interface AuthProviderProps {
   children: ReactNode;

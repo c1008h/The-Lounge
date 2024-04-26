@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { userCollection } from '@/services/firebaseConfig';
 import { query, where, updateDoc, arrayRemove, getDocs, onSnapshot } from 'firebase/firestore';
 import { Friend } from '@/interfaces/Friend';
+import { useAuth } from '@/context/AuthContext';
 
-export const useFriendListener = (userId: string) => {
+export const useFriendListener = () => {
+    const { currentUser } = useAuth()
     const [friends, setFriends] = useState<Friend[]>([]);
     const [friendRequests, setFriendRequests] = useState<Friend[]>([]);
     const [pendingFriends, setPendingFriends] = useState<Friend[]>([]);
@@ -15,13 +17,13 @@ export const useFriendListener = (userId: string) => {
         setLoading(true);
         setError(null);
 
-        if (!userId) {
+        if (!currentUser?.uid) {
             setLoading(false)
             return;
         }
         
         try {
-            const q = query(userCollection, where("uid", "==", userId))
+            const q = query(userCollection, where("uid", "==", currentUser.uid))
             
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const friendsData: Friend[] = []
@@ -41,9 +43,9 @@ export const useFriendListener = (userId: string) => {
                     }
                 });
 
-                console.log("FRIENDS:", friends)
-                console.log("FRIEND REQUEST DATA:", friendRequestsData)
-                console.log("PENDING FRIEND DATA:", pendingFriendsData)
+                // console.log("FRIENDS:", friends)
+                // console.log("FRIEND REQUEST DATA:", friendRequestsData)
+                // console.log("PENDING FRIEND DATA:", pendingFriendsData)
 
                 setFriends(friendsData);
                 setFriendRequests(friendRequestsData);
@@ -56,7 +58,7 @@ export const useFriendListener = (userId: string) => {
             setError(error instanceof Error ? error : new Error('Error fetching friends'));
             setLoading(false);
         } 
-    }, [userId, setFriends, setFriendRequests, setPendingFriends, setLoading, setError]);
+    }, [currentUser?.uid, setFriends, setFriendRequests, setPendingFriends, setLoading, setError]);
 
     useEffect(() => {
         fetchFriends();

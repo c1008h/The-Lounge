@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Friend } from '@/interfaces/Friend';
-import { useSocketContext } from '@/provider/SocketProvider';
+import { useSocketContext } from '@/context/SocketContext';
 
 interface FriendProps {
     friends: Friend[];

@@ -1,16 +1,15 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useDispatch, useSelector } from 'react-redux';
-import { MessageContainer, ButtonTemplate, MessageInput, Error, Loading, Navbar } from '@/components'
+import { MessageContainer, ButtonTemplate, MessageInput, Error, Loading } from '@/components'
 import { useSession, useMessage } from '@/hooks';
 import { useSessionsListener, useChatListener, useFriendListener } from '@/hooks';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/context/AuthContext';
 import { RootState } from '@/features/store';
 import Name from './Name';
 
 export default function Page() {
-  // const [message, setMessage] = useState<string>('') 
+  const [message, setMessage] = useState<string>('') 
   // const [uid, setUid] = useState<string>('')
   // const [displayName, setDisplayName] = useState<string>('')
   // const [filteredFriends, setFilteredFriends] = useState<Friend[]>([])
@@ -19,27 +18,13 @@ export default function Page() {
 
   const { currentUser } = useAuth();
   // const participantList = useSelector((state: RootState) => state.participant.participants);
-  // const activeSessionID = useSelector((state: RootState) => state.session.currentSession)
+  const activeSessionID = useSelector((state: RootState) => state.session.currentSession)
 
-  // const { friends } = useFriendListener(currentUser?.uid)
+  // const { friends } = useFriendListener()
   // const { addASession, deleteSession, leaveSession, currentSessionId } = useSession()
 
-  // const { sendMessage } = useMessage()
-  // const { messages, error: chatError } = useChatListener(activeSessionID)
-  // console.log("CURRENT SESSION ID IN PAGE:", activeSessionID)
-
-  // useEffect(() => {
-  //   if (currentUser) {
-  //     // console.log("USER STATE UID:", userState)
-  //     console.log(typeof currentUser.uid)
-  //     setUid(currentUser.uid)
-  //   } else {
-  //     router.push('/login')
-  //   }
-  //   return () => {
-
-  //   }
-  // }, [isAuthenticated, currentUser, userState, router])
+  const { sendMessage } = useMessage()
+  const { messages, error: chatError } = useChatListener()
 
   // useEffect(() => {
   //   if (inputValue.length > 2) {
@@ -56,21 +41,6 @@ export default function Page() {
   //   }
   // }, [inputValue, friends])
   
-
-  // // const handleSendMessage = () => {
-  // //   if (uid && activeSessionID ) {
-
-  // //     console.log("Active session ID:", activeSessionID)
-  // //     const messageData = {
-  // //       message: message,
-  // //       type:'message'
-  // //       sender: { uid: uid, displayName: displayName },
-  // //       timestamp: new Date().toISOString()
-  // //     }
-  
-  // //     sendMessage(activeSessionID, messageData)
-  // //   }
-  // // }
   // const handleSelectFriend = (friend: Friend) => {
   //   if (activeSessionID) {
   //     const newParticipant = { 
@@ -86,9 +56,6 @@ export default function Page() {
   //   }
   // };
   
-  // // if (!currentUser) {
-  // //   // return <Loading message={'Not logged in!'} />
-  // //   router.push('/login')
   // if (authLoading) {
   //   return <Loading message={'Authenticating...'} />
   // } else if (sessionLoading) {
@@ -101,7 +68,7 @@ export default function Page() {
   // }
   
   return (
-    <div>
+    <div className='flex flex-col h-screen'>
       {/* <div className="flex flex-row flex-1"> */}
       {/* <div className="w-2/3 h-screen flex flex-col gap-4 relative"> */}
         <div className='relative flex top-0 w-full h-14 justify-center'>
@@ -149,29 +116,22 @@ export default function Page() {
             <h3 className='text-white'>To: {participants && participants.map(participant => participant.displayName).join(', ')}</h3>
           )} */}
         </div>
-          {/* {messages && messages.map((message, index) => (
-            <React.Fragment key={`message-${index}`}>
-              <CardTemplate 
-                id={message.id}
-                message={message.message}
-                sender={message.sender.displayName}
-                timestamp={message.timestamp}
-                alignment={message.sender === uid ? 'right' : 'left'}
-              />
-            </React.Fragment>
-          ))} */}
-
-        {/* <MessageContainer 
-          messages={messages} 
-          uid={currentUser?.uid}
-          displayName={displayName}
-        /> */}
-        <div className="w-full flex fixed bottom-0 p-4 bg-gray-800">
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex flex-col space-y-2">
+            <MessageContainer 
+              messages={messages} 
+              uid={currentUser?.uid}
+              displayName={currentUser?.displayName}
+            />
+          </div>
+        </div>
+        {/* <div className="w-full flex fixed bottom-0 p-4 bg-gray-800"> */}
+        <div className=" bg-gray-800 p-4 justify-between items-center">
           <MessageInput 
-            // sendMessage={sendMessage}
-            // sessionId={activeSessionID}
+            sendMessage={sendMessage}
+            sessionId={activeSessionID}
             uid={currentUser?.uid}
-            // displayName={displayName}
+            displayName={currentUser?.displayName}
           />
         </div>
       </div>

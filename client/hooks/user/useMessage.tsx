@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { Message } from '@/interfaces/Chat';
-import { useSocketContext } from '@/provider/SocketProvider';
+import { useSocketContext } from '@/context/SocketContext';
 interface MessageProps {
     messages: Message[];
     sendMessage: (sessionId: string, message: Message) => void;

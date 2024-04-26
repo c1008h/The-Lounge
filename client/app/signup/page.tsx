@@ -3,7 +3,7 @@ import React, { useState, FormEvent } from 'react'
 import Head from 'next/head';
 import Link from 'next/link';
 import {ButtonTemplate, Divider} from '@/components';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation'
 
 export default function Page() {

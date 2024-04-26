@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Session } from '@/interfaces/Session';
 import { selectSessionToState, addSessionToState, deleteSessionFromState, leaveSessionFromState} from '@/features/session/sessionSlices'
-import { useSocketContext } from '@/provider/SocketProvider';
+import { useSocketContext } from '@/context/SocketContext';
 interface SessionProps {
     sessions: Session[];
     addASession: (uid: string) => void;
