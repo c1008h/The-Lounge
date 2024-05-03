@@ -12,6 +12,7 @@ import { useFriendListener } from '@/hooks'
 export default function Name() {
     const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState<Friend[]>([])
+    const [focusedIndex, setFocusedIndex] = useState(-1); // New state for tracking focused item
 
     const activeSessionID = useSelector((state: RootState) => state.session.currentSession)
     const addingToChat = useSelector((state: RootState) => state.session.addToChat)
@@ -25,10 +26,10 @@ export default function Name() {
     useEffect(() => {
         if (inputValue.length >= 3) {
             const filtered = friends.filter(friend =>
-                friend.displayName.toLowerCase().includes(inputValue.toLowerCase()) ||
-                friend.email.toLowerCase().includes(inputValue.toLowerCase()) ||
-                friend.phoneNumber.toLowerCase().includes(inputValue.toLowerCase()) ||
-                friend.uid.toLowerCase().includes(inputValue.toLowerCase())
+                friend.displayName?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                friend.email?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                friend.phoneNumber?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                friend.uid?.toLowerCase().includes(inputValue.toLowerCase())
             )
 
             setSuggestions(filtered)
@@ -75,13 +76,26 @@ export default function Name() {
     console.log('typeof current participant:', typeof participants)
 
     console.log('current participant:', participants.displayName)
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'ArrowDown' && focusedIndex < suggestions.length - 1) {
+            setFocusedIndex(focusedIndex + 1);
+        } else if (event.key === 'ArrowUp' && focusedIndex > 0) {
+            setFocusedIndex(focusedIndex - 1);
+        } else if (event.key === 'Enter' && focusedIndex >= 0) {
+            handleAddParticipant(suggestions[focusedIndex]);
+            event.preventDefault();
+        } else if (event.key === 'Backspace' && !inputValue.trim()) {
+            // Your existing logic here for backspace
+        }
+    };
     return (
         <div className='w-full bg-gray-400' >
-{Object.keys(participants).length === 1 && !addingToChat && (
-    Object.values(participants).map((participant, index) => (
-        <p key={index}>{participant.displayName ? participant.displayName : participant.email ? participant.email : participant.phoneNumber}</p>
-    ))
-)}
+            {Object.keys(participants).length === 1 && !addingToChat && (
+                Object.values(participants).map((participant, index) => (
+                    <p key={index}>{participant.displayName ? participant.displayName : participant.email ? participant.email : participant.phoneNumber}</p>
+                ))
+            )}
             {!addingToChat || participants.length != 0 && (
                 participants.map((p, index) => (
                     <p>{p.displayName ? p.displayName : p.email ? p.email : p.phoneNumber}</p>
@@ -93,20 +107,35 @@ export default function Name() {
                 ))
             ): ( */}
             {addingToChat && participants.length === 0 && (
-                <InputForm
-                // id="participantInput"
-                    value={inputValue}
-                    className=''
-                    onValueChange={(value: string) => setInputValue(value)} 
-                    onKeyDown={(event) => { 
-                        if (event.key === 'Enter' || event.key === ' ') {
-                            // handleAddParticipant(friend); 
-                        } else if (event.key === 'Backspace' && !inputValue.trim()) {
-                            removeParticipant();
-                            handleBackSpace()
-                        }
-                    }}
-                />
+                <>
+                    <InputForm
+                    // id="participantInput"
+                        value={inputValue}
+                        className=''
+                        onValueChange={(value: string) => setInputValue(value)} 
+                        onKeyDown={(event) => { 
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                // handleAddParticipant(friend); 
+                            } else if (event.key === 'Backspace' && !inputValue.trim()) {
+                                removeParticipant();
+                                handleBackSpace()
+                            }
+                        }}
+                    />
+                    {suggestions.length > 0 && (
+                        <ul className="absolute bg-white border mt-2 w-full border-gray-200 z-10">
+                            {suggestions.map((suggestion, index) => (
+                                <li key={index} 
+                                    className={`p-2 hover:bg-gray-100 cursor-pointer ${index === focusedIndex ? 'bg-gray-200' : ''}`}
+                                    onClick={() => handleAddParticipant(suggestion)}
+                                    onMouseEnter={() => setFocusedIndex(index)}
+                                >
+                                    {suggestion.displayName || suggestion.email || suggestion.phoneNumber}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </>
             )}
         </div>
     )
