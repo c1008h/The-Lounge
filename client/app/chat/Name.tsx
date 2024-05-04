@@ -23,6 +23,10 @@ export default function Name() {
     const dispatch = useDispatch()
     const { friends} = useFriendListener();
 
+    // useEffect(() => {
+    //     console.log(suggestions)
+    // }, [suggestions])
+
     useEffect(() => {
         if (inputValue.length >= 3) {
             const filtered = friends.filter(friend =>
@@ -73,9 +77,8 @@ export default function Name() {
         setInputValue(''); 
         }
     };
-    console.log('typeof current participant:', typeof participants)
-
-    console.log('current participant:', participants.displayName)
+    // console.log('typeof current participant:', typeof participants)
+    // console.log('current participant:', participants.displayName)
 
     const handleKeyDown = (event) => {
         if (event.key === 'ArrowDown' && focusedIndex < suggestions.length - 1) {
@@ -86,7 +89,8 @@ export default function Name() {
             handleAddParticipant(suggestions[focusedIndex]);
             event.preventDefault();
         } else if (event.key === 'Backspace' && !inputValue.trim()) {
-            // Your existing logic here for backspace
+            removeParticipant();
+            handleBackSpace()
         }
     };
     return (
@@ -113,14 +117,15 @@ export default function Name() {
                         value={inputValue}
                         className=''
                         onValueChange={(value: string) => setInputValue(value)} 
-                        onKeyDown={(event) => { 
-                            if (event.key === 'Enter' || event.key === ' ') {
-                                // handleAddParticipant(friend); 
-                            } else if (event.key === 'Backspace' && !inputValue.trim()) {
-                                removeParticipant();
-                                handleBackSpace()
-                            }
-                        }}
+                        // onKeyDown={(event) => { 
+                        //     if (event.key === 'Enter' || event.key === ' ') {
+                        //         // handleAddParticipant(friend); 
+                        //     } else if (event.key === 'Backspace' && !inputValue.trim()) {
+                        //         removeParticipant();
+                        //         handleBackSpace()
+                        //     }
+                        // }}
+                        onKeyDown={handleKeyDown}
                     />
                     {suggestions.length > 0 && (
                         <ul className="absolute bg-white border mt-2 w-full border-gray-200 z-10">
