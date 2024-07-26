@@ -2,8 +2,13 @@
 
 Welcome to The Lounge, a real-time chat application that lets you create sessions instantly to chat with friends. Share the link, jump into conversations, and enjoy private chats that disappear when the session ends.
 
+## Demo
+
+![Anon-Chat-Demo](./assets/anon-chat-demo.gif)
+
 ## Table of Contents
 - [The Lounge - Client](#the-lounge---client)
+  - [Demo](#demo)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Technology Stack](#technology-stack)
